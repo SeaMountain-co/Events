@@ -92,6 +92,31 @@
             .order-summary { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
         }
     </style>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Config ringkas (tak perlu penuh pun takpa untuk cek auth, tapi lebih baik penuh)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+            authDomain: "sea-mountain.firebaseapp.com",
+            projectId: "sea-mountain" 
+        };
+
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+
+        // Cek serta-merta bila page loading
+        onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            // Kalau TAK ADA user (belum login)
+            alert("Sila Log In dahulu untuk mendaftar.");
+            window.location.href = "login.html"; // Tendang ke Login Page
+            }
+        });
+    </script>
+
 </head>
 <body>
 
