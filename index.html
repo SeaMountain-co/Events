@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea Mountain Sporty Edition</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,900;1,300;1,900&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ASAS & WARNA --- */
+        :root {
+            --brand-orange: #ff0000;
+            --sport-blue: #ff0000; /* Warna aksen baru (Neon Blue) */
+            --bg-dark: #0f1014;
+            --card-bg: #1a1c23;
+            --text-white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 20%);
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+
+        /* --- HEADER MODEN --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background: rgba(15, 16, 20, 0.9);
+            backdrop-filter: blur(10px); /* Kesan kaca */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+        /* 1. Susun Gambar dan Teks sebaris */
+            display: flex;
+            align-items: center; 
+    
+        /* 2. Kawal jarak antara Gambar dan Teks di sini */
+            gap: 10px; /* Semakin kecil nombor, semakin rapat gambar dengan teks */
+    
+        /* Style Teks Asal */
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;     /* Tebal untuk "SEA" */
+            font-style: italic;   /* Condong */
+            font-size: 1.5rem;    /* Saiz font */
+            color: #fff;
+            text-transform: uppercase;
+            text-decoration: none;
+
+        /* 3. Kawal jarak antara HURUF teks (supaya padat) */
+            letter-spacing: -1px; 
+        }
+
+        /* Style untuk Gambar */
+        .logo img {
+            height: 40px; /* Sesuaikan ketinggian logo */
+            width: auto;
+            display: block;
+        }
+
+        /* Style untuk bahagian "MOUNTAIN" */
+        .logo span {
+            color: var(--brand-red); /* Merah */
+            font-weight: 300;        /* Nipis untuk "MOUNTAIN" */
+        }
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .nav-links a:hover { color: var(--brand-orange); }
+
+        .login-btn {
+            background: linear-gradient(45deg, var(--brand-orange), #ff7b00);
+            padding: 10px 25px;
+            border-radius: 30px; /* Butang bulat nampak lebih moden */
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #000;
+            box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3);
+        }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 170, 0, 0.5); }
+
+        /* --- HERO SECTION (BANNER UTAMA) --- */
+        .hero {
+            position: relative;
+            /* Tukar height kepada min-height supaya tak putus bila skrin kecil */
+            min-height: 500px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 5%; /* Tambah padding atas bawah */
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        /* Latar belakang imej dengan overlay gelap */
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1552674605-46d5c4e5176c?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+            filter: brightness(0.4);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1200px; /* Hadkan lebar supaya tak terlalu luas */
+            
+            /* INI KUNCI UTAMA: Flexbox untuk susun Kiri-Kanan */
+            display: flex;
+            align-items: center; /* Center secara vertikal */
+            justify-content: space-between; /* Jarakkan kiri dan kanan */
+            gap: 50px; /* Jarak antara teks dan gambar */
+        }
+
+        /* Group untuk Teks (Kiri) */
+        .hero-text {
+            flex: 1; /* Ambil separuh ruang */
+            max-width: 600px;
+        }
+
+        .badge-featured {
+            background-color: var(--sport-blue);
+            color: #ffffff;
+            padding: 5px 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            transform: skew(-10deg); /* Bentuk senget sporty */
+        }
+
+        .hero h1 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 3.5rem;
+            line-height: 1.1;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-style: italic;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #ddd;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--brand-orange);
+            padding-left: 15px;
+        }
+
+        .cta-btn {
+            background: linear-gradient(45deg, var(--brand-orange), #ff7b00);
+            color: #000;
+            padding: 15px 40px;
+            font-weight: 900;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%); /* Bentuk unik */
+            transition: 0.3s;
+        }
+
+        .cta-btn:hover {
+            background: var(--brand-orange);
+            padding-left: 50px; /* Animasi gelongsor */
+        }
+
+        /* Group untuk Gambar (Kanan) */
+        .featured-image {
+            flex: 1; /* Ambil separuh ruang */
+            max-width: 550px;
+            position: relative;
+        }
+
+        .featured-image img {
+            width: 100%;
+            border-radius: 15px; /* Bucu bulat */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Bayang */
+            border: 2px solid var(--brand-orange); /* Bingkai oren */
+            transform: perspective(1000px) rotateY(-10deg); /* Efek 3D sikit */
+            transition: transform 0.5s;
+        }
+
+        /* Efek bila mouse lalu atas gambar */
+        .featured-image:hover img {
+            transform: perspective(1000px) rotateY(0deg) scale(1.02);
+        }
+
+        /* --- SEARCH BAR --- */
+        .search-container {
+            padding: 0 5%;
+            margin-top: -30px; /* Overlap dengan banner */
+            position: relative;
+            z-index: 10;
+        }
+
+        .search-box {
+            background: #252830;
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.1rem;
+            width: 100%;
+            outline: none;
+            padding-left: 15px;
+        }
+
+        .search-box i { color: var(--brand-orange); font-size: 1.2rem; }
+
+        /* --- EVENTS GRID --- */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 40px 5% 20px;
+        }
+
+        .section-title h2 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2rem;
+            text-transform: uppercase;
+            font-style: italic;
+        }
+        
+        .section-title span { color: var(--sport-blue); }
+
+        .view-all {
+            color: var(--brand-orange);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            padding: 0 5% 60px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            position: relative;
+            border: 1px solid transparent;
+        }
+
+        /* Card Hover Effect */
+        .card:hover {
+            transform: translateY(-10px); /* Naik ke atas */
+            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.2);
+            border-color: var(--sport-blue);
+        }
+
+        .card-img-wrapper {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .card:hover .card-img-wrapper img {
+            transform: scale(1.1); /* Gambar zoom in */
+        }
+
+        /* Badge Kategori Jarak */
+        .distance-tags {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .tag {
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border-radius: 4px;
+            border-left: 2px solid var(--brand-orange);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .card-info {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .card-info i { color: var(--brand-orange); width: 15px;}
+
+        .card-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 1px solid var(--brand-orange);
+            color: var(--brand-orange);
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .card-btn:hover {
+            background: var(--brand-orange);
+            color: #000;
+        }
+
+        /* =========================================
+           TAMBAHAN: FOOTER
+           ========================================= */
+        footer {
+            background-color: var(--footer-bg); padding: 60px 5% 20px;
+            border-top: 1px solid #222; margin-top: auto;
+        }
+        .footer-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px; max-width: 1200px; margin: 0 auto 50px;
+        }
+        .footer-col h4 {
+            color: var(--brand-red); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .footer-col p { color: #888; font-size: 0.9rem; line-height: 1.6; }
+        
+        .app-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .app-btn {
+            background: #222; color: #fff; padding: 10px 15px; border-radius: 5px; border: 1px solid #333;
+            display: flex; align-items: center; gap: 10px; font-size: 0.8rem; cursor: pointer; transition: 0.3s;
+        }
+        .app-btn:hover { border-color: #fff; background: #000; }
+        .app-btn i { font-size: 1.5rem; }
+
+        .social-icons { display: flex; gap: 15px; }
+        .social-icons a {
+            width: 40px; height: 40px; background: #222; color: #fff;
+            display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s;
+        }
+        .social-icons a:hover { background: var(--brand-red); transform: translateY(-3px); }
+
+        .footer-bottom {
+            text-align: center; border-top: 1px solid #222; padding-top: 20px; color: #555; font-size: 0.8rem;
+        }
+        .footer-links { margin-bottom: 10px; }
+        .footer-links a { color: #888; margin: 0 10px; font-weight: 600; }
+        .footer-links a:hover { color: #fff; }
+
+        /* Responsif */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2.2rem; }
+        }
+
+        /* --- RESPONSIF (Untuk Telefon) --- */
+        @media (max-width: 900px) {
+            .hero-content {
+                flex-direction: column; /* Balik ke atas-bawah pada skrin kecil */
+                text-align: center;
+            }
+
+            .nav-links { display: none; }
+            .hero h1 { font-size: 2.2rem; }
+
+            .hero-text {
+                margin-bottom: 30px;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem; /* Kecilkan sikit font tajuk */
+            }
+            
+            .featured-image img {
+                transform: none; /* Hilangkan efek 3D pada phone supaya kemas */
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <header>
+    <a href="index.html" class="logo">
+        <img src="seaMLogo.png" alt="Sea Mountain Logo">
+        SEA<span>MOUNTAIN</span>
+    </a>
+
+    <nav class="nav-links">
+        <a href="index.html">Events</a>
+        <a href="#">Results</a>
+        <a href="photos.html">Photos</a>
+        <a href="leaderboard.html">Leaderboard</a>
+    </nav>
+    <a href="login.html" class="login-btn">Log In</a>
+</header>
+
+    <!----------------------------------------- HERO SECTION ----------------------------------------->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        
+        <div class="hero-content">
+            
+            <div class="hero-text">
+                <span class="badge-featured">Featured Event</span>
+                <h1>Tunggul Melati<br>Trail 2026</h1>
+                <p>
+                    <i class="far fa-calendar-alt"></i> 4-6 Sept 2026 &nbsp;|&nbsp; 
+                    <i class="fas fa-map-marker-alt"></i> Sepang, Selangor
+                </p>
+                <a href="KRDetail01.html" class="cta-btn">Register Race <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="featured-image">
+                <img src="https://heyjom-v5.s3.ap-southeast-5.amazonaws.com/events/event_banner_1738908182.png" alt="Featured Event">
+            </div>
+
+        </div>
+    </section>
+
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Find your next challenge...">
+            <i class="fas fa-sliders-h" style="cursor: pointer;"></i>
+        </div>
+    </div>
+
+    <!----------------------------------------- LATEST RUN EVENT ----------------------------------------->
+
+    <div class="section-header">
+        <div class="section-title">
+            <h2>Latest <span>Run</span></h2>
+        </div>
+        <a href="#" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+    </div>
+
+    <div class="events-grid">
+        <div class="card">
+            <div class="card-img-wrapper">
+                <img src="https://cdn.raceroster.com/event-logo/nqdkzp2q7kjvnhwd._original.jpg" alt="Run 1">
+                <div class="distance-tags">
+                    <span class="tag">5KM</span>
+                    <span class="tag">10KM</span>
+                    <span class="tag">21KM</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Putrajaya Night Run 2026</div>
+                <div class="card-info"><i class="far fa-clock"></i> 15 Feb 2026</div>
+                <div class="card-info"><i class="fas fa-map-marker-alt"></i> Putrajaya, Malaysia</div>
+                <a href="KRDetail02.html" class="card-btn">Register Race <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrapper">
+                <img src="https://scontent.fkul10-2.fna.fbcdn.net/v/t39.30808-6/300371095_483614050439082_8619916646601720142_n.png?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=CM1DepNh064Q7kNvwHbVXAo&_nc_oc=Admctixv4jkXzlWKffXLjwc9cEY1UNNrtOEy1EauHtCFeAVuNz0cXhAZN5A5tjA1tjs&_nc_zt=23&_nc_ht=scontent.fkul10-2.fna&_nc_gid=5Ej2Ar_QApoJgtSGu7-YRw&oh=00_AfmboleeapaeTfde8Zm9cYUprdEuZe7INL4E8jSyAeGhYw&oe=693DA135" alt="Run 2">
+                <div class="distance-tags">
+                    <span class="tag">VIRTUAL</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Ikat Tepi Virtual Run</div>
+                <div class="card-info"><i class="far fa-clock"></i> Dec 2025 - Mar 2026</div>
+                <div class="card-info"><i class="fas fa-map-marker-alt"></i> Anywhere (Virtual)</div>
+                <a href="KRDetail03.html" class="card-btn">Register Race <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrapper">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVC1nflivJXmmLXwHSskAw4O3Xnv7HQdThLQ&s" alt="Run 3">
+                <div class="distance-tags">
+                    <span class="tag">10KM</span>
+                    <span class="tag">FUN RUN</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Race Against Cancer</div>
+                <div class="card-info"><i class="far fa-clock"></i> 29 Mar 2026</div>
+                <div class="card-info"><i class="fas fa-map-marker-alt"></i> Kepong Park, KL</div>
+                <a href="KRDetail04.html" class="card-btn">Register Race <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrapper">
+                <img src="https://www.ishcmc.com/wp-content/uploads/sites/20/2024/09/RUN-Square-Main.jpg?w=640" alt="Run 4">
+                <div class="distance-tags">
+                    <span class="tag">25KM</span>
+                    <span class="tag">CHARITY RUN</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">Avoid Cancer RUN</div>
+                <div class="card-info"><i class="far fa-clock"></i> 13 June 2026</div>
+                <div class="card-info"><i class="fas fa-map-marker-alt"></i> Ampang Park, KL</div>
+                <button class="card-btn">Register Race</button>
+            </div>
+        </div>
+    </div>
+
+    <!---------------------------------- UPCOMING RUN EVENT  ----------------------------------------->
+
+    <div class="section-header">
+        <div class="section-title">
+            <h2>UPCOMING <span>Run</span></h2>
+        </div>
+        <a href="#" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+    </div>
+
+    <div class="events-grid">
+        <div class="card">
+            <div class="card-img-wrapper">
+                <img src="#" alt="Run 1">
+                <div class="distance-tags">
+                    <span class="tag">5KM</span>
+                    <span class="tag">10KM</span>
+                    <span class="tag">21KM</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">#</div>
+                <div class="card-info"><i class="far fa-clock"></i>#</div>
+                <div class="card-info"><i class="fas fa-map-marker-alt"></i> #</div>
+                <button class="card-btn">Register Race</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrapper">
+                <img src="" alt="Run 2">
+                <div class="distance-tags">
+                    <span class="tag">VIRTUAL</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">#</div>
+                <div class="card-info"><i class="far fa-clock"></i> #</div>
+                <div class="card-info"><i class="fas fa-map-marker-alt"></i> #</div>
+                <button class="card-btn">Register Race</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrapper">
+                <img src="" alt="Run 3">
+                <div class="distance-tags">
+                    <span class="tag">10KM</span>
+                    <span class="tag">FUN RUN</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">#</div>
+                <div class="card-info"><i class="far fa-clock"></i> #</div>
+                <div class="card-info"><i class="fas fa-map-marker-alt"></i> #</div>
+                <button class="card-btn">Register Race</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrapper">
+                <img src="" alt="Run 4">
+                <div class="distance-tags">
+                    <span class="tag">25KM</span>
+                    <span class="tag">CHARITY RUN</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">#</div>
+                <div class="card-info"><i class="far fa-clock"></i> #</div>
+                <div class="card-info"><i class="fas fa-map-marker-alt"></i> #</div>
+                <button class="card-btn">Register Race</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>About</h4>
+                <p>THE SPORTS AND FITNESS ONLINE EVENT REGISTRATION SOLUTION.</p>
+                <p style="margin-top:10px; color:#fff;"><strong>info@seamountain.com</strong></p>
+            </div>
+
+            <div class="footer-col">
+                <h4>Get The App</h4>
+                <div class="app-buttons">
+                    <div class="app-btn">
+                        <i class="fab fa-apple"></i>
+                        <div style="text-align:left; line-height:1.2;">
+                            <span style="font-size:0.6rem; display:block;">Available on the</span>App Store
+                        </div>
+                    </div>
+                    <div class="app-btn">
+                        <i class="fab fa-google-play"></i>
+                        <div style="text-align:left; line-height:1.2;">
+                            <span style="font-size:0.6rem; display:block;">GET IT ON</span>Google Play
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Follow Us</h4>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a> | 
+                <a href="#">Refund Policy</a> | 
+                <a href="#">Terms & Conditions</a>
+            </div>
+            <p>&copy; 2025 Sea Mountain.Co. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Interaksi carian ringkas
+        const searchInput = document.getElementById('searchInput');
+        const cards = document.querySelectorAll('.card');
+
+        searchInput.addEventListener('keyup', (e) => {
+            const val = e.target.value.toLowerCase();
+            cards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                card.style.display = title.includes(val) ? 'block' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>
+

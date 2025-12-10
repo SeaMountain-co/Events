@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea Mountain - Payment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --brand-red: #ff0000;
+            --bg-dark: #0f1014;
+            --card-bg: #1a1c23;
+            --text-white: #ffffff;
+            --text-gray: #b0b3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 60%);
+        }
+
+        .payment-container {
+            display: flex;
+            max-width: 900px;
+            width: 90%;
+            background: var(--card-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Kiri: Order Summary */
+        .order-summary {
+            flex: 1;
+            padding: 40px;
+            background: rgba(0,0,0,0.2);
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .order-summary h2 { font-family: 'Russo One'; margin-bottom: 20px; color: var(--brand-red); text-transform: uppercase; font-style: italic; }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--text-gray); font-size: 0.9rem; }
+        .summary-item.total { border-top: 1px solid #333; padding-top: 15px; margin-top: 20px; color: #fff; font-weight: bold; font-size: 1.2rem; }
+        
+        /* Kanan: Payment Form */
+        .payment-details { flex: 1.5; padding: 40px; }
+        .payment-header { margin-bottom: 30px; }
+        .payment-header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
+        .payment-icons { display: flex; gap: 10px; margin-top: 15px; }
+        .payment-icons i { font-size: 2rem; color: #fff; opacity: 0.7; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-gray); font-weight: 600; }
+        .form-input {
+            width: 100%; padding: 12px; background: #252830; border: 1px solid transparent;
+            border-radius: 8px; color: #fff; outline: none; transition: 0.3s;
+        }
+        .form-input:focus { border-color: var(--brand-red); }
+
+        .row { display: flex; gap: 20px; }
+
+        .pay-btn {
+            width: 100%; padding: 15px; background: linear-gradient(45deg, var(--brand-red), #aa0000);
+            border: none; border-radius: 8px; color: #fff; font-weight: 800; text-transform: uppercase;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
+
+        /* Loader Overlay (Untuk effect processing) */
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 9999;
+        }
+        .spinner {
+            width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid var(--brand-red);
+            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .payment-container { flex-direction: column; }
+            .order-summary { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="payment-container">
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            <div class="summary-item">
+                <span>Runner Name</span>
+                <span id="display-name" style="color:white; font-weight:bold;">Loading...</span>
+            </div>
+            <div class="summary-item">
+                <span>Event</span>
+                <span>Tunggul Melati Trail 2026</span>
+            </div>
+            <div class="summary-item">
+                <span>Category</span>
+                <span id="display-cat" style="color:var(--brand-red);">Loading...</span>
+            </div>
+            <div class="summary-item">
+                <span>Registration Fee</span>
+                <span>RM 80.00</span>
+            </div>
+            <div class="summary-item">
+                <span>Processing Fee</span>
+                <span>RM 5.00</span>
+            </div>
+            <div class="summary-item total">
+                <span>TOTAL TO PAY</span>
+                <span style="color:var(--brand-red);">RM 85.00</span>
+            </div>
+        </div>
+
+        <div class="payment-details">
+            <div class="payment-header">
+                <h1>Secure Payment</h1>
+                <p style="color:var(--text-gray); font-size:0.9rem;">Encrypted connection. Please enter your card details.</p>
+                <div class="payment-icons">
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-cc-amex"></i>
+                </div>
+            </div>
+
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label class="form-label">Cardholder Name</label>
+                    <input type="text" class="form-input" placeholder="Name on Card" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Card Number</label>
+                    <input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19" required>
+                </div>
+
+                <div class="row">
+                    <div class="form-group" style="flex:1">
+                        <label class="form-label">Expiry Date</label>
+                        <input type="text" class="form-input" placeholder="MM/YY" maxlength="5" required>
+                    </div>
+                    <div class="form-group" style="flex:1">
+                        <label class="form-label">CVV</label>
+                        <input type="password" class="form-input" placeholder="123" maxlength="3" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="pay-btn">PAY RM 85.00 NOW</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+        <h3 style="color:#fff; font-family:'Montserrat';">Processing Payment...</h3>
+        <p style="color:#888; margin-top:5px;">Please do not close this window.</p>
+    </div>
+
+    <script>
+        // 1. Ambil data nama yang disimpan masa register tadi
+        const runnerName = localStorage.getItem("runnerName") || "Runner";
+        const raceCategory = localStorage.getItem("raceCategory") || "Open";
+
+        // 2. Paparkan di Order Summary
+        document.getElementById("display-name").textContent = runnerName;
+        document.getElementById("display-cat").textContent = raceCategory;
+
+        // 3. Logic bila tekan butang PAY
+        document.getElementById("paymentForm").addEventListener("submit", function(e){
+            e.preventDefault();
+            
+            // Tunjuk loader (Simulasi processing)
+            const loader = document.getElementById("loader");
+            loader.style.display = "flex";
+
+            // Tunggu 3 saat, kemudian bagitahu Berjaya
+            setTimeout(() => {
+                loader.style.display = "none";
+                alert("Payment Successful! Your slot is confirmed. See you at the race!");
+                
+                // Balik ke Home
+                window.location.href = "index.html"; 
+            }, 3000);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea Mountain - Register Race</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,900;1,300;1,900&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ASAS & WARNA --- */
+        :root {
+            --brand-red: #ff0000;
+            --brand-dark-red: #aa0000;
+            --bg-dark: #0f1014;
+            --card-bg: #1a1c23;
+            --input-bg: #252830;
+            --text-white: #ffffff;
+            --text-gray: #b0b3b8;
+            --footer-bg: #000000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            background-image: radial-gradient(circle at 50% 0%, rgba(255, 0, 0, 0.1) 0%, transparent 50%);
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+
+        /* --- HEADER --- */
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 5%; background: rgba(15, 16, 20, 0.95); position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+        /* 1. Susun Gambar dan Teks sebaris */
+            display: flex;
+            align-items: center; 
+    
+        /* 2. Kawal jarak antara Gambar dan Teks di sini */
+            gap: 10px; /* Semakin kecil nombor, semakin rapat gambar dengan teks */
+    
+        /* Style Teks Asal */
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;     /* Tebal untuk "SEA" */
+            font-style: italic;   /* Condong */
+            font-size: 1.5rem;    /* Saiz font */
+            color: #fff;
+            text-transform: uppercase;
+            text-decoration: none;
+
+        /* 3. Kawal jarak antara HURUF teks (supaya padat) */
+            letter-spacing: -1px; 
+        }
+
+        /* Style untuk Gambar */
+        .logo img {
+            height: 40px; /* Sesuaikan ketinggian logo */
+            width: auto;
+            display: block;
+        }
+
+        /* Style untuk bahagian "MOUNTAIN" */
+        .logo span {
+            color: var(--brand-red); /* Merah */
+            font-weight: 300;        /* Nipis untuk "MOUNTAIN" */
+        }
+
+        .nav-links { display: flex; gap: 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
+        .nav-links a:hover { color: var(--brand-red); }
+        .login-btn {
+            background: linear-gradient(45deg, var(--brand-red), #aa0000); padding: 10px 25px;
+            border-radius: 30px; font-weight: 800; text-transform: uppercase; color: #fff;
+        }
+
+        /* --- FORM STYLES --- */
+        .register-container { max-width: 900px; margin: 60px auto; padding: 0 5%; }
+
+        .register-header { text-align: center; margin-bottom: 40px; }
+        .register-header h1 {
+            font-family: 'Russo One', sans-serif; font-size: 2.5rem; text-transform: uppercase;
+            font-style: italic; margin-bottom: 15px; position: relative; display: inline-block;
+        }
+        .register-header h1::after {
+            content: ''; display: block; width: 50%; height: 4px; background-color: var(--brand-red);
+            margin: 5px auto 0; border-radius: 2px;
+        }
+        .register-header p { color: var(--text-gray); font-size: 0.95rem; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+
+        .register-card {
+            background-color: var(--card-bg); padding: 40px; border-radius: 15px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-label { font-size: 0.9rem; font-weight: 600; color: var(--text-gray); margin-bottom: 8px; }
+        
+        .form-input, .form-select {
+            background-color: var(--input-bg); border: 1px solid transparent; padding: 12px 15px;
+            border-radius: 8px; color: #fff; font-size: 1rem; outline: none; transition: 0.3s; width: 100%;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .form-input:focus, .form-select:focus { border-color: var(--brand-red); box-shadow: 0 0 10px rgba(255, 0, 0, 0.2); }
+        
+        .full-width { grid-column: span 2; }
+
+        /* --- CHECKBOX STYLE (SEPERTI YANG DIMINTA) --- */
+        .terms-group {
+            display: flex;
+            align-items: center; /* Pastikan center secara vertikal */
+            gap: 12px;           /* Jarak antara checkbox dan teks */
+            margin-top: 20px;
+            padding: 5px 0;
+        }
+
+        .terms-group input[type="checkbox"] {
+            appearance: none; /* Buang style default browser */
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--text-gray);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0; /* Pastikan kotak tak mengecut */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Style bila dah tick */
+        .terms-group input[type="checkbox"]:checked {
+            background-color: var(--brand-red);
+            border-color: var(--brand-red);
+        }
+
+        /* Tanda 'Right' (Tick) manual */
+        .terms-group input[type="checkbox"]:checked::after {
+            content: '\f00c'; /* FontAwesome Check Icon */
+            font-family: 'Font Awesome 5 Free';
+            font-weight: 900;
+            color: white;
+            font-size: 12px;
+        }
+
+        .terms-text {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+            line-height: 1.4;
+            cursor: pointer;
+            margin: 0; /* Pastikan tiada margin tambahan */
+        }
+
+        .terms-text a {
+            color: var(--brand-red);
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, var(--brand-red), #aa0000);
+            color: #fff; border: none; padding: 15px; border-radius: 8px;
+            font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s;
+            text-align: center; width: 100%; font-size: 1.1rem; margin-top: 15px;
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+        .submit-btn:hover { transform: translateY(-2px); background: var(--brand-red); }
+
+        footer { background-color: var(--footer-bg); padding: 40px 5%; border-top: 1px solid #222; margin-top: auto; text-align: center; color: #555; }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .form-grid { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+    <a href="index.html" class="logo">
+        <img src="seaMLogo.png" alt="Sea Mountain Logo">
+        SEA<span>MOUNTAIN</span>
+    </a>
+
+    <nav class="nav-links">
+        <a href="index.html">Events</a>
+        <a href="#">Results</a>
+        <a href="#">Photos</a>
+        <a href="leaderboard.html">Leaderboard</a>
+    </nav>
+    <a href="login.html" class="login-btn">Log In</a>
+    </header>
+
+    <div class="register-container">
+        <div class="register-header">
+            <h1>Register Now</h1>
+            <p>Secure your spot in the Tunggul Melati Trail 2026. Early registration ensures you get your preferred race category and complete runner's kit.</p>
+        </div>
+
+        <div class="register-card">
+            <form id="registrationForm">
+                <div class="form-grid">
+                    
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" id="firstName" class="form-input" placeholder="Enter first name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" id="lastName" class="form-input" placeholder="Enter last name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" id="email" class="form-input" placeholder="example@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" id="phone" class="form-input" placeholder="+6012-3456789" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth</label>
+                        <input type="date" id="dob" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Gender</label>
+                        <select id="gender" class="form-select" required>
+                            <option value="" disabled selected>Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Address</label>
+                        <input type="text" id="address" class="form-input" placeholder="Street address, Apt, Suite, Unit" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">City</label>
+                        <input type="text" id="city" class="form-input" placeholder="Enter City" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Postcode</label>
+                        <input type="text" id="postcode" class="form-input" placeholder="Poscode" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Race Category</label>
+                        <select id="category" class="form-select" required>
+                            <option value="" disabled selected>Select Race Category</option>
+                            <option value="5km">5KM Fun Run</option>
+                            <option value="10km">10KM Speed</option>
+                            <option value="21km">21KM Half Marathon</option>
+                            <option value="50km">50KM Ultra Trail</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">T-Shirt Size</label>
+                        <select id="tshirt" class="form-select" required>
+                            <option value="" disabled selected>Select Size</option>
+                            <option value="xs">XS</option>
+                            <option value="s">S</option>
+                            <option value="m">M</option>
+                            <option value="l">L</option>
+                            <option value="xl">XL</option>
+                            <option value="xxl">XXL</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width terms-group">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms" class="terms-text">
+                            I agree to the <a href="#">terms and conditions</a> and acknowledge the <a href="#">privacy policy</a>.
+                        </label>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <button type="submit" class="submit-btn">
+                            Complete Registration
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Sea Mountain.Co. All Rights Reserved.</p>
+    </footer>
+
+    <script type="module">
+      // Import fungsi Firebase
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+      // Config Firebase (Ini kekalkan yang anda punya)
+      const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225",
+        measurementId: "G-XLTKE4DB9N"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      // Handle form submission
+      document.getElementById('registrationForm').addEventListener('submit', function(e) {
+          e.preventDefault();
+
+          // Ambil nilai dari input fields
+          const firstName = document.getElementById('firstName').value;
+          const lastName = document.getElementById('lastName').value;
+          const email = document.getElementById('email').value;
+          const phone = document.getElementById('phone').value;
+          const dob = document.getElementById('dob').value;
+          const gender = document.getElementById('gender').value;
+          const address = document.getElementById('address').value;
+          const city = document.getElementById('city').value;
+          const postcode = document.getElementById('postcode').value;
+          const category = document.getElementById('category').value;
+          const tshirt = document.getElementById('tshirt').value;
+          
+          const registerTime = new Date().toLocaleString();
+
+          // Push data to Firebase
+          push(ref(db, 'registrations'), {
+              first_name: firstName,
+              last_name: lastName,
+              email: email,
+              phone: phone,
+              dob: dob,
+              gender: gender,
+              address: address,
+              city: city,
+              postcode: postcode,
+              category: category,
+              tshirt_size: tshirt,
+              registration_time: registerTime,
+              status: "Pending Payment"
+          })
+          .then(() => {
+              // --- KOD REDIRECT BERADA DI SINI (DALAM .then) ---
+              
+              // 1. Simpan nama dalam memori browser sekejap
+              localStorage.setItem("runnerName", firstName + " " + lastName);
+              localStorage.setItem("raceCategory", category);
+
+              // 2. Alert pengguna
+              alert("Registration successful! Redirecting to payment...");
+
+              // 3. Pindah ke page payment (Redirect)
+              window.location.href = "payment.html"; 
+          })
+          .catch((error) => {
+              // Kalau gagal
+              alert("Registration failed: " + error.message);
+          });
+      });
+    </script>
+</body>
+</html>
+
+
