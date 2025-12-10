@@ -410,24 +410,128 @@
 
     </div>
 
-    <script>
-        const searchInput = document.getElementById('leaderboardSearch');
-        const tableRows = document.querySelectorAll('#leaderboardTable tr');
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // --- CONFIG ANDA (PASTIKAN BETUL) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+            authDomain: "sea-mountain.firebaseapp.com",
+            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sea-mountain",
+            storageBucket: "sea-mountain.firebasestorage.app",
+            messagingSenderId: "812228825024",
+            appId: "1:812228825024:web:717049c1a64b39c8a60225"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Tarik data dari node 'runners'
+        const runnersRef = ref(db, 'runners');
+
+        // Variable untuk simpan data supaya search boleh guna
+        let allRunners = [];
+
+        onValue(runnersRef, (snapshot) => {
+            const data = snapshot.val();
+            const podiumContainer = document.querySelector('.podium-wrapper');
+            const tableBody = document.getElementById('leaderboardTable');
+
+            if (data) {
+                // Convert object to array dan sort ikut Rank (1, 2, 3...)
+                allRunners = Object.values(data).sort((a, b) => a.rank - b.rank);
+                
+                // Render Mula-mula
+                renderLeaderboard(allRunners);
+
+            } else {
+                podiumContainer.innerHTML = '<p style="color:white; width:100%; text-align:center;">No Data Available</p>';
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No Data Participate.</td></tr>';
+            }
+        });
+
+        // FUNGSI PAPARAN (RENDER)
+        function renderLeaderboard(runners) {
+            const podiumContainer = document.querySelector('.podium-wrapper');
+            const tableBody = document.getElementById('leaderboardTable');
+            
+            // 1. UPDATE PODIUM (Hanya ambil Top 3 dari list)
+            let podiumHTML = '';
+            
+            // Cari runner Rank 2
+            const rank2 = runners.find(r => r.rank == 2);
+            if(rank2) podiumHTML += createPodiumCard(rank2, 'rank-2', '2');
+
+            // Cari runner Rank 1
+            const rank1 = runners.find(r => r.rank == 1);
+            if(rank1) podiumHTML += createPodiumCard(rank1, 'rank-1', '<i class="fas fa-crown"></i>');
+
+            // Cari runner Rank 3
+            const rank3 = runners.find(r => r.rank == 3);
+            if(rank3) podiumHTML += createPodiumCard(rank3, 'rank-3', '3');
+
+            podiumContainer.innerHTML = podiumHTML;
+
+            // 2. UPDATE TABLE
+            let tableHTML = '';
+            runners.forEach(runner => {
+                let statusClass = '';
+                if(runner.status === 'Finished') statusClass = 'status-finished';
+                else if(runner.status === 'Running') statusClass = 'status-running';
+                else statusClass = 'status-dnf';
+                
+                tableHTML += `
+                    <tr>
+                        <td class="col-rank">${runner.rank}</td>
+                        <td class="col-runner">
+                            <img src="https://ui-avatars.com/api/?name=${runner.name}&background=random" style="width:35px; height:35px; border-radius:50%;">
+                            ${runner.name}
+                        </td>
+                        <td>${runner.bib}</td>
+                        <td>${runner.category}</td>
+                        <td>${runner.checkpoint}</td>
+                        <td class="col-time">${runner.time}</td>
+                        <td><span class="badge ${statusClass}">${runner.status}</span></td>
+                    </tr>
+                `;
+            });
+            tableBody.innerHTML = tableHTML;
+        }
+
+        // Helper Function: Buat HTML Kad Podium
+        function createPodiumCard(runner, rankClass, badgeContent) {
+            return `
+                <div class="podium-card ${rankClass}">
+                    <div class="rank-badge">${badgeContent}</div>
+                    <img src="https://ui-avatars.com/api/?name=${runner.name}&background=random&size=128" class="racer-avatar">
+                    <div class="racer-name">${runner.name}</div>
+                    <div class="racer-bib">BIB: ${runner.bib}</div>
+                    <div style="flex-grow:1"></div>
+                    <div class="racer-time">${runner.time}</div>
+                    <span class="badge status-finished">${runner.status}</span>
+                </div>
+            `;
+        }
+
+        // --- SEARCH FUNCTIONALITY ---
+        const searchInput = document.getElementById('leaderboardSearch');
+        
         searchInput.addEventListener('keyup', (e) => {
             const term = e.target.value.toLowerCase();
             
-            tableRows.forEach(row => {
-                const name = row.querySelector('.col-runner').textContent.toLowerCase();
-                const bib = row.querySelectorAll('td')[2].textContent.toLowerCase();
-                
-                if(name.includes(term) || bib.includes(term)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+            // Filter senarai runners berdasarkan nama atau bib
+            const filteredRunners = allRunners.filter(runner => 
+                runner.name.toLowerCase().includes(term) || 
+                runner.bib.toLowerCase().includes(term)
+            );
+
+            // Render semula table dengan hasil carian
+            // (Nota: Podium kekal statik atau boleh disorok kalau nak)
+            renderLeaderboard(filteredRunners);
         });
+
     </script>
 
 </body>
