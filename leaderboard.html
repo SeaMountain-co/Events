@@ -413,7 +413,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- CONFIG ANDA (PASTIKAN BETUL) ---
+        // --- CONFIG FIREBASE ANDA ---
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
             authDomain: "sea-mountain.firebaseapp.com",
@@ -426,113 +426,132 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-
-        // Tarik data dari node 'runners'
         const runnersRef = ref(db, 'runners');
 
-        // Variable untuk simpan data supaya search boleh guna
-        let allRunners = [];
+        // Simpan semua data di sini supaya boleh filter tanpa tarik database banyak kali
+        let allRunnersData = [];
 
+        // 1. TARIK DATA DARI FIREBASE
         onValue(runnersRef, (snapshot) => {
             const data = snapshot.val();
             const podiumContainer = document.querySelector('.podium-wrapper');
             const tableBody = document.getElementById('leaderboardTable');
 
             if (data) {
-                // Convert object to array dan sort ikut Rank (1, 2, 3...)
-                allRunners = Object.values(data).sort((a, b) => a.rank - b.rank);
+                // Simpan dalam variable global 'allRunnersData'
+                allRunnersData = Object.values(data).sort((a, b) => a.rank - b.rank);
                 
-                // Render Mula-mula
-                renderLeaderboard(allRunners);
+                // Mula-mula, paparkan semua (atau ikut filter semasa)
+                filterAndRender();
 
             } else {
                 podiumContainer.innerHTML = '<p style="color:white; width:100%; text-align:center;">No Data Available</p>';
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No Data Participate.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Tiada data peserta.</td></tr>';
             }
         });
 
-        // FUNGSI PAPARAN (RENDER)
+        // 2. FUNGSI FILTER (DROPDOWN & SEARCH)
+        const categoryFilter = document.getElementById('categoryFilter');
+        const searchInput = document.getElementById('leaderboardSearch');
+
+        // Dengar bila Dropdown berubah
+        categoryFilter.addEventListener('change', filterAndRender);
+        
+        // Dengar bila Search berubah
+        searchInput.addEventListener('keyup', filterAndRender);
+
+        function filterAndRender() {
+            const selectedCategory = categoryFilter.value;
+            const searchTerm = searchInput.value.toLowerCase();
+
+            // Lakukan penapisan
+            const filteredRunners = allRunnersData.filter(runner => {
+                
+                // Cek Kategori (Kalau 'all', terima semua. Kalau tak, mesti sama match)
+                // Kita guna .includes() supaya "50KM Men" boleh match dengan "50KM Men Open" kalau database tak tepat sangat
+                const categoryMatch = (selectedCategory === 'all') || runner.category.includes(selectedCategory);
+                
+                // Cek Search (Nama atau BIB)
+                const searchMatch = runner.name.toLowerCase().includes(searchTerm) || runner.bib.toLowerCase().includes(searchTerm);
+
+                return categoryMatch && searchMatch;
+            });
+
+            // Paparkan hasil tapisan
+            renderLeaderboard(filteredRunners);
+        }
+
+        // 3. FUNGSI RENDER (LUKIS TABLE & PODIUM)
         function renderLeaderboard(runners) {
             const podiumContainer = document.querySelector('.podium-wrapper');
             const tableBody = document.getElementById('leaderboardTable');
             
-            // 1. UPDATE PODIUM (Hanya ambil Top 3 dari list)
+            // --- UPDATE PODIUM (Hanya tunjuk Top 3 dari hasil tapisan) ---
             let podiumHTML = '';
             
-            // Cari runner Rank 2
-            const rank2 = runners.find(r => r.rank == 2);
+            // Perlu sort semula sebab filter mungkin kacau susunan
+            const sortedForPodium = [...runners].sort((a, b) => a.rank - b.rank);
+
+            const rank1 = sortedForPodium.find(r => r.rank == 1);
+            const rank2 = sortedForPodium.find(r => r.rank == 2);
+            const rank3 = sortedForPodium.find(r => r.rank == 3);
+
             if(rank2) podiumHTML += createPodiumCard(rank2, 'rank-2', '2');
-
-            // Cari runner Rank 1
-            const rank1 = runners.find(r => r.rank == 1);
             if(rank1) podiumHTML += createPodiumCard(rank1, 'rank-1', '<i class="fas fa-crown"></i>');
-
-            // Cari runner Rank 3
-            const rank3 = runners.find(r => r.rank == 3);
             if(rank3) podiumHTML += createPodiumCard(rank3, 'rank-3', '3');
 
+            // Kalau lepas filter tak ada winner, kosongkan podium
+            if(podiumHTML === '') podiumHTML = '<p style="color:gray; font-size:0.9rem; margin-top:50px;">Select "All Categories" to see podium.</p>';
+            
             podiumContainer.innerHTML = podiumHTML;
 
-            // 2. UPDATE TABLE
+            // --- UPDATE TABLE ---
             let tableHTML = '';
-            runners.forEach(runner => {
-                let statusClass = '';
-                if(runner.status === 'Finished') statusClass = 'status-finished';
-                else if(runner.status === 'Running') statusClass = 'status-running';
-                else statusClass = 'status-dnf';
-                
-                tableHTML += `
-                    <tr>
-                        <td class="col-rank">${runner.rank}</td>
-                        <td class="col-runner">
-                            <img src="https://ui-avatars.com/api/?name=${runner.name}&background=random" style="width:35px; height:35px; border-radius:50%;">
-                            ${runner.name}
-                        </td>
-                        <td>${runner.bib}</td>
-                        <td>${runner.category}</td>
-                        <td>${runner.checkpoint}</td>
-                        <td class="col-time">${runner.time}</td>
-                        <td><span class="badge ${statusClass}">${runner.status}</span></td>
-                    </tr>
-                `;
-            });
+            if (runners.length > 0) {
+                runners.forEach(runner => {
+                    let statusClass = '';
+                    if(runner.status === 'Finished') statusClass = 'status-finished';
+                    else if(runner.status === 'Running') statusClass = 'status-running';
+                    else statusClass = 'status-dnf';
+                    
+                    tableHTML += `
+                        <tr>
+                            <td class="col-rank">${runner.rank}</td>
+                            <td class="col-runner">
+                                <img src="https://ui-avatars.com/api/?name=${runner.name}&background=random" style="width:35px; height:35px; border-radius:50%;">
+                                ${runner.name}
+                            </td>
+                            <td>${runner.bib}</td>
+                            <td>${runner.category}</td>
+                            <td>${runner.checkpoint}</td>
+                            <td class="col-time">${runner.time}</td>
+                            <td><span class="badge ${statusClass}">${runner.status}</span></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tableHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">No runners found in this category.</td></tr>';
+            }
             tableBody.innerHTML = tableHTML;
         }
 
-        // Helper Function: Buat HTML Kad Podium
+        // Helper: Buat HTML Kad Podium
         function createPodiumCard(runner, rankClass, badgeContent) {
             return `
                 <div class="podium-card ${rankClass}">
                     <div class="rank-badge">${badgeContent}</div>
                     <img src="https://ui-avatars.com/api/?name=${runner.name}&background=random&size=128" class="racer-avatar">
                     <div class="racer-name">${runner.name}</div>
-                    <div class="racer-bib">BIB: ${runner.bib}</div>
+                    <div style="font-size:0.8rem; color:#888;">BIB: ${runner.bib}</div>
                     <div style="flex-grow:1"></div>
                     <div class="racer-time">${runner.time}</div>
                     <span class="badge status-finished">${runner.status}</span>
                 </div>
             `;
         }
-
-        // --- SEARCH FUNCTIONALITY ---
-        const searchInput = document.getElementById('leaderboardSearch');
-        
-        searchInput.addEventListener('keyup', (e) => {
-            const term = e.target.value.toLowerCase();
-            
-            // Filter senarai runners berdasarkan nama atau bib
-            const filteredRunners = allRunners.filter(runner => 
-                runner.name.toLowerCase().includes(term) || 
-                runner.bib.toLowerCase().includes(term)
-            );
-
-            // Render semula table dengan hasil carian
-            // (Nota: Podium kekal statik atau boleh disorok kalau nak)
-            renderLeaderboard(filteredRunners);
-        });
-
     </script>
 
 </body>
 </html>
+
 
