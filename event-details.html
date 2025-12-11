@@ -237,8 +237,10 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        // PENTING: Tambah import Auth untuk cek login
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // CONFIG FIREBASE (Guna yang anda punya)
+        // --- CONFIG FIREBASE ANDA (PASTIKAN BETUL) ---
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
             authDomain: "sea-mountain.firebaseapp.com",
@@ -251,13 +253,28 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app); // Initialize Auth
 
-        // 1. Dapatkan ID Event dari URL (Contoh: event-detail.html?id=nightrun)
+        // 1. Dapatkan ID Event dari URL
         const urlParams = new URLSearchParams(window.location.search);
         const eventId = urlParams.get('id');
 
+        // Variable untuk simpan status login user
+        let isUserLoggedIn = false;
+
+        // 2. Sentiasa cek status login user (Realtime)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                isUserLoggedIn = true;
+                console.log("User status: Logged In as " + user.email);
+            } else {
+                isUserLoggedIn = false;
+                console.log("User status: Guest (Not Logged In)");
+            }
+        });
+
         if (eventId) {
-            // 2. Tarik Data dari Firebase
+            // 3. Tarik Data Event dari Firebase
             const eventRef = ref(db, 'events/' + eventId);
             
             onValue(eventRef, (snapshot) => {
@@ -266,18 +283,39 @@
                     // Masukkan Data ke HTML
                     document.getElementById('eventTitle').innerText = data.title;
                     document.getElementById('eventImage').src = data.image_url;
-                    document.getElementById('regDuration').innerText = data.reg_duration;
+                    document.getElementById('regDuration').innerText = data.reg_duration || "-";
                     document.getElementById('eventVenue').innerText = data.venue;
-                    document.getElementById('eventDate').innerText = `${data.date_start} - ${data.date_end}`;
-                    document.getElementById('kitDate').innerText = data.kit_date;
+                    document.getElementById('eventDate').innerText = data.date || `${data.date_start} - ${data.date_end}`;
+                    document.getElementById('kitDate').innerText = data.kit_date || "To be announced";
                     
-                    // Update Link Register
-                    document.getElementById('registerBtn').href = `register-event.html?event=${eventId}`;
+                    // --- LOGIC BUTANG REGISTER ---
+                    const registerBtn = document.getElementById('registerBtn'); 
+                    
+                    // Update teks butang (tambah harga jika ada)
+                    if(data.price) {
+                        registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
+                    }
 
-                    // Start Countdown
+                    // Tambah fungsi klik pada butang
+                    registerBtn.onclick = function(e) {
+                        e.preventDefault(); // Halang link asal
+
+                        if (isUserLoggedIn) {
+                            // Kalau DAH Login: Terus ke borang register
+                            window.location.href = `register-event.html?event=${eventId}`;
+                        } else {
+                            // Kalau BELUM Login: Tanya user
+                            if(confirm("Anda perlu Log In dahulu untuk mendaftar event ini. Pergi ke halaman Login?")) {
+                                window.location.href = "login.html";
+                            }
+                        }
+                    };
+
+                    // Start Countdown (Jika ada)
                     if(data.countdown_date) startCountdown(data.countdown_date);
+
                 } else {
-                    document.querySelector('.main-container').innerHTML = "<h2>Event not found!</h2>";
+                    document.querySelector('.main-container').innerHTML = "<h2 style='color:white; text-align:center; margin-top:50px;'>Event not found!</h2>";
                 }
             });
         } else {
@@ -298,12 +336,13 @@
                     document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                     document.getElementById("seconds").innerText = Math.floor((distance % (1000 * 60)) / 1000);
                 } else {
-                    document.querySelector(".timer-container").innerHTML = "<h2 style='color:red'>EVENT STARTED</h2>";
+                    const timerContainer = document.querySelector(".timer-container");
+                    if(timerContainer) timerContainer.innerHTML = "<h2 style='color:var(--brand-red)'>REGISTRATION CLOSED</h2>";
                 }
             }, 1000);
         }
 
-        // Tab Switcher (Global Scope)
+        // Tab Switcher Global
         window.openTab = function(evt, tabName) {
             var i, x, tablinks;
             x = document.getElementsByClassName("tab-panel");
@@ -317,4 +356,5 @@
     </script>
 
 </body>
+
 </html>
