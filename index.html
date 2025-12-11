@@ -543,26 +543,26 @@
             </div>
             <p>&copy; 2025 Sea Mountain.Co. All Rights Reserved.</p>
             <div class="visitor-counter">
-    <i class="fas fa-eye"></i> Total Views: <span id="visitCount">...</span>
-</div>
+            <i class="fas fa-eye"></i> Total Views: <span id="visitCount">...</span>
+        </div>
         </div>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        // IMPORT runTransaction DI SINI!
+        import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- PASTE CONFIG ANDA DI SINI ---
+        // CONFIG FIREBASE (SAYA GUNA YANG AWAK BAGI DULU)
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
             authDomain: "sea-mountain.firebaseapp.com",
-            // !!! PENTING: Sila masukkan URL database awak dari Firebase Console !!!
             databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app", 
             projectId: "sea-mountain",
             storageBucket: "sea-mountain.appspot.com",
-            messagingSenderId: "TULIS_SENDER_ID_ANDA",
-            appId: "TULIS_APP_ID_ANDA"
+            messagingSenderId: "812228825024",
+            appId: "1:812228825024:web:717049c1a64b39c8a60225"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -570,20 +570,17 @@
         const db = getDatabase(app);
 
         // --- BAHAGIAN VISITOR COUNTER (BARU) ---
-        // Kita simpan data ni dekat path: 'site_stats/visits'
         const visitRef = ref(db, 'site_stats/visits');
 
-        // 1. Naikkan count (+1) setiap kali page load
-        // runTransaction pastikan kiraan tepat walaupun ramai masuk serentak
         runTransaction(visitRef, (currentVisits) => {
             return (currentVisits || 0) + 1;
         }).then((result) => {
-            // Bila berjaya, update nombor dekat HTML
             if (result.snapshot.exists()) {
                 const count = result.snapshot.val();
-                document.getElementById('visitCount').innerText = count.toLocaleString(); // Letak koma (contoh: 1,205)
+                const counterElement = document.getElementById('visitCount');
+                if(counterElement) counterElement.innerText = count.toLocaleString();
             }
-        });
+        }).catch(err => console.log("Counter Error:", err));
 
         // --- 1. LOGIC LOGIN / LOGOUT ---
         const loginBtn = document.querySelector('.login-btn'); 
@@ -618,15 +615,12 @@
             const latestContainer = document.getElementById('latest-events-container');
             const upcomingContainer = document.getElementById('upcoming-events-container');
 
-            // Kosongkan container sebelum isi data baru
             latestContainer.innerHTML = '';
             upcomingContainer.innerHTML = '';
 
             if (data) {
                 Object.entries(data).forEach(([key, event]) => {
                     
-                    // Logic: Sold Out
-                    // Guna parseInt untuk pastikan ia nombor
                     const registered = parseInt(event.registered) || 0;
                     const quota = parseInt(event.quota) || 99999; 
                     let buttonHTML = '';
@@ -637,7 +631,6 @@
                         buttonHTML = `<a href="event-details.html?id=${key}" class="card-btn">Register Race <i class="fas fa-arrow-right"></i></a>`;
                     }
 
-                    // Card HTML Template (Menggunakan Key Database Awak: image_url, venue, title, date)
                     const cardHTML = `
                         <div class="card">
                             <div class="card-img-wrapper">
@@ -655,19 +648,15 @@
                         </div>
                     `;
 
-                    // Logic: Masuk Latest atau Upcoming?
                     if (event.category === 'latest') {
                         latestContainer.innerHTML += cardHTML;
                     } else {
-                        // Default masuk Upcoming kalau tiada category atau category='upcoming'
                         upcomingContainer.innerHTML += cardHTML;
                     }
                 });
             } else {
                 latestContainer.innerHTML = '<p>No events found.</p>';
             }
-
-            // Panggil semula function search bila card dah siap render
             setupSearch(); 
         });
 
@@ -675,7 +664,6 @@
         function setupSearch() {
             const searchInput = document.getElementById('searchInput');
             if(searchInput) {
-                // Clone node untuk buang event listener lama (elak duplicate)
                 const newSearchInput = searchInput.cloneNode(true);
                 searchInput.parentNode.replaceChild(newSearchInput, searchInput);
 
