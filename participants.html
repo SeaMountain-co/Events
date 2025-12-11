@@ -285,18 +285,25 @@
             }
         });
 
-        // 3. FETCH & PROCESS REGISTRATIONS
+        // 3. FETCH & PROCESS REGISTRATIONS (YANG DIBETULKAN)
         function fetchParticipants(eventId, maxQuota) {
-            get(ref(db, 'registrations')).then((snapshot) => {
+            // PERUBAHAN UTAMA: Kita tarik data TERUS dari folder event tersebut
+            // Dulu: ref(db, 'registrations')
+            // Sekarang: ref(db, `registrations/${eventId}`)
+            
+            get(ref(db, `registrations/${eventId}`)).then((snapshot) => {
                 const tbody = document.querySelector("#participantsTable tbody");
                 tbody.innerHTML = ""; // Kosongkan table
 
                 if(!snapshot.exists()) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No registrations yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No participants found for this event.</td></tr>`;
+                    
+                    // Reset KPI kalau tiada data
+                    updateKPI(0, 0, maxQuota, {}, {});
                     return;
                 }
 
-                const allRegs = snapshot.val();
+                const users = snapshot.val();
                 let count = 0;
                 let rowsHTML = "";
                 
@@ -304,40 +311,58 @@
                 const shirtStats = {};
                 const categoryStats = {};
 
-                // Loop semua registration
-                Object.entries(allRegs).forEach(([regId, reg]) => {
+                // Loop semua user dalam event ini sahaja
+                Object.entries(users).forEach(([userId, reg]) => {
+                    count++;
                     
-                    // PENAPIS: Pastikan kita cuma ambil data event ID yang betul!
-                    if(reg.event_id === eventId) {
-                        count++;
-                        
-                        // Kumpul data untuk chart
-                        const shirt = reg.shirt_size || "Unknown";
-                        const category = reg.category || "General";
+                    // Kumpul data untuk chart
+                    const shirt = reg.tshirt_size || "Unknown";
+                    const category = reg.category || "General";
 
-                        shirtStats[shirt] = (shirtStats[shirt] || 0) + 1;
-                        categoryStats[category] = (categoryStats[category] || 0) + 1;
+                    shirtStats[shirt] = (shirtStats[shirt] || 0) + 1;
+                    categoryStats[category] = (categoryStats[category] || 0) + 1;
 
-                        // Create Table Row
-                        rowsHTML += `
-                            <tr>
-                                <td>${count}</td>
-                                <td>${reg.fullname}</td>
-                                <td>${reg.email}</td>
-                                <td><span style="color:#fff; background:#333; padding:2px 8px; border-radius:4px;">${category}</span></td>
-                                <td>${shirt}</td>
-                                <td>${new Date(reg.timestamp).toLocaleDateString()}</td>
-                                <td><span class="status-paid">PAID</span></td>
-                            </tr>
-                        `;
+                    // Tentukan warna status
+                    let statusBadge = `<span class="status-pending">PENDING</span>`;
+                    if(reg.status === 'Paid') {
+                        statusBadge = `<span class="status-paid">PAID</span>`;
                     }
+
+                    // Create Table Row
+                    rowsHTML += `
+                        <tr>
+                            <td>${count}</td>
+                            <td>${reg.first_name} ${reg.last_name || ''}</td>
+                            <td>${reg.email}</td>
+                            <td><span style="color:#fff; background:#333; padding:2px 8px; border-radius:4px;">${category}</span></td>
+                            <td>${shirt}</td>
+                            <td>${reg.registration_time ? reg.registration_time.split(',')[0] : '-'}</td>
+                            <td>${statusBadge}</td>
+                        </tr>
+                    `;
                 });
 
-                if(count === 0) {
-                     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No participants found for this event.</td></tr>`;
-                } else {
-                    tbody.innerHTML = rowsHTML;
-                }
+                tbody.innerHTML = rowsHTML;
+
+                // Update KPI & Charts
+                updateKPI(count, count * eventPrice, maxQuota, shirtStats, categoryStats);
+            });
+        }
+
+        // Helper function untuk update UI (Supaya kod lebih kemas)
+        function updateKPI(count, revenue, maxQuota, shirtStats, categoryStats) {
+            // Update Number Cards
+            document.getElementById('totalPax').innerText = count;
+            document.getElementById('totalRevenue').innerText = "RM " + revenue.toLocaleString('en-MY', {minimumFractionDigits: 2});
+
+            // Update Quota Bar
+            const percent = Math.min((count / maxQuota) * 100, 100);
+            document.getElementById('quotaBar').style.width = percent + "%";
+            document.getElementById('quotaText').innerText = `${count} / ${maxQuota} Quota used`;
+
+            // Update Charts
+            renderCharts(shirtStats, categoryStats);
+        }
 
                 // 4. UPDATE KPI CARDS
                 document.getElementById('totalPax').innerText = count;
@@ -353,8 +378,8 @@
 
                 // Update Charts
                 renderCharts(shirtStats, categoryStats);
-            });
-        }
+            
+        
 
         // 5. RENDER CHARTS MENGGUNAKAN CHART.JS
         function renderCharts(shirtData, categoryData) {
