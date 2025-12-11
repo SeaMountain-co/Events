@@ -205,7 +205,7 @@
                 <span class="chart-title" style="font-size:1.2rem;">Participant List</span>
                 <div style="display:flex; gap:10px;">
                     <input type="text" id="searchInput" class="search-input" placeholder="Search name, email, or ID...">
-                    <button class="btn-export" onclick="exportTableToCSV('participants.csv')"><i class="fas fa-file-download"></i> Export CSV</button>
+                    <button id="btnExport" class="btn-export" onclick="exportTableToCSV('participants.csv')"><i class="fas fa-file-download"></i> Export CSV</button>
                 </div>
             </div>
             <div style="overflow-x:auto;">
@@ -437,28 +437,36 @@
             });
         });
 
-        // 7. EXPORT CSV FUNCTION
-        window.exportTableToCSV = function(filename) {
+        // // 7. EXPORT CSV FUNCTION (DIBETULKAN)
+        function exportTableToCSV(filename) {
             const csv = [];
+        // ... (kod sama macam dulu) ...
             const rows = document.querySelectorAll("table tr");
-            
-            for (let i = 0; i < rows.length; i++) {
-                const row = [], cols = rows[i].querySelectorAll("td, th");
-                
-                for (let j = 0; j < cols.length; j++) 
-                    row.push('"' + cols[j].innerText + '"'); // Tambah quote elak koma kacau
-                
-                csv.push(row.join(","));        
-            }
+
+        for (let i = 0; i < rows.length; i++) {
+        const row = [], cols = rows[i].querySelectorAll("td, th");
+        // Pastikan baris yang disorok (hidden by search) tak masuk CSV
+        if(rows[i].style.display === 'none') continue; 
+
+        for (let j = 0; j < cols.length; j++) 
+            row.push('"' + cols[j].innerText + '"'); 
+
+        csv.push(row.join(","));        
+        }
 
             const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
             const downloadLink = document.createElement("a");
-            downloadLink.download = filename;
-            downloadLink.href = window.URL.createObjectURL(csvFile);
-            downloadLink.style.display = "none";
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
         }
+
+        // TAMBAH LISTENER INI DI BAWAH SEKALI (DALAM SCRIPT MODULE)
+        document.getElementById('btnExport').addEventListener('click', () => {
+        exportTableToCSV('participants_list.csv');
+        });
 
     </script>
 </body>
