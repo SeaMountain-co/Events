@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea Mountain - Manage Event</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        body { background-color: #111; color: #fff; font-family: 'Montserrat', sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #1a1c23; padding: 40px; border-radius: 10px; border: 1px solid #333; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        .logo { font-family: 'Russo One'; color: #ff0000; font-size: 1.5rem; }
+        .back-btn { color: #888; text-decoration: none; font-weight: bold; }
+        .back-btn:hover { color: #fff; }
+
+        .form-section { margin-bottom: 30px; border-bottom: 1px dashed #333; padding-bottom: 20px; }
+        .section-title { color: #ff0000; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; display: block; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: #ccc; }
+        .form-input, textarea { 
+            width: 100%; padding: 12px; background: #252830; border: 1px solid #444; 
+            border-radius: 5px; color: #fff; outline: none; font-family: 'Montserrat';
+        }
+        .form-input:focus { border-color: #ff0000; }
+        /* Style untuk input disabled (ID tak boleh ubah masa edit) */
+        .form-input:disabled { background: #111; color: #666; border-color: #222; cursor: not-allowed; }
+        
+        .row { display: flex; gap: 20px; }
+        .col { flex: 1; }
+
+        .btn-submit { 
+            width: 100%; padding: 15px; background: #28a745; color: #fff; border: none; 
+            border-radius: 5px; font-weight: bold; font-size: 1rem; cursor: pointer; text-transform: uppercase; 
+        }
+        .btn-submit:hover { background: #218838; }
+        
+        .img-preview { margin-top: 10px; max-width: 200px; display: none; border: 1px solid #555; }
+        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:999; }
+    </style>
+</head>
+<body>
+
+    <div id="loading" class="loading-overlay"><h3>Loading Data...</h3></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo" id="pageTitle">ADD NEW EVENT</div>
+            <a href="admin-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+        </div>
+
+        <form id="eventForm">
+            
+            <div class="form-section">
+                <span class="section-title">Basic Info</span>
+                <div class="row">
+                    <div class="col">
+                        <label class="form-label">Event Unique ID</label>
+                        <input type="text" id="eventId" class="form-input" placeholder="e.g. tmt2026 (No spaces)" required>
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Event Price</label>
+                        <input type="text" id="eventPrice" class="form-input" placeholder="e.g. RM 85.00" required>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top:20px;">
+                    <label class="form-label">Event Title</label>
+                    <input type="text" id="eventTitle" class="form-input" placeholder="Full Event Name" required>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <span class="section-title">Date & Venue</span>
+                <div class="form-group">
+                    <label class="form-label">Registration Duration</label>
+                    <div class="row">
+                        <input type="date" id="regStart" class="form-input" required>
+                        <input type="date" id="regEnd" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Event Duration (Race Day)</label>
+                    <div class="row">
+                        <input type="date" id="eventStart" class="form-input" required>
+                        <input type="date" id="eventEnd" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Event Venue</label>
+                    <input type="text" id="eventVenue" class="form-input" placeholder="e.g. Dataran Putrajaya" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Countdown Target Date</label>
+                    <input type="datetime-local" id="countdownDate" class="form-input">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <span class="section-title">Race Kit Collection</span>
+                <div class="form-group">
+                    <label class="form-label">Collection Date & Time (Text)</label>
+                    <input type="text" id="kitDate" class="form-input" placeholder="e.g. 14 Feb 2026 (10am - 6pm)">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <span class="section-title">Event Visuals (Paste Image Link)</span>
+                <div class="form-group">
+                    <label class="form-label">Main Poster URL</label>
+                    <input type="url" id="mainPoster" class="form-input" placeholder="https://..." onchange="previewImg(this, 'previewMain')">
+                    <img id="previewMain" class="img-preview">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Entitlement / Medal Poster URL</label>
+                    <input type="url" id="entitlementPoster" class="form-input" placeholder="https://..." onchange="previewImg(this, 'previewEnt')">
+                    <img id="previewEnt" class="img-preview">
+                </div>
+            </div>
+
+            
+
+            <div class="form-section">
+                <span class="section-title">Details</span>
+                <div class="form-group">
+                    <label class="form-label">Event Description</label>
+                    <textarea id="eventDesc" rows="3" class="form-input"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Entitlements List (Text)</label>
+                    <textarea id="entitlementText" rows="3" class="form-input" placeholder="e.g. Medal, T-Shirt, Bib, Cert"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">FAQ (Text)</label>
+                    <textarea id="faqText" rows="4" class="form-input" placeholder="Q: xxx A: xxx"></textarea>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-submit">PUBLISH EVENT</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // --- PASTE CONFIG ANDA ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+            authDomain: "sea-mountain.firebaseapp.com",
+            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sea-mountain",
+            storageBucket: "sea-mountain.firebasestorage.app",
+            messagingSenderId: "812228825024",
+            appId: "1:812228825024:web:717049c1a64b39c8a60225"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const ALLOWED_ADMIN = "admin@sm.com"; 
+
+        // 1. SECURITY & MODE CHECK (ADD or EDIT)
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email !== ALLOWED_ADMIN) {
+                alert("ACCESS DENIED");
+                window.location.href = "admin-login.html";
+            } else {
+                // Cek URL kalau ada ?id=tmt2026
+                const urlParams = new URLSearchParams(window.location.search);
+                const editId = urlParams.get('id');
+
+                if(editId) {
+                    // --- EDIT MODE ---
+                    enterEditMode(editId);
+                }
+            }
+        });
+
+        // 2. FUNGSI MASUK EDIT MODE (AUTO-FILL)
+        function enterEditMode(id) {
+            document.getElementById('loading').style.display = 'flex';
+            document.getElementById('pageTitle').innerText = "EDIT EVENT: " + id.toUpperCase();
+            document.getElementById('submitBtn').innerText = "UPDATE EVENT";
+            
+            // Kunci ID supaya tak boleh ubah
+            const idInput = document.getElementById('eventId');
+            idInput.value = id;
+            idInput.disabled = true;
+
+            // Tarik data dari Firebase
+            get(ref(db, 'events/' + id)).then((snapshot) => {
+                document.getElementById('loading').style.display = 'none';
+                if(snapshot.exists()) {
+                    const data = snapshot.val();
+                    
+                    // Isi Borang dengan data lama
+                    document.getElementById('eventTitle').value = data.title || "";
+                    document.getElementById('eventPrice').value = data.price || "";
+                    document.getElementById('eventVenue').value = data.venue || "";
+                    document.getElementById('eventDesc').value = data.description || "";
+                    document.getElementById('kitDate').value = data.kit_date || "";
+                    
+                    // Tarikh (Jika anda simpan raw_dates sebelum ni)
+                    if(data.raw_reg_start) document.getElementById('regStart').value = data.raw_reg_start;
+                    if(data.raw_reg_end) document.getElementById('regEnd').value = data.raw_reg_end;
+                    if(data.raw_event_start) document.getElementById('eventStart').value = data.raw_event_start;
+                    if(data.raw_event_end) document.getElementById('eventEnd').value = data.raw_event_end;
+                    
+                    // Countdown (Convert format balik)
+                    if(data.raw_countdown) document.getElementById('countdownDate').value = data.raw_countdown;
+
+                    // Gambar
+                    if(data.image_url) {
+                        document.getElementById('mainPoster').value = data.image_url;
+                        previewImg(document.getElementById('mainPoster'), 'previewMain');
+                    }
+
+                } else {
+                    alert("Event ID not found!");
+                }
+            });
+        }
+
+        // 3. PREVIEW GAMBAR
+        window.previewImg = function(input, imgId) {
+            const img = document.getElementById(imgId);
+            if(input.value) { img.src = input.value; img.style.display = "block"; } 
+            else { img.style.display = "none"; }
+        }
+
+        // 4. SUBMIT FORM (SAVE / UPDATE)
+        document.getElementById('eventForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // ID Event (Kalau edit mode, ambil yang disabled pun ok)
+            const eventId = document.getElementById('eventId').value.trim();
+            
+            // Tarikh Raw
+            const regStart = document.getElementById('regStart').value;
+            const regEnd = document.getElementById('regEnd').value;
+            const evStart = document.getElementById('eventStart').value;
+            const evEnd = document.getElementById('eventEnd').value;
+            const cdRaw = document.getElementById('countdownDate').value;
+
+            // Format Countdown untuk Display
+            let countdownStr = "";
+            if(cdRaw) {
+                const d = new Date(cdRaw);
+                const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+                countdownStr = `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:00`;
+            }
+
+            const eventData = {
+                title: document.getElementById('eventTitle').value,
+                price: document.getElementById('eventPrice').value,
+                venue: document.getElementById('eventVenue').value,
+                description: document.getElementById('eventDesc').value,
+                image_url: document.getElementById('mainPoster').value,
+                kit_date: document.getElementById('kitDate').value,
+                
+                // Display Strings (Untuk HTML baca)
+                reg_duration: `${regStart} - ${regEnd}`,
+                date: `${evStart} - ${evEnd}`,
+                date_start: evStart,
+                date_end: evEnd,
+                countdown_date: countdownStr,
+
+                // RAW DATA (PENTING UNTUK EDIT BALIK NANTI)
+                raw_reg_start: regStart,
+                raw_reg_end: regEnd,
+                raw_event_start: evStart,
+                raw_event_end: evEnd,
+                raw_countdown: cdRaw
+            };
+
+            set(ref(db, 'events/' + eventId), eventData)
+            .then(() => {
+                alert("Event Saved Successfully!");
+                window.location.href = "admin-dashboard.html";
+            })
+            .catch((err) => {
+                alert("Error: " + err.message);
+            });
+        });
+    </script>
+</body>
+</html>
