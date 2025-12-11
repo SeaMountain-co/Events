@@ -205,7 +205,7 @@
                 <span class="chart-title" style="font-size:1.2rem;">Participant List</span>
                 <div style="display:flex; gap:10px;">
                     <input type="text" id="searchInput" class="search-input" placeholder="Search name, email, or ID...">
-                    <button id="btnExport" class="btn-export" onclick="exportTableToCSV('participants.csv')"><i class="fas fa-file-download"></i> Export CSV</button>
+                    <button id="btnExport" class="btn-export"><i class="fas fa-file-download"></i> Export CSV</button>
                 </div>
             </div>
             <div style="overflow-x:auto;">
@@ -285,20 +285,14 @@
             }
         });
 
-        // 3. FETCH & PROCESS REGISTRATIONS (YANG DIBETULKAN)
+        // 3. FETCH & PROCESS REGISTRATIONS
         function fetchParticipants(eventId, maxQuota) {
-            // PERUBAHAN UTAMA: Kita tarik data TERUS dari folder event tersebut
-            // Dulu: ref(db, 'registrations')
-            // Sekarang: ref(db, `registrations/${eventId}`)
-            
             get(ref(db, `registrations/${eventId}`)).then((snapshot) => {
                 const tbody = document.querySelector("#participantsTable tbody");
                 tbody.innerHTML = ""; // Kosongkan table
 
                 if(!snapshot.exists()) {
                     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No participants found for this event.</td></tr>`;
-                    
-                    // Reset KPI kalau tiada data
                     updateKPI(0, 0, maxQuota, {}, {});
                     return;
                 }
@@ -307,28 +301,23 @@
                 let count = 0;
                 let rowsHTML = "";
                 
-                // Data untuk Charts
                 const shirtStats = {};
                 const categoryStats = {};
 
-                // Loop semua user dalam event ini sahaja
                 Object.entries(users).forEach(([userId, reg]) => {
                     count++;
                     
-                    // Kumpul data untuk chart
                     const shirt = reg.tshirt_size || "Unknown";
                     const category = reg.category || "General";
 
                     shirtStats[shirt] = (shirtStats[shirt] || 0) + 1;
                     categoryStats[category] = (categoryStats[category] || 0) + 1;
 
-                    // Tentukan warna status
                     let statusBadge = `<span class="status-pending">PENDING</span>`;
                     if(reg.status === 'Paid') {
                         statusBadge = `<span class="status-paid">PAID</span>`;
                     }
 
-                    // Create Table Row
                     rowsHTML += `
                         <tr>
                             <td>${count}</td>
@@ -343,50 +332,30 @@
                 });
 
                 tbody.innerHTML = rowsHTML;
-
-                // Update KPI & Charts
                 updateKPI(count, count * eventPrice, maxQuota, shirtStats, categoryStats);
             });
         }
 
-        // Helper function untuk update UI (Supaya kod lebih kemas)
+        // Helper function untuk update UI
         function updateKPI(count, revenue, maxQuota, shirtStats, categoryStats) {
-            // Update Number Cards
             document.getElementById('totalPax').innerText = count;
             document.getElementById('totalRevenue').innerText = "RM " + revenue.toLocaleString('en-MY', {minimumFractionDigits: 2});
 
-            // Update Quota Bar
             const percent = Math.min((count / maxQuota) * 100, 100);
             document.getElementById('quotaBar').style.width = percent + "%";
             document.getElementById('quotaText').innerText = `${count} / ${maxQuota} Quota used`;
 
-            // Update Charts
             renderCharts(shirtStats, categoryStats);
         }
 
-                // 4. UPDATE KPI CARDS
-                document.getElementById('totalPax').innerText = count;
-                
-                // Update Revenue
-                const totalRev = count * eventPrice;
-                document.getElementById('totalRevenue').innerText = "RM " + totalRev.toLocaleString('en-MY', {minimumFractionDigits: 2});
-
-                // Update Quota Bar
-                const percent = Math.min((count / maxQuota) * 100, 100);
-                document.getElementById('quotaBar').style.width = percent + "%";
-                document.getElementById('quotaText').innerText = `${count} / ${maxQuota} Quota used`;
-
-                // Update Charts
-                renderCharts(shirtStats, categoryStats);
-            
-        
-
-        // 5. RENDER CHARTS MENGGUNAKAN CHART.JS
+        // 5. RENDER CHARTS
         function renderCharts(shirtData, categoryData) {
             
-            // --- PIE CHART: BAJU ---
             const shirtCtx = document.getElementById('shirtChart').getContext('2d');
-            new Chart(shirtCtx, {
+            // Check kalau chart dah ada, destroy dulu (untuk elak glitch)
+            if(window.myShirtChart) window.myShirtChart.destroy();
+
+            window.myShirtChart = new Chart(shirtCtx, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(shirtData),
@@ -401,9 +370,10 @@
                 }
             });
 
-            // --- BAR CHART: KATEGORI ---
             const catCtx = document.getElementById('categoryChart').getContext('2d');
-            new Chart(catCtx, {
+            if(window.myCatChart) window.myCatChart.destroy();
+
+            window.myCatChart = new Chart(catCtx, {
                 type: 'bar',
                 data: {
                     labels: Object.keys(categoryData),
@@ -425,7 +395,7 @@
             });
         }
 
-        // 6. SEARCH FUNCTION (Client-Side)
+        // 6. SEARCH FUNCTION
         const searchInput = document.getElementById('searchInput');
         searchInput.addEventListener('keyup', function() {
             const filter = searchInput.value.toLowerCase();
@@ -437,35 +407,35 @@
             });
         });
 
-        // // 7. EXPORT CSV FUNCTION (DIBETULKAN)
+        // 7. EXPORT CSV FUNCTION (FIXED)
         function exportTableToCSV(filename) {
             const csv = [];
-        // ... (kod sama macam dulu) ...
             const rows = document.querySelectorAll("table tr");
 
-        for (let i = 0; i < rows.length; i++) {
-        const row = [], cols = rows[i].querySelectorAll("td, th");
-        // Pastikan baris yang disorok (hidden by search) tak masuk CSV
-        if(rows[i].style.display === 'none') continue; 
+            for (let i = 0; i < rows.length; i++) {
+                const row = [], cols = rows[i].querySelectorAll("td, th");
+                
+                // Jangan export row yang disorok (search result)
+                if(rows[i].style.display === 'none') continue; 
 
-        for (let j = 0; j < cols.length; j++) 
-            row.push('"' + cols[j].innerText + '"'); 
+                for (let j = 0; j < cols.length; j++) 
+                    row.push('"' + cols[j].innerText + '"'); 
 
-        csv.push(row.join(","));        
-        }
+                csv.push(row.join(","));        
+            }
 
             const csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
             const downloadLink = document.createElement("a");
-        downloadLink.download = filename;
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
+            downloadLink.download = filename;
+            downloadLink.href = window.URL.createObjectURL(csvFile);
+            downloadLink.style.display = "none";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
         }
 
-        // TAMBAH LISTENER INI DI BAWAH SEKALI (DALAM SCRIPT MODULE)
+        // LISTENER BUTTON EXPORT
         document.getElementById('btnExport').addEventListener('click', () => {
-        exportTableToCSV('participants_list.csv');
+            exportTableToCSV('participants_list.csv');
         });
 
     </script>
