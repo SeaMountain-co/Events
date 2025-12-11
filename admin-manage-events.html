@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sea Mountain - Manage Events</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        body { background-color: #111; color: #fff; font-family: 'Montserrat', sans-serif; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        .logo { font-family: 'Russo One'; color: #ff0000; font-size: 1.5rem; }
+        .back-btn { color: #888; text-decoration: none; font-weight: bold; }
+        .back-btn:hover { color: #fff; }
+
+        .add-new-btn { 
+            background: #28a745; color: white; padding: 10px 20px; 
+            text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-flex; align-items: center; gap: 10px;
+        }
+        .add-new-btn:hover { background: #218838; }
+
+        /* TABLE STYLE */
+        .table-container { overflow-x: auto; background: #1a1c23; border-radius: 10px; padding: 20px; border: 1px solid #333; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { text-align: left; padding: 15px; color: #888; border-bottom: 2px solid #333; text-transform: uppercase; font-size: 0.85rem; }
+        td { padding: 15px; border-bottom: 1px solid #2a2c35; vertical-align: middle; }
+        
+        .event-img { width: 60px; height: 60px; object-fit: cover; border-radius: 5px; border: 1px solid #444; }
+        .event-id { color: #ff0000; font-weight: bold; font-family: monospace; font-size: 1rem; }
+        .event-title { font-weight: 700; font-size: 1rem; display: block; margin-bottom: 5px; }
+        .event-date { color: #888; font-size: 0.9rem; }
+
+        /* ACTION BUTTONS */
+        .btn-action { padding: 8px 15px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 0.8rem; margin-right: 5px; border: none; cursor: pointer; display: inline-block; }
+        .btn-edit { background: #3498db; color: white; }
+        .btn-edit:hover { background: #2980b9; }
+        .btn-delete { background: #e74c3c; color: white; }
+        .btn-delete:hover { background: #c0392b; }
+        .btn-view { background: #333; color: #ccc; }
+        .btn-view:hover { background: #555; color: #fff; }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">EVENT MANAGER</div>
+            <div>
+                <a href="admin-dashboard.html" class="back-btn" style="margin-right: 20px;">Dashboard</a>
+                <a href="admin-add-event.html" class="add-new-btn"><i class="fas fa-plus"></i> Add New Event</a>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="80">Image</th>
+                        <th>Event Info</th>
+                        <th>Price</th>
+                        <th>Reg Period</th>
+                        <th width="200">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="eventTableBody">
+                    <tr><td colspan="5" style="text-align:center; padding:30px;">Loading Events...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // --- PASTE CONFIG ANDA ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+            authDomain: "sea-mountain.firebaseapp.com",
+            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sea-mountain",
+            storageBucket: "sea-mountain.firebasestorage.app",
+            messagingSenderId: "812228825024",
+            appId: "1:812228825024:web:717049c1a64b39c8a60225"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const ALLOWED_ADMIN = "admin@sm.com"; 
+
+        // 1. SECURITY GUARD
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email !== ALLOWED_ADMIN) {
+                alert("ACCESS DENIED");
+                window.location.href = "admin-login.html";
+            } else {
+                loadEvents();
+            }
+        });
+
+        // 2. LOAD EVENTS LIST
+        function loadEvents() {
+            const eventsRef = ref(db, 'events');
+            onValue(eventsRef, (snapshot) => {
+                const data = snapshot.val();
+                const tableBody = document.getElementById('eventTableBody');
+                tableBody.innerHTML = "";
+
+                if (data) {
+                    Object.keys(data).forEach(key => {
+                        const event = data[key];
+                        
+                        const row = `
+                            <tr>
+                                <td>
+                                    <img src="${event.image_url || 'https://via.placeholder.com/60'}" class="event-img">
+                                </td>
+                                <td>
+                                    <span class="event-id">ID: ${key}</span>
+                                    <span class="event-title">${event.title}</span>
+                                    <span class="event-date"><i class="far fa-calendar-alt"></i> ${event.date}</span>
+                                </td>
+                                <td>${event.price || '-'}</td>
+                                <td style="font-size:0.9rem; color:#aaa;">${event.reg_duration || '-'}</td>
+                                <td>
+                                    <a href="admin-add-event.html?id=${key}" class="btn-action btn-edit">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    
+                                    <a href="event-detail.html?id=${key}" target="_blank" class="btn-action btn-view">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+
+                                    <button class="btn-action btn-delete" onclick="deleteEvent('${key}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.innerHTML += row;
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px;">No events found. Add one!</td></tr>';
+                }
+            });
+        }
+
+        // 3. DELETE EVENT FUNCTION
+        window.deleteEvent = function(eventId) {
+            if(confirm(`Are you sure you want to DELETE event: ${eventId}? This cannot be undone.`)) {
+                remove(ref(db, 'events/' + eventId))
+                .then(() => alert("Event Deleted Successfully"))
+                .catch((err) => alert("Error: " + err.message));
+            }
+        }
+    </script>
+
+</body>
+</html>
