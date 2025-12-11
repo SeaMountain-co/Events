@@ -397,6 +397,31 @@
         .footer-links a { color: #888; margin: 0 10px; font-weight: 600; }
         .footer-links a:hover { color: #fff; }
 
+        /* VISITOR COUNTER STYLE */
+        .visitor-counter {
+        margin-top: 10px;
+        font-size: 0.8rem;
+        color: #555;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: bold;
+        display: inline-block;
+        padding: 5px 15px;
+        background: #000; /* Latar belakang hitam pekat */
+        border: 1px solid #333;
+        border-radius: 20px;
+        }
+
+        .visitor-counter i {
+        color: var(--brand-orange); /* Ikon mata warna oren */
+        margin-right: 5px;
+        }
+
+        .visitor-counter span {
+            color: #fff; /* Nombor warna putih */
+            font-family: 'Courier New', monospace; /* Font stail digital */
+        }
+
         @media (max-width: 900px) {
             .hero-content { flex-direction: column; text-align: center; }
             .nav-links { display: none; }
@@ -517,6 +542,9 @@
                 <a href="participants.html" style="color:#0f1014; text-decoration:none; font-size:0.7rem;">Participants</a>
             </div>
             <p>&copy; 2025 Sea Mountain.Co. All Rights Reserved.</p>
+            <div class="visitor-counter">
+    <i class="fas fa-eye"></i> Total Views: <span id="visitCount">...</span>
+</div>
         </div>
     </footer>
 
@@ -540,6 +568,22 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+
+        // --- BAHAGIAN VISITOR COUNTER (BARU) ---
+        // Kita simpan data ni dekat path: 'site_stats/visits'
+        const visitRef = ref(db, 'site_stats/visits');
+
+        // 1. Naikkan count (+1) setiap kali page load
+        // runTransaction pastikan kiraan tepat walaupun ramai masuk serentak
+        runTransaction(visitRef, (currentVisits) => {
+            return (currentVisits || 0) + 1;
+        }).then((result) => {
+            // Bila berjaya, update nombor dekat HTML
+            if (result.snapshot.exists()) {
+                const count = result.snapshot.val();
+                document.getElementById('visitCount').innerText = count.toLocaleString(); // Letak koma (contoh: 1,205)
+            }
+        });
 
         // --- 1. LOGIC LOGIN / LOGOUT ---
         const loginBtn = document.querySelector('.login-btn'); 
@@ -648,5 +692,3 @@
     </script>
 </body>
 </html>
-
-
