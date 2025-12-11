@@ -21,11 +21,11 @@
 
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: #ccc; }
-        .form-input, textarea { 
+        .form-input, textarea, select { 
             width: 100%; padding: 12px; background: #252830; border: 1px solid #444; 
             border-radius: 5px; color: #fff; outline: none; font-family: 'Montserrat';
         }
-        .form-input:focus { border-color: #ff0000; }
+        .form-input:focus, select:focus { border-color: #ff0000; }
         /* Style untuk input disabled (ID tak boleh ubah masa edit) */
         .form-input:disabled { background: #111; color: #666; border-color: #222; cursor: not-allowed; }
         
@@ -53,7 +53,8 @@
         </div>
 
         <form id="eventForm">
-            
+            <input type="hidden" id="currentRegistered" value="0">
+
             <div class="form-section">
                 <span class="section-title">Basic Info</span>
                 <div class="row">
@@ -66,6 +67,25 @@
                         <input type="text" id="eventPrice" class="form-input" placeholder="e.g. RM 85.00" required>
                     </div>
                 </div>
+                
+                <div class="row" style="margin-top: 20px;">
+                    <div class="col">
+                        <label class="form-label">Display Category</label>
+                        <select id="eventCategory" class="form-input">
+                            <option value="upcoming">Upcoming Run</option>
+                            <option value="latest">Latest Run</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Total Quota (Pax)</label>
+                        <input type="number" id="eventQuota" class="form-input" placeholder="e.g. 1000" required>
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Distances</label>
+                        <input type="text" id="eventDistance" class="form-input" placeholder="e.g. 5KM, 10KM" required>
+                    </div>
+                </div>
+
                 <div class="form-group" style="margin-top:20px;">
                     <label class="form-label">Event Title</label>
                     <input type="text" id="eventTitle" class="form-input" placeholder="Full Event Name" required>
@@ -120,8 +140,6 @@
                 </div>
             </div>
 
-            
-
             <div class="form-section">
                 <span class="section-title">Details</span>
                 <div class="form-group">
@@ -174,7 +192,6 @@
                 const editId = urlParams.get('id');
 
                 if(editId) {
-                    // --- EDIT MODE ---
                     enterEditMode(editId);
                 }
             }
@@ -197,26 +214,36 @@
                 if(snapshot.exists()) {
                     const data = snapshot.val();
                     
-                    // Isi Borang dengan data lama
+                    // Isi Borang Asas
                     document.getElementById('eventTitle').value = data.title || "";
                     document.getElementById('eventPrice').value = data.price || "";
                     document.getElementById('eventVenue').value = data.venue || "";
                     document.getElementById('eventDesc').value = data.description || "";
                     document.getElementById('kitDate').value = data.kit_date || "";
                     
-                    // Tarikh (Jika anda simpan raw_dates sebelum ni)
+                    // --- ISI DATA BARU (Category, Quota, Distance) ---
+                    document.getElementById('eventCategory').value = data.category || "upcoming";
+                    document.getElementById('eventQuota').value = data.quota || "";
+                    document.getElementById('eventDistance').value = data.distance || "";
+
+                    // Simpan current registered count (PENTING SUPAYA TAK RESET KE 0)
+                    document.getElementById('currentRegistered').value = data.registered || 0;
+
+                    // Tarikh & Countdown
                     if(data.raw_reg_start) document.getElementById('regStart').value = data.raw_reg_start;
                     if(data.raw_reg_end) document.getElementById('regEnd').value = data.raw_reg_end;
                     if(data.raw_event_start) document.getElementById('eventStart').value = data.raw_event_start;
                     if(data.raw_event_end) document.getElementById('eventEnd').value = data.raw_event_end;
-                    
-                    // Countdown (Convert format balik)
                     if(data.raw_countdown) document.getElementById('countdownDate').value = data.raw_countdown;
 
                     // Gambar
                     if(data.image_url) {
                         document.getElementById('mainPoster').value = data.image_url;
                         previewImg(document.getElementById('mainPoster'), 'previewMain');
+                    }
+                    if(data.entitlement_image) { // Kalau awak simpan entitlement image
+                        document.getElementById('entitlementPoster').value = data.entitlement_image;
+                         previewImg(document.getElementById('entitlementPoster'), 'previewEnt');
                     }
 
                 } else {
@@ -236,7 +263,6 @@
         document.getElementById('eventForm').addEventListener('submit', (e) => {
             e.preventDefault();
 
-            // ID Event (Kalau edit mode, ambil yang disabled pun ok)
             const eventId = document.getElementById('eventId').value.trim();
             
             // Tarikh Raw
@@ -246,7 +272,7 @@
             const evEnd = document.getElementById('eventEnd').value;
             const cdRaw = document.getElementById('countdownDate').value;
 
-            // Format Countdown untuk Display
+            // Format Countdown
             let countdownStr = "";
             if(cdRaw) {
                 const d = new Date(cdRaw);
@@ -254,22 +280,33 @@
                 countdownStr = `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:00`;
             }
 
+            // Ambil registered count lama (jika ada)
+            const currentReg = parseInt(document.getElementById('currentRegistered').value) || 0;
+
             const eventData = {
+                // Info Asas
                 title: document.getElementById('eventTitle').value,
                 price: document.getElementById('eventPrice').value,
                 venue: document.getElementById('eventVenue').value,
                 description: document.getElementById('eventDesc').value,
                 image_url: document.getElementById('mainPoster').value,
+                entitlement_image: document.getElementById('entitlementPoster').value,
                 kit_date: document.getElementById('kitDate').value,
                 
-                // Display Strings (Untuk HTML baca)
+                // --- DATA BARU ---
+                category: document.getElementById('eventCategory').value,
+                quota: parseInt(document.getElementById('eventQuota').value), // Simpan sebagai Nombor
+                distance: document.getElementById('eventDistance').value,
+                registered: currentReg, // Masukkan balik jumlah peserta sedia ada
+                
+                // Display Strings
                 reg_duration: `${regStart} - ${regEnd}`,
                 date: `${evStart} - ${evEnd}`,
                 date_start: evStart,
                 date_end: evEnd,
                 countdown_date: countdownStr,
 
-                // RAW DATA (PENTING UNTUK EDIT BALIK NANTI)
+                // RAW DATA
                 raw_reg_start: regStart,
                 raw_reg_end: regEnd,
                 raw_event_start: evStart,
