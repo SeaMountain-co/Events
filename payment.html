@@ -4,220 +4,165 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sea Mountain - Payment</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --brand-red: #ff0000;
-            --bg-dark: #0f1014;
-            --card-bg: #1a1c23;
-            --text-white: #ffffff;
-            --text-gray: #b0b3b8;
-        }
-
+        /* (Style kekal sama dengan sedikit tambahan) */
+        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text-white: #ffffff; --text-gray: #b0b3b8; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-white);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-image: radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 60%);
-        }
-
-        .payment-container {
-            display: flex;
-            max-width: 900px;
-            width: 90%;
-            background: var(--card-bg);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        /* Kiri: Order Summary */
-        .order-summary {
-            flex: 1;
-            padding: 40px;
-            background: rgba(0,0,0,0.2);
-            border-right: 1px solid rgba(255,255,255,0.05);
-        }
-
+        body { background-color: var(--bg-dark); color: var(--text-white); height: 100vh; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 60%); }
+        .payment-container { display: flex; max-width: 900px; width: 90%; background: var(--card-bg); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
+        
+        .order-summary { flex: 1; padding: 40px; background: rgba(0,0,0,0.2); border-right: 1px solid rgba(255,255,255,0.05); }
         .order-summary h2 { font-family: 'Russo One'; margin-bottom: 20px; color: var(--brand-red); text-transform: uppercase; font-style: italic; }
         .summary-item { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--text-gray); font-size: 0.9rem; }
         .summary-item.total { border-top: 1px solid #333; padding-top: 15px; margin-top: 20px; color: #fff; font-weight: bold; font-size: 1.2rem; }
         
-        /* Kanan: Payment Form */
         .payment-details { flex: 1.5; padding: 40px; }
         .payment-header { margin-bottom: 30px; }
         .payment-header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
-        .payment-icons { display: flex; gap: 10px; margin-top: 15px; }
-        .payment-icons i { font-size: 2rem; color: #fff; opacity: 0.7; }
-
+        
+        /* Bank Info Box */
+        .bank-info-box { background: #252830; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
+        .bank-name { font-weight: bold; color: var(--brand-red); margin-bottom: 5px; display: block; }
+        .bank-details { font-size: 0.9rem; color: #ccc; }
+        
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-gray); font-weight: 600; }
-        .form-input {
-            width: 100%; padding: 12px; background: #252830; border: 1px solid transparent;
-            border-radius: 8px; color: #fff; outline: none; transition: 0.3s;
-        }
+        .form-input { width: 100%; padding: 12px; background: #252830; border: 1px solid transparent; border-radius: 8px; color: #fff; outline: none; transition: 0.3s; }
         .form-input:focus { border-color: var(--brand-red); }
-
-        .row { display: flex; gap: 20px; }
-
-        .pay-btn {
-            width: 100%; padding: 15px; background: linear-gradient(45deg, var(--brand-red), #aa0000);
-            border: none; border-radius: 8px; color: #fff; font-weight: 800; text-transform: uppercase;
-            cursor: pointer; transition: 0.3s; margin-top: 10px;
-        }
+        
+        /* File Upload Style */
+        .file-upload-wrapper { border: 2px dashed #444; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+        .file-upload-wrapper:hover { border-color: var(--brand-red); background: rgba(255,0,0,0.05); }
+        
+        .pay-btn { width: 100%; padding: 15px; background: linear-gradient(45deg, var(--brand-red), #aa0000); border: none; border-radius: 8px; color: #fff; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
-
-        /* Loader Overlay (Untuk effect processing) */
-        .loader-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); display: none; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 9999;
-        }
-        .spinner {
-            width: 50px; height: 50px; border: 5px solid #333; border-top: 5px solid var(--brand-red);
-            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        @media (max-width: 768px) {
-            .payment-container { flex-direction: column; }
-            .order-summary { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        }
+        
+        @media (max-width: 768px) { .payment-container { flex-direction: column; height: auto; margin: 20px 0; } .order-summary { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); } }
     </style>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-        // Config ringkas (tak perlu penuh pun takpa untuk cek auth, tapi lebih baik penuh)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
-            authDomain: "sea-mountain.firebaseapp.com",
-            projectId: "sea-mountain" 
-        };
-
-            const app = initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-
-        // Cek serta-merta bila page loading
-        onAuthStateChanged(auth, (user) => {
-        if (!user) {
-            // Kalau TAK ADA user (belum login)
-            alert("Sila Log In dahulu untuk mendaftar.");
-            window.location.href = "login.html"; // Tendang ke Login Page
-            }
-        });
-    </script>
-
 </head>
 <body>
 
     <div class="payment-container">
         <div class="order-summary">
             <h2>Order Summary</h2>
-            <div class="summary-item">
-                <span>Runner Name</span>
-                <span id="display-name" style="color:white; font-weight:bold;">Loading...</span>
-            </div>
-            <div class="summary-item">
-                <span>Event</span>
-                <span>Tunggul Melati Trail 2026</span>
-            </div>
-            <div class="summary-item">
-                <span>Category</span>
-                <span id="display-cat" style="color:var(--brand-red);">Loading...</span>
-            </div>
-            <div class="summary-item">
-                <span>Registration Fee</span>
-                <span>RM 80.00</span>
-            </div>
-            <div class="summary-item">
-                <span>Processing Fee</span>
-                <span>RM 5.00</span>
-            </div>
-            <div class="summary-item total">
-                <span>TOTAL TO PAY</span>
-                <span style="color:var(--brand-red);">RM 85.00</span>
-            </div>
+            <div class="summary-item"><span>Runner Name</span><span id="display-name" style="color:white; font-weight:bold;">Loading...</span></div>
+            <div class="summary-item"><span>Event</span><span id="display-event">Loading...</span></div>
+            <div class="summary-item"><span>Category</span><span id="display-cat" style="color:var(--brand-red);">Loading...</span></div>
+            
+            <div class="summary-item"><span>Registration Fee</span><span id="fee-display">RM 0.00</span></div>
+            
+            <div class="summary-item"><span>Processing Fee</span><span>RM 5.00</span></div>
+            
+            <div class="summary-item total"><span>TOTAL TO PAY</span><span id="total-display" style="color:var(--brand-red);">RM 0.00</span></div>
         </div>
 
         <div class="payment-details">
             <div class="payment-header">
-                <h1>Secure Payment</h1>
-                <p style="color:var(--text-gray); font-size:0.9rem;">Encrypted connection. Please enter your card details.</p>
-                <div class="payment-icons">
-                    <i class="fab fa-cc-visa"></i>
-                    <i class="fab fa-cc-mastercard"></i>
-                    <i class="fab fa-cc-amex"></i>
+                <h1>Bank Transfer</h1>
+                <p style="color:var(--text-gray); font-size:0.9rem;">Please transfer the total amount to the account below and upload your receipt.</p>
+            </div>
+
+            <div class="bank-info-box">
+                <span class="bank-name">MAYBANK</span>
+                <div class="bank-details">
+                    Account Name: <strong>SEA MOUNTAIN ENTERPRISE</strong><br>
+                    Account No: <strong>5123 4567 8901</strong><br>
+                    Reference: <span id="ref-code" style="color:yellow">...</span>
                 </div>
             </div>
 
             <form id="paymentForm">
                 <div class="form-group">
-                    <label class="form-label">Cardholder Name</label>
-                    <input type="text" class="form-input" placeholder="Name on Card" required>
+                    <label class="form-label">Upload Receipt / Proof of Payment</label>
+                    <div class="file-upload-wrapper" onclick="document.getElementById('receiptFile').click()">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #666; margin-bottom: 10px;"></i>
+                        <p style="color:#aaa; font-size:0.9rem;">Click to upload receipt image</p>
+                        <input type="file" id="receiptFile" style="display:none" required>
+                        <p id="fileName" style="color:var(--brand-red); font-size:0.8rem; margin-top:5px;"></p>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Card Number</label>
-                    <input type="text" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19" required>
+                    <label class="form-label">Or Share via WhatsApp</label>
+                    <a href="#" id="whatsappBtn" class="pay-btn" style="background:#25D366; display:flex; justify-content:center; align-items:center; gap:10px; text-decoration:none;">
+                        <i class="fab fa-whatsapp"></i> Send Receipt via WhatsApp
+                    </a>
                 </div>
 
-                <div class="row">
-                    <div class="form-group" style="flex:1">
-                        <label class="form-label">Expiry Date</label>
-                        <input type="text" class="form-input" placeholder="MM/YY" maxlength="5" required>
-                    </div>
-                    <div class="form-group" style="flex:1">
-                        <label class="form-label">CVV</label>
-                        <input type="password" class="form-input" placeholder="123" maxlength="3" required>
-                    </div>
-                </div>
-
-                <button type="submit" class="pay-btn">PAY RM 85.00 NOW</button>
+                <button type="submit" class="pay-btn">Submit Payment</button>
             </form>
         </div>
     </div>
 
-    <div class="loader-overlay" id="loader">
-        <div class="spinner"></div>
-        <h3 style="color:#fff; font-family:'Montserrat';">Processing Payment...</h3>
-        <p style="color:#888; margin-top:5px;">Please do not close this window.</p>
-    </div>
+    <script type="module">
+        // 1. DATA HARGA (Boleh ubah ikut kesesuaian)
+        const priceList = {
+            "5km": 45,
+            "10km": 60,
+            "21km": 85,
+            "50km": 120,
+            "virtual": 40
+        };
 
-    <script>
-        // 1. Ambil data nama yang disimpan masa register tadi
+        const processingFee = 5; // Cas proses tetap
+
+        // 2. AMBIL DATA DARI MEMORI
         const runnerName = localStorage.getItem("runnerName") || "Runner";
-        const raceCategory = localStorage.getItem("raceCategory") || "Open";
+        const raceCategory = localStorage.getItem("raceCategory") || "5km"; // Default 5km kalau tak jumpa
+        const eventName = localStorage.getItem("eventName") || "Sea Mountain Event";
 
-        // 2. Paparkan di Order Summary
+        // 3. KIRA HARGA
+        // Kita cuba cari harga berdasarkan kategori (cth: "5km" -> 45)
+        // Kita guna .toLowerCase() dan .includes() supaya carian lebih fleksibel
+        let basePrice = 0;
+        let selectedCatKey = "Unknown";
+
+        // Logic ringkas untuk cari harga:
+        if (raceCategory.toLowerCase().includes("5km")) { basePrice = priceList["5km"]; }
+        else if (raceCategory.toLowerCase().includes("10km")) { basePrice = priceList["10km"]; }
+        else if (raceCategory.toLowerCase().includes("21km")) { basePrice = priceList["21km"]; }
+        else if (raceCategory.toLowerCase().includes("50km")) { basePrice = priceList["50km"]; }
+        else if (raceCategory.toLowerCase().includes("virtual")) { basePrice = priceList["virtual"]; }
+        else { basePrice = 50; } // Harga default kalau kategori pelik
+
+        const totalPrice = basePrice + processingFee;
+
+        // 4. PAPARKAN DI HTML
         document.getElementById("display-name").textContent = runnerName;
+        document.getElementById("display-event").textContent = eventName;
         document.getElementById("display-cat").textContent = raceCategory;
+        
+        // Update Harga
+        document.getElementById("fee-display").textContent = "RM " + basePrice.toFixed(2);
+        document.getElementById("total-display").textContent = "RM " + totalPrice.toFixed(2);
+        
+        // Update Butang Pay
+        const payBtn = document.querySelector('.pay-btn'); // Kalau butang submit
+        if(payBtn) payBtn.innerText = "SUBMIT PAYMENT (RM " + totalPrice.toFixed(2) + ")";
 
-        // 3. Logic bila tekan butang PAY
+        // 5. GENERATE REF CODE
+        const refCode = "REF-" + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById("ref-code").textContent = refCode;
+
+        // 6. SETUP WHATSAPP LINK (Dgn Harga Betul)
+        const whatsappMsg = `Hi Sea Mountain, I have made payment of RM${totalPrice.toFixed(2)} for ${eventName}. Reference: ${refCode}. Name: ${runnerName}.`;
+        document.getElementById("whatsappBtn").href = `https://wa.me/60179832739?text=${encodeURIComponent(whatsappMsg)}`;
+
+        // 7. FILE UPLOAD LOGIC
+        document.getElementById('receiptFile').addEventListener('change', function(){
+            const fileName = this.files[0] ? this.files[0].name : "No file selected";
+            document.getElementById('fileName').textContent = fileName;
+        });
+
+        // 8. HANDLE SUBMIT
         document.getElementById("paymentForm").addEventListener("submit", function(e){
             e.preventDefault();
-            
-            // Tunjuk loader (Simulasi processing)
-            const loader = document.getElementById("loader");
-            loader.style.display = "flex";
-
-            // Tunggu 3 saat, kemudian bagitahu Berjaya
-            setTimeout(() => {
-                loader.style.display = "none";
-                alert("Payment Successful! Your slot is confirmed. See you at the race!");
-                
-                // Balik ke Home
-                window.location.href = "index.html"; 
-            }, 3000);
+            alert("Terima kasih! Bukti pembayaran RM" + totalPrice.toFixed(2) + " telah dihantar. Pihak kami akan mengesahkan pendaftaran anda.");
+            window.location.href = "index.html";
         });
     </script>
 
