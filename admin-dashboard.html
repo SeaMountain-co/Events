@@ -81,8 +81,8 @@
             <select id="eventFilter" class="filter-select">
                 <option value="all">All Events</option>
                 </select>
-                <a href="participants.html" class="btn-action" style="background:#000000; text-decoration:none; display:inline-block; padding:8px 15px;">
-                <i class="fa-solid fa-user-tie"></i></i> Client View</a>
+                <a id="btnClientView" href="#" class="btn-action" style="background:#d9c7c7; text-decoration:none; display:none; padding:8px 15px; margin-left: 10px;">
+                <i class="fas fa-chart-pie"></i> View Analytics</a>
         </div>
         <button onclick="downloadCSV()" class="btn-download"><i class="fas fa-file-csv"></i> Download CSV</button>
     </div>
@@ -225,15 +225,24 @@
             });
         }
 
-        // --- FILTER FUNCTION ---
+        // --- FILTER FUNCTION (UPDATED) ---
         document.getElementById('eventFilter').addEventListener('change', function() {
-            const selectedEvent = this.value;
-            if(selectedEvent === 'all') {
-                renderTable(allRegistrations);
-            } else {
-                const filtered = allRegistrations.filter(r => r.eventId === selectedEvent);
-                renderTable(filtered);
-            }
+        const selectedEvent = this.value;
+        const btnAnalytics = document.getElementById('btnClientView'); // Ambil butang tadi
+
+        if(selectedEvent === 'all') {
+        // Kalau pilih 'All Events', tunjuk semua data tapi SOROK butang analytics
+        renderTable(allRegistrations);
+        btnAnalytics.style.display = 'none'; 
+        } else {
+        // Kalau pilih specific event, filter table DAN tunjuk butang analytics
+        const filtered = allRegistrations.filter(r => r.eventId === selectedEvent);
+        renderTable(filtered);
+        
+        // Update link butang supaya ada ID! (Solusi masalah error awak)
+        btnAnalytics.href = `participants.html?id=${selectedEvent}`;
+        btnAnalytics.style.display = 'inline-block';
+        }
         });
 
         // --- DOWNLOAD CSV FUNCTION ---
