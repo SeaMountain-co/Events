@@ -136,7 +136,7 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- 1. CONFIGURATION (Hanya Sekali) ---
+        // --- 1. CONFIGURATION (PASTIKAN GUNA YANG ANDA PUNYA) ---
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
             authDomain: "sea-mountain.firebaseapp.com",
@@ -148,69 +148,103 @@
             measurementId: "G-XLTKE4DB9N"
         };
 
-        // --- 2. INITIALIZE ---
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // --- 3. SECURITY GUARD (CHECK LOGIN) ---
+        // --- 2. DATA EVENT (DATABASE KECIL DALAM KOD) ---
+        // Ini mesti sama dengan kod ?event=... dekat index.html tadi
+        const eventDetails = {
+            'tmt2025': {
+                title: "Tunggul Melati Trail 2026",
+                desc: "Secure your spot in the toughest trail in Selangor!"
+            },
+            'nightrun': {
+                title: "Putrajaya Night Run 2026",
+                desc: "Join the glowing night run through the heart of Putrajaya."
+            },
+            'ikattepi': {
+                title: "Ikat Tepi Virtual Run",
+                desc: "Run anywhere, anytime. Get your medal delivered."
+            },
+            'cancer': {
+                title: "Race Against Cancer",
+                desc: "Run for a cause. Support cancer research Malaysia."
+            },
+            'avoidcancer': {
+                title: "Avoid Cancer RUN",
+                desc: "Charity run at Ampang Park to raise awareness."
+            }
+        };
+
+        // --- 3. DAPATKAN ID DARI URL ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('event'); // Contoh: dapat "nightrun"
+
+        // --- 4. SECURITY & UI UPDATE ---
         onAuthStateChanged(auth, (user) => {
             if (!user) {
-                // Kalau user tak login, tendang keluar
-                alert("Sila Log In dahulu untuk mendaftar acara ini.");
+                // Kalau tak login -> Tendang keluar
+                alert("Please Log In first.");
                 window.location.href = "login.html";
             } else {
-                // Kalau user dah login, tunjuk borang
-                document.body.style.display = "block"; // Tunjukkan body yang disorok tadi
-                console.log("User detected:", user.email);
-                
-                // (Optional) Auto-fill email
-                if(document.getElementById('email')) {
-                    document.getElementById('email').value = user.email;
+                // Kalau dah login -> Cek Event Valid ke tak?
+                if (eventId && eventDetails[eventId]) {
+                    
+                    // TUKAR TAJUK & DESCRIPTION IKUT EVENT
+                    const headerTitle = document.querySelector('.register-header h1');
+                    const headerDesc = document.querySelector('.register-header p');
+
+                    if(headerTitle) headerTitle.innerText = "Register: " + eventDetails[eventId].title;
+                    if(headerDesc) headerDesc.innerText = eventDetails[eventId].desc;
+
+                    // Tunjuk borang
+                    document.body.style.display = "block";
+                    console.log("Register for:", eventId);
+
+                } else {
+                    // Kalau link salah atau user main taip je
+                    alert("Event not found! Please select from Home.");
+                    window.location.href = "index.html";
                 }
             }
         });
 
-        // --- 4. HANDLE FORM SUBMIT ---
+        // --- 5. HANDLE SUBMIT (HANTAR KE FOLDER KHAS) ---
         const form = document.getElementById('registrationForm');
         if(form) {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
 
-                // Ambil Data
-                const firstName = document.getElementById('firstName').value;
-                const lastName = document.getElementById('lastName').value;
-                const email = document.getElementById('email').value;
-                const phone = document.getElementById('phone').value;
-                const dob = document.getElementById('dob').value;
-                const gender = document.getElementById('gender').value;
-                const address = document.getElementById('address').value;
-                const city = document.getElementById('city').value;
-                const postcode = document.getElementById('postcode').value;
-                const category = document.getElementById('category').value;
-                const tshirt = document.getElementById('tshirt').value;
-                const registerTime = new Date().toLocaleString();
+                // Ambil Data Form
+                const formData = {
+                    first_name: document.getElementById('firstName').value,
+                    last_name: document.getElementById('lastName').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    dob: document.getElementById('dob').value,
+                    gender: document.getElementById('gender').value,
+                    address: document.getElementById('address').value,
+                    city: document.getElementById('city').value,
+                    postcode: document.getElementById('postcode').value,
+                    category: document.getElementById('category').value,
+                    tshirt_size: document.getElementById('tshirt').value,
+                    registration_time: new Date().toLocaleString(),
+                    status: "Pending Payment",
+                    event_code: eventId, // Simpan kod event
+                    event_name: eventDetails[eventId].title // Simpan nama penuh event
+                };
 
-                // Hantar Data ke Database
-                push(ref(db, 'registrations'), {
-                    first_name: firstName,
-                    last_name: lastName,
-                    email: email,
-                    phone: phone,
-                    dob: dob,
-                    gender: gender,
-                    address: address,
-                    city: city,
-                    postcode: postcode,
-                    category: category,
-                    tshirt_size: tshirt,
-                    registration_time: registerTime,
-                    status: "Pending Payment"
-                })
+                // 🔥 CARA ASINGKAN DATA DALAM FIREBASE 🔥
+                // Data akan masuk folder: registrations > nightrun > ID_UNIK
+                const databasePath = 'registrations/' + eventId;
+
+                push(ref(db, databasePath), formData)
                 .then(() => {
-                    // Simpan data untuk payment page
-                    localStorage.setItem("runnerName", firstName + " " + lastName);
-                    localStorage.setItem("raceCategory", category);
+                    // Simpan info untuk page Payment
+                    localStorage.setItem("runnerName", formData.first_name + " " + formData.last_name);
+                    localStorage.setItem("raceCategory", formData.category);
+                    localStorage.setItem("eventName", eventDetails[eventId].title); // Simpan nama event juga
 
                     alert("Registration successful! Redirecting to payment...");
                     window.location.href = "payment.html"; 
