@@ -333,7 +333,7 @@
                         window.location.href = `register-event.html?event=${eventId}`;
                     } else {
                         // Kalau BELUM Login: Tanya user
-                        if(confirm("Anda perlu Log In dahulu untuk mendaftar event ini. Pergi ke halaman Login?")) {
+                        if(confirm("You need to log in first.")) {
                             // Simpan link event ni supaya lepas login boleh balik sini (Optional)
                             sessionStorage.setItem('redirectAfterLogin', window.location.href);
                             window.location.href = "login.html";
@@ -388,3 +388,4 @@
 </body>
 
 </html>
+
