@@ -235,125 +235,155 @@
     
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        // PENTING: Tambah import Auth untuk cek login
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // PENTING: Tambah 'signOut' di sini
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // --- CONFIG FIREBASE ANDA (PASTIKAN BETUL) ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
-            authDomain: "sea-mountain.firebaseapp.com",
-            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "sea-mountain",
-            storageBucket: "sea-mountain.firebasestorage.app",
-            messagingSenderId: "812228825024",
-            appId: "1:812228825024:web:717049c1a64b39c8a60225"
-        };
+    // --- CONFIG FIREBASE ANDA ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app); // Initialize Auth
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
 
-        // 1. Dapatkan ID Event dari URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const eventId = urlParams.get('id');
+    // 1. Dapatkan ID Event dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('id');
 
-        // Variable untuk simpan status login user
-        let isUserLoggedIn = false;
+    let isUserLoggedIn = false;
+    const loginBtn = document.querySelector('.login-btn'); // Ambil butang header (pastikan class di HTML ialah .login-btn) or .cta-btn di header
 
-        // 2. Sentiasa cek status login user (Realtime)
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                isUserLoggedIn = true;
-                console.log("User status: Logged In as " + user.email);
+    // 2. LOGIC AUTH & HEADER UI (INI YANG SAYA TAMBAH)
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // USER LOGIN: Set variable & Tukar Header jadi Hijau
+            isUserLoggedIn = true;
+            console.log("Logged In as:", user.email);
+
+            if(loginBtn) {
+                // Tukar teks jadi nama user
+                loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.displayName || 'User'}`;
+                loginBtn.href = "#"; 
+                // Tukar warna jadi hijau
+                loginBtn.style.background = "#28a745"; 
+                loginBtn.style.color = "#fff";
+                
+                // Tambah fungsi Logout bila tekan nama
+                loginBtn.onclick = function(e) {
+                    e.preventDefault();
+                    if(confirm("Log out dari akaun ini?")) {
+                        signOut(auth).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                };
+            }
+        } else {
+            // GUEST: Reset Header jadi "LOG IN" Merah
+            isUserLoggedIn = false;
+            console.log("Guest User");
+
+            if(loginBtn) {
+                loginBtn.innerHTML = "LOG IN";
+                loginBtn.href = "login.html";
+                loginBtn.style.background = ""; // Guna warna asal CSS (Merah)
+                loginBtn.onclick = null; // Buang event listener logout
+            }
+        }
+    });
+
+    if (eventId) {
+        // 3. Tarik Data Event dari Firebase
+        const eventRef = ref(db, 'events/' + eventId);
+        
+        onValue(eventRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Masukkan Data ke HTML
+                document.getElementById('eventTitle').innerText = data.title;
+                document.getElementById('eventImage').src = data.image_url;
+                document.getElementById('regDuration').innerText = data.reg_duration || "-";
+                document.getElementById('eventVenue').innerText = data.venue;
+                document.getElementById('eventDate').innerText = data.date || `${data.date_start} - ${data.date_end}`;
+                document.getElementById('kitDate').innerText = data.kit_date || "To be announced";
+                
+                // --- LOGIC BUTANG REGISTER ---
+                const registerBtn = document.getElementById('registerBtn'); 
+                
+                // Update teks butang (tambah harga jika ada)
+                if(data.price) {
+                    registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
+                }
+
+                // Tambah fungsi klik pada butang REGISTER
+                registerBtn.onclick = function(e) {
+                    e.preventDefault(); 
+
+                    if (isUserLoggedIn) {
+                        // Kalau DAH Login: Terus ke borang register
+                        window.location.href = `register-event.html?event=${eventId}`;
+                    } else {
+                        // Kalau BELUM Login: Tanya user
+                        if(confirm("Anda perlu Log In dahulu untuk mendaftar event ini. Pergi ke halaman Login?")) {
+                            // Simpan link event ni supaya lepas login boleh balik sini (Optional)
+                            sessionStorage.setItem('redirectAfterLogin', window.location.href);
+                            window.location.href = "login.html";
+                        }
+                    }
+                };
+
+                // Start Countdown (Jika ada)
+                if(data.countdown_date) startCountdown(data.countdown_date);
+
             } else {
-                isUserLoggedIn = false;
-                console.log("User status: Guest (Not Logged In)");
+                document.querySelector('.main-container').innerHTML = "<h2 style='color:white; text-align:center; margin-top:50px;'>Event not found!</h2>";
             }
         });
+    } else {
+        alert("No Event Selected!");
+        window.location.href = "index.html";
+    }
 
-        if (eventId) {
-            // 3. Tarik Data Event dari Firebase
-            const eventRef = ref(db, 'events/' + eventId);
+    // Fungsi Countdown Timer
+    function startCountdown(targetDateString) {
+        const eventDate = new Date(targetDateString).getTime();
+        setInterval(() => {
+            const now = new Date().getTime();
+            const distance = eventDate - now;
             
-            onValue(eventRef, (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    // Masukkan Data ke HTML
-                    document.getElementById('eventTitle').innerText = data.title;
-                    document.getElementById('eventImage').src = data.image_url;
-                    document.getElementById('regDuration').innerText = data.reg_duration || "-";
-                    document.getElementById('eventVenue').innerText = data.venue;
-                    document.getElementById('eventDate').innerText = data.date || `${data.date_start} - ${data.date_end}`;
-                    document.getElementById('kitDate').innerText = data.kit_date || "To be announced";
-                    
-                    // --- LOGIC BUTANG REGISTER ---
-                    const registerBtn = document.getElementById('registerBtn'); 
-                    
-                    // Update teks butang (tambah harga jika ada)
-                    if(data.price) {
-                        registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
-                    }
+            if (distance > 0) {
+                document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
+                document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById("seconds").innerText = Math.floor((distance % (1000 * 60)) / 1000);
+            } else {
+                const timerContainer = document.querySelector(".timer-container");
+                if(timerContainer) timerContainer.innerHTML = "<h2 style='color:var(--brand-red)'>REGISTRATION CLOSED</h2>";
+            }
+        }, 1000);
+    }
 
-                    // Tambah fungsi klik pada butang
-                    registerBtn.onclick = function(e) {
-                        e.preventDefault(); // Halang link asal
-
-                        if (isUserLoggedIn) {
-                            // Kalau DAH Login: Terus ke borang register
-                            window.location.href = `register-event.html?event=${eventId}`;
-                        } else {
-                            // Kalau BELUM Login: Tanya user
-                            if(confirm("Anda perlu Log In dahulu untuk mendaftar event ini. Pergi ke halaman Login?")) {
-                                window.location.href = "login.html";
-                            }
-                        }
-                    };
-
-                    // Start Countdown (Jika ada)
-                    if(data.countdown_date) startCountdown(data.countdown_date);
-
-                } else {
-                    document.querySelector('.main-container').innerHTML = "<h2 style='color:white; text-align:center; margin-top:50px;'>Event not found!</h2>";
-                }
-            });
-        } else {
-            alert("No Event Selected!");
-            window.location.href = "index.html";
-        }
-
-        // Fungsi Countdown Timer
-        function startCountdown(targetDateString) {
-            const eventDate = new Date(targetDateString).getTime();
-            setInterval(() => {
-                const now = new Date().getTime();
-                const distance = eventDate - now;
-                
-                if (distance > 0) {
-                    document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
-                    document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                    document.getElementById("seconds").innerText = Math.floor((distance % (1000 * 60)) / 1000);
-                } else {
-                    const timerContainer = document.querySelector(".timer-container");
-                    if(timerContainer) timerContainer.innerHTML = "<h2 style='color:var(--brand-red)'>REGISTRATION CLOSED</h2>";
-                }
-            }, 1000);
-        }
-
-        // Tab Switcher Global
-        window.openTab = function(evt, tabName) {
-            var i, x, tablinks;
-            x = document.getElementsByClassName("tab-panel");
-            for (i = 0; i < x.length; i++) { x[i].style.display = "none"; x[i].classList.remove("active"); }
-            tablinks = document.getElementsByClassName("tab-btn");
-            for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
-            document.getElementById(tabName).style.display = "block";
-            document.getElementById(tabName).classList.add("active");
-            evt.currentTarget.classList.add("active");
-        }
-    </script>
+    // Tab Switcher Global
+    window.openTab = function(evt, tabName) {
+        var i, x, tablinks;
+        x = document.getElementsByClassName("tab-panel");
+        for (i = 0; i < x.length; i++) { x[i].style.display = "none"; x[i].classList.remove("active"); }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
+        document.getElementById(tabName).style.display = "block";
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
 
 </body>
 
