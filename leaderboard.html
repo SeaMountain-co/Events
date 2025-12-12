@@ -410,148 +410,158 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    // PENTING: Tambah 'signOut' di sini
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // --- CONFIG FIREBASE ANDA ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
-            authDomain: "sea-mountain.firebaseapp.com",
-            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "sea-mountain",
-            storageBucket: "sea-mountain.firebasestorage.app",
-            messagingSenderId: "812228825024",
-            appId: "1:812228825024:web:717049c1a64b39c8a60225"
-        };
+    // --- CONFIG FIREBASE ANDA ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const runnersRef = ref(db, 'runners');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
 
-        // Simpan semua data di sini supaya boleh filter tanpa tarik database banyak kali
-        let allRunnersData = [];
+    // 1. Dapatkan ID Event dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('id');
 
-        // 1. TARIK DATA DARI FIREBASE
-        onValue(runnersRef, (snapshot) => {
-            const data = snapshot.val();
-            const podiumContainer = document.querySelector('.podium-wrapper');
-            const tableBody = document.getElementById('leaderboardTable');
+    let isUserLoggedIn = false;
+    const loginBtn = document.querySelector('.login-btn'); // Ambil butang header (pastikan class di HTML ialah .login-btn) or .cta-btn di header
 
-            if (data) {
-                // Simpan dalam variable global 'allRunnersData'
-                allRunnersData = Object.values(data).sort((a, b) => a.rank - b.rank);
+    // 2. LOGIC AUTH & HEADER UI (INI YANG SAYA TAMBAH)
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // USER LOGIN: Set variable & Tukar Header jadi Hijau
+            isUserLoggedIn = true;
+            console.log("Logged In as:", user.email);
+
+            if(loginBtn) {
+                // Tukar teks jadi nama user
+                loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.displayName || 'User'}`;
+                loginBtn.href = "#"; 
+                // Tukar warna jadi hijau
+                loginBtn.style.background = "#28a745"; 
+                loginBtn.style.color = "#fff";
                 
-                // Mula-mula, paparkan semua (atau ikut filter semasa)
-                filterAndRender();
+                // Tambah fungsi Logout bila tekan nama
+                loginBtn.onclick = function(e) {
+                    e.preventDefault();
+                    if(confirm("Log out dari akaun ini?")) {
+                        signOut(auth).then(() => {
+                            window.location.reload();
+                        });
+                    }
+                };
+            }
+        } else {
+            // GUEST: Reset Header jadi "LOG IN" Merah
+            isUserLoggedIn = false;
+            console.log("Guest User");
+
+            if(loginBtn) {
+                loginBtn.innerHTML = "LOG IN";
+                loginBtn.href = "login.html";
+                loginBtn.style.background = ""; // Guna warna asal CSS (Merah)
+                loginBtn.onclick = null; // Buang event listener logout
+            }
+        }
+    });
+
+    if (eventId) {
+        // 3. Tarik Data Event dari Firebase
+        const eventRef = ref(db, 'events/' + eventId);
+        
+        onValue(eventRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // Masukkan Data ke HTML
+                document.getElementById('eventTitle').innerText = data.title;
+                document.getElementById('eventImage').src = data.image_url;
+                document.getElementById('regDuration').innerText = data.reg_duration || "-";
+                document.getElementById('eventVenue').innerText = data.venue;
+                document.getElementById('eventDate').innerText = data.date || `${data.date_start} - ${data.date_end}`;
+                document.getElementById('kitDate').innerText = data.kit_date || "To be announced";
+                
+                // --- LOGIC BUTANG REGISTER ---
+                const registerBtn = document.getElementById('registerBtn'); 
+                
+                // Update teks butang (tambah harga jika ada)
+                if(data.price) {
+                    registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
+                }
+
+                // Tambah fungsi klik pada butang REGISTER
+                registerBtn.onclick = function(e) {
+                    e.preventDefault(); 
+
+                    if (isUserLoggedIn) {
+                        // Kalau DAH Login: Terus ke borang register
+                        window.location.href = `register-event.html?event=${eventId}`;
+                    } else {
+                        // Kalau BELUM Login: Tanya user
+                        if(confirm("Anda perlu Log In dahulu untuk mendaftar event ini. Pergi ke halaman Login?")) {
+                            // Simpan link event ni supaya lepas login boleh balik sini (Optional)
+                            sessionStorage.setItem('redirectAfterLogin', window.location.href);
+                            window.location.href = "login.html";
+                        }
+                    }
+                };
+
+                // Start Countdown (Jika ada)
+                if(data.countdown_date) startCountdown(data.countdown_date);
 
             } else {
-                podiumContainer.innerHTML = '<p style="color:white; width:100%; text-align:center;">No Data Available</p>';
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Tiada data peserta.</td></tr>';
+                document.querySelector('.main-container').innerHTML = "<h2 style='color:white; text-align:center; margin-top:50px;'>Event not found!</h2>";
             }
         });
+    } else {
+        alert("No Event Selected!");
+        window.location.href = "index.html";
+    }
 
-        // 2. FUNGSI FILTER (DROPDOWN & SEARCH)
-        const categoryFilter = document.getElementById('categoryFilter');
-        const searchInput = document.getElementById('leaderboardSearch');
-
-        // Dengar bila Dropdown berubah
-        categoryFilter.addEventListener('change', filterAndRender);
-        
-        // Dengar bila Search berubah
-        searchInput.addEventListener('keyup', filterAndRender);
-
-        function filterAndRender() {
-            const selectedCategory = categoryFilter.value;
-            const searchTerm = searchInput.value.toLowerCase();
-
-            // Lakukan penapisan
-            const filteredRunners = allRunnersData.filter(runner => {
-                
-                // Cek Kategori (Kalau 'all', terima semua. Kalau tak, mesti sama match)
-                // Kita guna .includes() supaya "50KM Men" boleh match dengan "50KM Men Open" kalau database tak tepat sangat
-                const categoryMatch = (selectedCategory === 'all') || runner.category.includes(selectedCategory);
-                
-                // Cek Search (Nama atau BIB)
-                const searchMatch = runner.name.toLowerCase().includes(searchTerm) || runner.bib.toLowerCase().includes(searchTerm);
-
-                return categoryMatch && searchMatch;
-            });
-
-            // Paparkan hasil tapisan
-            renderLeaderboard(filteredRunners);
-        }
-
-        // 3. FUNGSI RENDER (LUKIS TABLE & PODIUM)
-        function renderLeaderboard(runners) {
-            const podiumContainer = document.querySelector('.podium-wrapper');
-            const tableBody = document.getElementById('leaderboardTable');
+    // Fungsi Countdown Timer
+    function startCountdown(targetDateString) {
+        const eventDate = new Date(targetDateString).getTime();
+        setInterval(() => {
+            const now = new Date().getTime();
+            const distance = eventDate - now;
             
-            // --- UPDATE PODIUM (Hanya tunjuk Top 3 dari hasil tapisan) ---
-            let podiumHTML = '';
-            
-            // Perlu sort semula sebab filter mungkin kacau susunan
-            const sortedForPodium = [...runners].sort((a, b) => a.rank - b.rank);
-
-            const rank1 = sortedForPodium.find(r => r.rank == 1);
-            const rank2 = sortedForPodium.find(r => r.rank == 2);
-            const rank3 = sortedForPodium.find(r => r.rank == 3);
-
-            if(rank2) podiumHTML += createPodiumCard(rank2, 'rank-2', '2');
-            if(rank1) podiumHTML += createPodiumCard(rank1, 'rank-1', '<i class="fas fa-crown"></i>');
-            if(rank3) podiumHTML += createPodiumCard(rank3, 'rank-3', '3');
-
-            // Kalau lepas filter tak ada winner, kosongkan podium
-            if(podiumHTML === '') podiumHTML = '<p style="color:gray; font-size:0.9rem; margin-top:50px;">Select "All Categories" to see podium.</p>';
-            
-            podiumContainer.innerHTML = podiumHTML;
-
-            // --- UPDATE TABLE ---
-            let tableHTML = '';
-            if (runners.length > 0) {
-                runners.forEach(runner => {
-                    let statusClass = '';
-                    if(runner.status === 'Finished') statusClass = 'status-finished';
-                    else if(runner.status === 'Running') statusClass = 'status-running';
-                    else statusClass = 'status-dnf';
-                    
-                    tableHTML += `
-                        <tr>
-                            <td class="col-rank">${runner.rank}</td>
-                            <td class="col-runner">
-                                <img src="https://ui-avatars.com/api/?name=${runner.name}&background=random" style="width:35px; height:35px; border-radius:50%;">
-                                ${runner.name}
-                            </td>
-                            <td>${runner.bib}</td>
-                            <td>${runner.category}</td>
-                            <td>${runner.checkpoint}</td>
-                            <td class="col-time">${runner.time}</td>
-                            <td><span class="badge ${statusClass}">${runner.status}</span></td>
-                        </tr>
-                    `;
-                });
+            if (distance > 0) {
+                document.getElementById("days").innerText = Math.floor(distance / (1000 * 60 * 60 * 24));
+                document.getElementById("hours").innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById("seconds").innerText = Math.floor((distance % (1000 * 60)) / 1000);
             } else {
-                tableHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">No runners found in this category.</td></tr>';
+                const timerContainer = document.querySelector(".timer-container");
+                if(timerContainer) timerContainer.innerHTML = "<h2 style='color:var(--brand-red)'>REGISTRATION CLOSED</h2>";
             }
-            tableBody.innerHTML = tableHTML;
-        }
+        }, 1000);
+    }
 
-        // Helper: Buat HTML Kad Podium
-        function createPodiumCard(runner, rankClass, badgeContent) {
-            return `
-                <div class="podium-card ${rankClass}">
-                    <div class="rank-badge">${badgeContent}</div>
-                    <img src="https://ui-avatars.com/api/?name=${runner.name}&background=random&size=128" class="racer-avatar">
-                    <div class="racer-name">${runner.name}</div>
-                    <div style="font-size:0.8rem; color:#888;">BIB: ${runner.bib}</div>
-                    <div style="flex-grow:1"></div>
-                    <div class="racer-time">${runner.time}</div>
-                    <span class="badge status-finished">${runner.status}</span>
-                </div>
-            `;
-        }
-    </script>
+    // Tab Switcher Global
+    window.openTab = function(evt, tabName) {
+        var i, x, tablinks;
+        x = document.getElementsByClassName("tab-panel");
+        for (i = 0; i < x.length; i++) { x[i].style.display = "none"; x[i].classList.remove("active"); }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
+        document.getElementById(tabName).style.display = "block";
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
 
 </body>
 </html>
+
 
 
