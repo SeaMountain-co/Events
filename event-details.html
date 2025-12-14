@@ -315,54 +315,54 @@
         onValue(eventRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // Masukkan Data ke HTML
+                // Masukkan Data ke HTML (Basic Info)
                 document.getElementById('eventTitle').innerText = data.title;
                 document.getElementById('eventImage').src = data.image_url;
                 document.getElementById('regDuration').innerText = data.reg_duration || "-";
                 document.getElementById('eventVenue').innerText = data.venue;
                 document.getElementById('eventDate').innerText = data.date || `${data.date_start} - ${data.date_end}`;
                 document.getElementById('kitDate').innerText = data.kit_date || "To be announced";
-                document.getElementById('entitlementList').innerText = data.entitlements || "Event Tee, Finisher Medal, E-Certificate, Bib Number.";
-                
-                const faqElement = document.getElementById('faqList'); 
-                if(faqElement) {
-                faqElement.innerText = data.faq || "No FAQ available yet.";
-            }
 
-                const tncElement = document.getElementById('tncList');
-                if(tncElement) {
-                tncElement.innerText = data.tnc || "Participants must be 18 years and above. Fees are non-refundable.";
-            }
+                // --- 1. ENTITLEMENTS (TEXT & IMAGE) ---
+                const entText = document.getElementById('entitlementList');
+                if (entText) {
+                    entText.innerText = data.entitlements || "Event Tee, Finisher Medal, E-Certificate, Bib Number.";
+                }
 
-
-                // 2. Masukkan Gambar Entitlement
                 const entImg = document.getElementById('entitlementImg');
                 if (data.entitlement_image) {
-                entImg.src = data.entitlement_image; // Set link gambar
-                entImg.style.display = "block";      // Tunjuk gambar
+                    entImg.src = data.entitlement_image;
+                    entImg.style.display = "block";
                 } else {
-                entImg.style.display = "none";       // Sorok kalau takde gambar
-            }
+                    entImg.style.display = "none";
+                }
 
-                // --- LOGIC BUTANG REGISTER ---
+                // --- 2. TERMS & CONDITIONS ---
+                const tncElement = document.getElementById('tncList');
+                if(tncElement) {
+                    // Guna data.tnc kalau ada, kalau tak guna default
+                    tncElement.innerText = data.tnc || "Participants must be 18 years and above. Fees are non-refundable.";
+                }
+
+                // --- 3. FAQ ---
+                const faqElement = document.getElementById('faqList'); 
+                if(faqElement) {
+                    // Guna data.faq kalau ada, kalau tak guna default
+                    faqElement.innerText = data.faq || "No FAQ available yet.";
+                }
+
+                // --- LOGIC BUTANG REGISTER & COUNTDOWN ---
                 const registerBtn = document.getElementById('registerBtn'); 
-                
-                // Update teks butang (tambah harga jika ada)
                 if(data.price) {
                     registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
                 }
 
-                // Tambah fungsi klik pada butang REGISTER
                 registerBtn.onclick = function(e) {
                     e.preventDefault(); 
-
                     if (isUserLoggedIn) {
-                        // Kalau DAH Login: Terus ke borang register
                         window.location.href = `register-event.html?event=${eventId}`;
                     } else {
-                        // Kalau BELUM Login: Tanya user
                         if(confirm("You need to log in first.")) {
-                            // Simpan link event ni supaya lepas login boleh balik sini (Optional)
                             sessionStorage.setItem('redirectAfterLogin', window.location.href);
                             window.location.href = "login.html";
                         }
