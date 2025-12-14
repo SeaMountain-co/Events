@@ -173,8 +173,13 @@
                 <button class="tab-btn" onclick="openTab(event, 'faq')">FAQ</button>
                 <button class="tab-btn" onclick="openTab(event, 'contact')">Contact</button>
             </div>
-            <div class="tabs-content-area">
-                <div id="entitlements" class="tab-panel active"><h3>Runner Entitlements</h3><p>Event Tee, Finisher Medal, E-Certificate, Bib Number, and Refreshments.</p></div>
+            <div class="tabs-content-area"> 
+                <div id="Entitlements" class="tab-panel active">
+                <h3 class="panel-title">RUNNER ENTITLEMENTS</h3>
+                <p id="entitlementList">Loading...</p>
+
+                <img id="entitlementImg" src="" alt="Entitlements" style="width:100%; max-width:600px; margin-top:20px; border-radius:10px; display:none; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                </div>
                 <div id="tnc" class="tab-panel"><h3>Terms & Conditions</h3><p>Participants must be 18 years and above. Fees are non-refundable.</p></div>
                 <div id="faq" class="tab-panel"><h3>FAQ</h3><p><strong>Q: Baggage drop?</strong> A: Yes, available at start point.</p></div>
                 <div id="contact" class="tab-panel">
@@ -182,7 +187,6 @@
                     <div class="contact-row"><span>Email:</span> support@seamountain.com</div>
                 </div>
             </div>
-        </div>
         </div>
 
         <!-- Footer Section -->
@@ -315,7 +319,17 @@
                 document.getElementById('eventVenue').innerText = data.venue;
                 document.getElementById('eventDate').innerText = data.date || `${data.date_start} - ${data.date_end}`;
                 document.getElementById('kitDate').innerText = data.kit_date || "To be announced";
-                
+                document.getElementById('entitlementList').innerText = data.entitlements || "Event Tee, Finisher Medal, E-Certificate, Bib Number.";
+
+                // 2. Masukkan Gambar Entitlement
+                const entImg = document.getElementById('entitlementImg');
+                if (data.entitlement_image) {
+                entImg.src = data.entitlement_image; // Set link gambar
+                entImg.style.display = "block";      // Tunjuk gambar
+                } else {
+                entImg.style.display = "none";       // Sorok kalau takde gambar
+            }
+
                 // --- LOGIC BUTANG REGISTER ---
                 const registerBtn = document.getElementById('registerBtn'); 
                 
@@ -388,4 +402,3 @@
 </body>
 
 </html>
-
