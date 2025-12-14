@@ -152,8 +152,8 @@
                     <textarea id="entitlementInput" class="form-control" rows="3" placeholder="e.g. Medal, T-Shirt..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>FAQ (Text)</label>
-                    <textarea id="faqInput" class="form-control" rows="3" placeholder="Q: xxx A: xxx"></textarea>
+                    <label>Terms & Conditions (Text)</label>
+                    <textarea id="tncInput" class="form-control" rows="4" placeholder="e.g. Fees are non-refundable..."></textarea>
                 </div>
             </div>
 
@@ -229,6 +229,9 @@
                 if(document.getElementById('faqInput')) {
                     document.getElementById('faqInput').value = data.faq || "";
                 }
+                if(document.getElementById('tncInput')) {
+                    document.getElementById('tncInput').value = data.tnc || "";
+                }
                 
                 // --- ISI DATA BARU ---
                 document.getElementById('eventCategory').value = data.category || "upcoming";
@@ -299,6 +302,10 @@
         if(document.getElementById('faqInput')) {
             faqText = document.getElementById('faqInput').value;
         }
+        let tncText = "";
+        if(document.getElementById('tncInput')) {
+            tncText = document.getElementById('tncInput').value;
+        }
 
         const eventData = {
             // Info Asas
@@ -309,7 +316,8 @@
             
             // SIMPAN DATA TEKS (YANG DAH DI-FIX)
             entitlements: entitlementsText,
-            faq: faqText, 
+            faq: faqText,
+            tnc: tncText, 
             
             image_url: document.getElementById('mainPoster').value,
             entitlement_image: document.getElementById('entitlementPoster').value,
