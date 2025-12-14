@@ -148,12 +148,12 @@
                     <textarea id="eventDesc" rows="3" class="form-input"></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Entitlements List (Text)</label>
-                    <textarea id="entitlementText" rows="3" class="form-input" placeholder="e.g. Medal, T-Shirt, Bib, Cert"></textarea>
+                    <label>Entitlements List (Text)</label>
+                    <textarea id="entitlementInput" class="form-control" rows="3" placeholder="e.g. Medal, T-Shirt..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">FAQ (Text)</label>
-                    <textarea id="faqText" rows="4" class="form-input" placeholder="Q: xxx A: xxx"></textarea>
+                    <label>FAQ (Text)</label>
+                    <textarea id="faqInput" class="form-control" rows="3" placeholder="Q: xxx A: xxx"></textarea>
                 </div>
             </div>
 
@@ -166,7 +166,7 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // --- PASTE CONFIG ANDA ---
+    // --- CONFIG FIREBASE ---
     const firebaseConfig = {
         apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
         authDomain: "sea-mountain.firebaseapp.com",
@@ -198,7 +198,7 @@
         }
     });
 
-    // 2. FUNGSI MASUK EDIT MODE (AUTO-FILL)
+    // 2. FUNGSI MASUK EDIT MODE (LOAD DATA LAMA)
     function enterEditMode(id) {
         document.getElementById('loading').style.display = 'flex';
         document.getElementById('pageTitle').innerText = "EDIT EVENT: " + id.toUpperCase();
@@ -222,18 +222,18 @@
                 document.getElementById('eventDesc').value = data.description || "";
                 document.getElementById('kitDate').value = data.kit_date || "";
                 
-                // --- ISI DATA ENTITLEMENTS (TEKS) ---
-                // Pastikan ada textarea id="entitlementInput" di HTML
+                // --- ISI DATA ENTITLEMENTS & FAQ (MASUKKAN KE INPUT BOX) ---
                 if(document.getElementById('entitlementInput')) {
                     document.getElementById('entitlementInput').value = data.entitlements || "";
                 }
+                if(document.getElementById('faqInput')) {
+                    document.getElementById('faqInput').value = data.faq || "";
+                }
                 
-                // --- ISI DATA BARU (Category, Quota, Distance) ---
+                // --- ISI DATA BARU ---
                 document.getElementById('eventCategory').value = data.category || "upcoming";
                 document.getElementById('eventQuota').value = data.quota || "";
                 document.getElementById('eventDistance').value = data.distance || "";
-
-                // Simpan current registered count (PENTING SUPAYA TAK RESET KE 0)
                 document.getElementById('currentRegistered').value = data.registered || 0;
 
                 // Tarikh & Countdown
@@ -266,7 +266,7 @@
         else { img.style.display = "none"; }
     }
 
-    // 4. SUBMIT FORM (SAVE / UPDATE)
+    // 4. SUBMIT FORM (SIMPAN DATA BARU)
     document.getElementById('eventForm').addEventListener('submit', (e) => {
         e.preventDefault();
 
@@ -287,13 +287,17 @@
             countdownStr = `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:00`;
         }
 
-        // Ambil registered count lama (jika ada)
         const currentReg = parseInt(document.getElementById('currentRegistered').value) || 0;
 
-        // Ambil text Entitlements
+        // --- AMBIL VALUE DARI INPUT BOX (BAHAGIAN PENTING) ---
         let entitlementsText = "";
         if(document.getElementById('entitlementInput')) {
             entitlementsText = document.getElementById('entitlementInput').value;
+        }
+
+        let faqText = "";
+        if(document.getElementById('faqInput')) {
+            faqText = document.getElementById('faqInput').value;
         }
 
         const eventData = {
@@ -302,7 +306,10 @@
             price: document.getElementById('eventPrice').value,
             venue: document.getElementById('eventVenue').value,
             description: document.getElementById('eventDesc').value,
-            entitlements: entitlementsText, // DATA BARU DISIMPAN
+            
+            // SIMPAN DATA TEKS (YANG DAH DI-FIX)
+            entitlements: entitlementsText,
+            faq: faqText, 
             
             image_url: document.getElementById('mainPoster').value,
             entitlement_image: document.getElementById('entitlementPoster').value,
@@ -339,5 +346,6 @@
         });
     });
 </script>
+
 </body>
 </html>
