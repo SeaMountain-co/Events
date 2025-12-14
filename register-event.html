@@ -3,258 +3,473 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sea Mountain - Register Race</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>Secure Checkout - Sea Mountain</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,900;1,300;1,900&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
     
     <style>
-        /* --- ASAS & WARNA --- */
-        :root {
-            --brand-red: #ff0000;
-            --bg-dark: #0f1014;
-            --card-bg: #1a1c23;
-            --input-bg: #252830;
-            --text-white: #ffffff;
-            --text-gray: #b0b3b8;
-            --footer-bg: #000000;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-white);
-            background-image: radial-gradient(circle at 50% 0%, rgba(255, 0, 0, 0.1) 0%, transparent 50%);
-            /* Sembunyikan content dulu sampai kita confirm user dah login */
-            display: none; 
-        }
-
-        a { text-decoration: none; color: inherit; transition: 0.3s; }
-
-        /* --- HEADER --- */
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 5%; background: rgba(15, 16, 20, 0.95); position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; font-size: 1.5rem; color: #fff; text-transform: uppercase; text-decoration: none; letter-spacing: -1px; }
-        .logo img { height: 40px; width: auto; display: block; }
-        .logo span { color: var(--brand-red); font-weight: 300; }
-
-        .nav-links { display: flex; gap: 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
-        .nav-links a:hover { color: var(--brand-red); }
-        .login-btn { background: linear-gradient(45deg, var(--brand-red), #aa0000); padding: 10px 25px; border-radius: 30px; font-weight: 800; text-transform: uppercase; color: #fff; }
-
-        /* --- FORM STYLES --- */
-        .register-container { max-width: 900px; margin: 60px auto; padding: 0 5%; }
-        .register-header { text-align: center; margin-bottom: 40px; }
-        .register-header h1 { font-family: 'Russo One', sans-serif; font-size: 2.5rem; text-transform: uppercase; font-style: italic; margin-bottom: 15px; position: relative; display: inline-block; }
-        .register-header h1::after { content: ''; display: block; width: 50%; height: 4px; background-color: var(--brand-red); margin: 5px auto 0; border-radius: 2px; }
-        .register-header p { color: var(--text-gray); font-size: 0.95rem; max-width: 600px; margin: 0 auto; line-height: 1.6; }
-
-        .register-card { background-color: var(--card-bg); padding: 40px; border-radius: 15px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-label { font-size: 0.9rem; font-weight: 600; color: var(--text-gray); margin-bottom: 8px; }
+        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding-bottom: 50px; }
         
-        .form-input, .form-select { background-color: var(--input-bg); border: 1px solid transparent; padding: 12px 15px; border-radius: 8px; color: #fff; font-size: 1rem; outline: none; transition: 0.3s; width: 100%; font-family: 'Montserrat', sans-serif; }
-        .form-input:focus, .form-select:focus { border-color: var(--brand-red); box-shadow: 0 0 10px rgba(255, 0, 0, 0.2); }
+        /* HEADER */
+        .header { padding: 20px 5%; background: rgba(0,0,0,0.9); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .logo { font-family: 'Russo One'; font-size: 1.2rem; color: #fff; text-decoration: none; }
+        .logo span { color: var(--brand-red); }
+
+        .container { max-width: 1200px; margin: 40px auto; display: flex; gap: 50px; padding: 0 5%; }
         
-        .full-width { grid-column: span 2; }
+        /* LEFT COLUMN: FORM */
+        .form-section { flex: 1.6; }
+        h2 { font-family: 'Russo One'; text-transform: uppercase; margin-bottom: 25px; font-size: 1.5rem; border-bottom: 2px solid var(--brand-red); display: inline-block; padding-bottom: 5px; }
+        
+        .form-card { background: var(--card-bg); padding: 35px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .form-group { margin-bottom: 25px; } /* Jarak bawah setiap input */
+        
+        .form-group label { display: block; margin-bottom: 10px; font-weight: 600; color: #aaa; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .form-control { width: 100%; padding: 14px; background: #0a0b0e; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 1rem; outline: none; transition: 0.3s; font-family: 'Montserrat'; }
+        .form-control:focus { border-color: var(--brand-red); box-shadow: 0 0 15px rgba(255,0,0,0.2); background: #111; }
+        
+        /* JARAK ANTARA KIRI & KANAN DALAM SATU ROW */
+        .form-row { display: flex; gap: 30px; } 
+        .form-row .form-group { flex: 1; }
 
-        /* Checkbox */
-        .terms-group { display: flex; align-items: center; gap: 12px; margin-top: 20px; padding: 5px 0; }
-        .terms-group input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; background-color: var(--input-bg); border: 1px solid var(--text-gray); border-radius: 4px; cursor: pointer; position: relative; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-        .terms-group input[type="checkbox"]:checked { background-color: var(--brand-red); border-color: var(--brand-red); }
-        .terms-group input[type="checkbox"]:checked::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; color: white; font-size: 12px; }
-        .terms-text { font-size: 0.9rem; color: var(--text-gray); line-height: 1.4; cursor: pointer; margin: 0; }
-        .terms-text a { color: var(--brand-red); font-weight: bold; text-decoration: underline; }
+        .section-label { color: var(--brand-red); font-weight: 800; margin-top: 40px; margin-bottom: 20px; text-transform: uppercase; border-top: 1px solid #333; padding-top: 25px; font-size: 1.1rem; letter-spacing: 1px; }
 
-        .submit-btn { background: linear-gradient(45deg, var(--brand-red), #aa0000); color: #fff; border: none; padding: 15px; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-align: center; width: 100%; font-size: 1.1rem; margin-top: 15px; box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3); }
-        .submit-btn:hover { transform: translateY(-2px); background: var(--brand-red); }
+        /* CHECKBOX */
+        .terms-group { display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; font-size: 0.9rem; color: #888; }
+        .terms-group input { margin-top: 4px; accent-color: var(--brand-red); width: 18px; height: 18px; }
+        .terms-group a { color: var(--brand-red); text-decoration: none; font-weight: bold; }
 
-        footer { background-color: var(--footer-bg); padding: 40px 5%; border-top: 1px solid #222; margin-top: auto; text-align: center; color: #555; }
+        /* RIGHT COLUMN: SUMMARY (STICKY) */
+        .summary-section { flex: 1; position: sticky; top: 100px; height: fit-content; }
+        .summary-card { background: #fff; color: #000; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
+        .summary-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: repeating-linear-gradient(45deg, #ff0000, #ff0000 10px, #000 10px, #000 20px); }
 
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .form-grid { grid-template-columns: 1fr; }
-            .full-width { grid-column: span 1; }
-        }
+        .event-mini-info { display: flex; gap: 15px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eee; }
+        .mini-img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; background: #eee; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .mini-details h4 { margin: 0 0 5px 0; font-family: 'Russo One'; font-size: 1.1rem; text-transform: uppercase; line-height: 1.2; }
+        .mini-details p { margin: 0; color: #666; font-size: 0.85rem; font-weight: 600; }
+
+        /* VOUCHER */
+        .voucher-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .voucher-input { flex: 1; padding: 12px; border: 2px dashed #ccc; border-radius: 6px; text-transform: uppercase; font-weight: bold; text-align: center; font-size: 1rem; letter-spacing: 2px; }
+        
+        .btn-apply { background: #000; color: #fff; border: none; padding: 0 25px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-apply:hover { background: #333; }
+        
+        /* Tombol Cancel (Merah) */
+        .btn-remove { background: #d9534f; color: #fff; border: none; padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: none; transition: 0.3s; }
+        .btn-remove:hover { background: #c9302c; }
+
+        /* PRICE */
+        .price-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; color: #555; font-weight: 500; }
+        .price-row.total { font-size: 1.6rem; font-weight: 900; color: #000; margin-top: 25px; border-top: 2px solid #000; padding-top: 15px; align-items: center; }
+        .discount-text { color: #28a745; font-weight: bold; }
+
+        .btn-pay { background: var(--brand-red); color: #fff; width: 100%; padding: 18px; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 25px; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
+        .btn-pay:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,0,0,0.6); }
+
+        @media (max-width: 900px) { .container { flex-direction: column; } .summary-section { order: -1; position: relative; top: 0; } .form-row { flex-direction: column; gap: 0; } }
     </style>
 </head>
 <body>
 
-    <header>
-        <a href="index.html" class="logo">
-            <img src="seaMLogo.png" alt="Sea Mountain Logo">
-            SEA<span>MOUNTAIN</span>
-        </a>
-        <nav class="nav-links">
-            <a href="index.html">Events</a>
-            <a href="#">Results</a>
-            <a href="#">Photos</a>
-            <a href="leaderboard.html">Leaderboard</a>
-        </nav>
-        <a href="login.html" class="login-btn">Log In</a>
-    </header>
-
-    <div class="register-container">
-        <div class="register-header">
-            <h1>Register Now</h1>
-            <p>Secure your spot in the Tunggul Melati Trail 2026. Early registration ensures you get your preferred race category and complete runner's kit.</p>
-        </div>
-
-        <div class="register-card">
-            <form id="registrationForm">
-                <div class="form-grid">
-                    <div class="form-group"><label class="form-label">First Name</label><input type="text" id="firstName" class="form-input" placeholder="Enter first name" required></div>
-                    <div class="form-group"><label class="form-label">Last Name</label><input type="text" id="lastName" class="form-input" placeholder="Enter last name" required></div>
-                    <div class="form-group"><label class="form-label">Email Address</label><input type="email" id="email" class="form-input" placeholder="example@email.com" required></div>
-                    <div class="form-group"><label class="form-label">Phone Number</label><input type="tel" id="phone" class="form-input" placeholder="+6012-3456789" required></div>
-                    <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" id="dob" class="form-input" required></div>
-                    <div class="form-group"><label class="form-label">Gender</label><select id="gender" class="form-select" required><option value="" disabled selected>Select Gender</option><option value="male">Male</option><option value="female">Female</option></select></div>
-                    <div class="form-group full-width"><label class="form-label">Address</label><input type="text" id="address" class="form-input" placeholder="Street address, Apt, Suite, Unit" required></div>
-                    <div class="form-group"><label class="form-label">City</label><input type="text" id="city" class="form-input" placeholder="Enter City" required></div>
-                    <div class="form-group"><label class="form-label">Postcode</label><input type="text" id="postcode" class="form-input" placeholder="Poscode" required></div>
-                    <div class="form-group full-width"><label class="form-label">Race Category</label><select id="category" class="form-select" required><option value="" disabled selected>Select Race Category</option><option value="5km">5KM Fun Run</option><option value="10km">10KM Speed</option><option value="21km">21KM Half Marathon</option><option value="50km">50KM Ultra Trail</option></select></div>
-                    <div class="form-group full-width"><label class="form-label">T-Shirt Size</label><select id="tshirt" class="form-select" required><option value="" disabled selected>Select Size</option><option value="xs">XS</option><option value="s">S</option><option value="m">M</option><option value="l">L</option><option value="xl">XL</option><option value="xxl">XXL</option></select></div>
-                    <div class="form-group full-width terms-group"><input type="checkbox" id="terms" required><label for="terms" class="terms-text">I agree to the <a href="#">terms and conditions</a> and acknowledge the <a href="#">privacy policy</a>.</label></div>
-                    <div class="form-group full-width"><button type="submit" class="submit-btn">Complete Registration</button></div>
-                </div>
-            </form>
-        </div>
+    <div class="header">
+        <a href="index.html" class="logo">SEA<span>MOUNTAIN</span></a>
+        <a href="index.html" style="color:#aaa; text-decoration:none; font-weight:bold; font-size: 0.9rem;"><i class="fas fa-times"></i> CANCEL REGISTRATION</a>
     </div>
 
-    <footer>
-        <p>&copy; 2025 Sea Mountain.Co. All Rights Reserved.</p>
-    </footer>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        // --- 1. CONFIGURATION (PASTIKAN GUNA YANG ANDA PUNYA) ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
-            authDomain: "sea-mountain.firebaseapp.com",
-            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "sea-mountain",
-            storageBucket: "sea-mountain.firebasestorage.app",
-            messagingSenderId: "812228825024",
-            appId: "1:812228825024:web:717049c1a64b39c8a60225",
-            measurementId: "G-XLTKE4DB9N"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-
-        // --- 2. DATA EVENT (DATABASE KECIL DALAM KOD) ---
-        // Ini mesti sama dengan kod ?event=... dekat index.html tadi
-        const eventDetails = {
-            'tmt2025': {
-                title: "Tunggul Melati Trail 2026",
-                desc: "Secure your spot in the toughest trail in Selangor!"
-            },
-            'nightrun': {
-                title: "Putrajaya Night Run 2026",
-                desc: "Join the glowing night run through the heart of Putrajaya."
-            },
-            'ikattepi': {
-                title: "Ikat Tepi Virtual Run",
-                desc: "Run anywhere, anytime. Get your medal delivered."
-            },
-            'cancer': {
-                title: "Race Against Cancer",
-                desc: "Run for a cause. Support cancer research Malaysia."
-            },
-            'avoidcancer': {
-                title: "Avoid Cancer RUN",
-                desc: "Charity run at Ampang Park to raise awareness."
-            }
-        };
-
-        // --- 3. DAPATKAN ID DARI URL ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const eventId = urlParams.get('event'); // Contoh: dapat "nightrun"
-
-        // --- 4. SECURITY & UI UPDATE ---
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                // Kalau tak login -> Tendang keluar
-                alert("Please Log In first.");
-                window.location.href = "login.html";
-            } else {
-                // Kalau dah login -> Cek Event Valid ke tak?
-                if (eventId && eventDetails[eventId]) {
+    <div class="container">
+        
+        <div class="form-section">
+            <h2>Participant Details</h2>
+            <div class="form-card">
+                <form id="regForm">
                     
-                    // TUKAR TAJUK & DESCRIPTION IKUT EVENT
-                    const headerTitle = document.querySelector('.register-header h1');
-                    const headerDesc = document.querySelector('.register-header p');
+                    <div class="section-label" style="margin-top:0;">Personal Information</div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input type="text" id="firstName" class="form-control" placeholder="Enter First Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input type="text" id="lastName" class="form-control" placeholder="Enter Last Name" required>
+                        </div>
+                    </div>
 
-                    if(headerTitle) headerTitle.innerText = "Register: " + eventDetails[eventId].title;
-                    if(headerDesc) headerDesc.innerText = eventDetails[eventId].desc;
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>IC / Passport No.</label>
+                            <input type="text" id="ic" class="form-control" placeholder="e.g. 901010-10-1234" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" id="dob" class="form-control" required>
+                        </div>
+                    </div>
 
-                    // Tunjuk borang
-                    document.body.style.display = "block";
-                    console.log("Register for:", eventId);
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Gender</label>
+                            <select id="gender" class="form-control" required>
+                                <option value="" disabled selected>Select Gender</option>
+                                <option>Male</option><option>Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="phone" class="form-control" placeholder="+60..." required>
+                        </div>
+                    </div>
 
-                } else {
-                    // Kalau link salah atau user main taip je
-                    alert("Event not found! Please select from Home.");
-                    window.location.href = "index.html";
-                }
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div>
+
+                    <div class="section-label">Mailing Address</div>
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" id="address" class="form-control" placeholder="Street address, Unit..." required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>City</label>
+                            <input type="text" id="city" class="form-control" placeholder="Enter City" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Postcode</label>
+                            <input type="text" id="postcode" class="form-control" placeholder="Poscode" required>
+                        </div>
+                    </div>
+
+                    <div class="section-label">Race Information</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Race Category</label>
+                            <select id="category" class="form-control" required>
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="5km">5KM Fun Run</option>
+                                <option value="10km">10KM Speed</option>
+                                <option value="21km">21KM Half Marathon</option>
+                                <option value="50km">50KM Ultra Trail</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>T-Shirt Size</label>
+                            <select id="tshirt" class="form-control" required>
+                                <option value="" disabled selected>Select Size</option>
+                                <option value="xs">XS</option><option value="s">S</option><option value="m">M</option><option value="l">L</option><option value="xl">XL</option><option value="xxl">XXL</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="section-label">Emergency Contact</div>
+                    <div class="form-group">
+                        <label>Name Emergency Contact</label>
+                        <input type="text" id="emergencyName" class="form-control" placeholder="Name of next of kin" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number Emergency Contact</label>
+                        <input type="tel" id="emergencyPhone" class="form-control" placeholder="+60..." required>
+                    </div>
+
+                    <div class="terms-group">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">I agree to the <a href="#">terms and conditions</a> and acknowledge the <a href="#">privacy policy</a>.</label>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <div class="summary-card">
+                <h3 style="margin-top:0; font-family:'Russo One'; margin-bottom: 25px;">ORDER SUMMARY</h3>
+                
+                <div class="event-mini-info">
+                    <img id="eventImg" src="" class="mini-img">
+                    <div class="mini-details">
+                        <h4 id="eventTitle">Loading Event...</h4>
+                        <p id="eventDate"><i class="far fa-calendar-alt"></i> -</p>
+                    </div>
+                </div>
+
+                <label style="font-size:0.8rem; font-weight:bold; color:#555; display:block; margin-bottom:8px;">HAVE A PROMO CODE?</label>
+                <div class="voucher-box">
+                    <input type="text" id="voucherCode" class="voucher-input" placeholder="CODE">
+                    
+                    <button type="button" id="btnApply" class="btn-apply">APPLY</button>
+                    
+                    <button type="button" id="btnRemove" class="btn-remove" title="Remove Voucher"><i class="fas fa-times"></i></button>
+                </div>
+                
+                <div id="voucherMsg" style="font-size:0.8rem; margin-top:-15px; margin-bottom:15px; display:none; font-weight: 600;"></div>
+
+                <div class="price-row">
+                    <span>Registration Fee</span>
+                    <span id="displayPrice">RM 0.00</span>
+                </div>
+                <div class="price-row" id="rowDiscount" style="display:none;">
+                    <span class="discount-text">Discount (<span id="appliedCode"></span>)</span>
+                    <span class="discount-text">- RM <span id="discountVal">0.00</span></span>
+                </div>
+                <div class="price-row">
+                    <span>Processing Fee</span>
+                    <span>RM 0.00</span>
+                </div>
+
+                <div class="price-row total">
+                    <span>TOTAL</span>
+                    <span style="color:var(--brand-red)" id="finalTotal">RM 0.00</span>
+                </div>
+
+                <button type="button" id="payBtn" class="btn-pay">COMPLETE REGISTRATION</button>
+                <p style="text-align:center; font-size:0.75rem; color:#888; margin-top:15px;">
+                    <i class="fas fa-lock"></i> Secure Payment by SeaMountain Pay
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get, push, set, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // --- CONFIG FIREBASE ANDA ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    // Global Variables
+    let originalPrice = 0;
+    let finalAmount = 0;
+    let discountAmount = 0;
+    let currentUser = null;
+    let currentVoucherCode = null; // Simpan kod voucher yang sedang diguna
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('event') || urlParams.get('id');
+
+    // 1. CHECK AUTH
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('email').value = user.email;
+        } else {
+            alert("Please Log In first.");
+            window.location.href = "login.html";
+        }
+    });
+
+    // 2. LOAD EVENT DATA & PRICE
+    if(eventId) {
+        get(ref(db, 'events/' + eventId)).then((snapshot) => {
+            if(snapshot.exists()) {
+                const data = snapshot.val();
+                
+                document.getElementById('eventTitle').innerText = data.title;
+                document.getElementById('eventDate').innerHTML = `<i class="far fa-calendar-alt"></i> ${data.date}`;
+                if(data.image_url) document.getElementById('eventImg').src = data.image_url;
+                
+                let priceString = String(data.price).replace(/[^0-9.]/g, ''); 
+                originalPrice = parseFloat(priceString) || 0;
+                finalAmount = originalPrice;
+
+                updatePriceUI();
+            } else {
+                alert("Event not found.");
+                window.location.href = "index.html";
             }
         });
+    } else {
+        alert("No event selected.");
+        window.location.href = "index.html";
+    }
 
-        // --- 5. HANDLE SUBMIT (HANTAR KE FOLDER KHAS) ---
-        const form = document.getElementById('registrationForm');
-        if(form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
+    // 3. VOUCHER LOGIC (ADVANCED: LIMIT & EXPIRY & PERCENT)
+    document.getElementById('btnApply').addEventListener('click', () => {
+        const codeInput = document.getElementById('voucherCode');
+        const code = codeInput.value.trim().toUpperCase();
+        const msg = document.getElementById('voucherMsg');
 
-                // Ambil Data Form
-                const formData = {
-                    first_name: document.getElementById('firstName').value,
-                    last_name: document.getElementById('lastName').value,
-                    email: document.getElementById('email').value,
-                    phone: document.getElementById('phone').value,
-                    dob: document.getElementById('dob').value,
-                    gender: document.getElementById('gender').value,
-                    address: document.getElementById('address').value,
-                    city: document.getElementById('city').value,
-                    postcode: document.getElementById('postcode').value,
-                    category: document.getElementById('category').value,
-                    tshirt_size: document.getElementById('tshirt').value,
-                    registration_time: new Date().toLocaleString(),
-                    status: "Pending Payment",
-                    event_code: eventId, // Simpan kod event
-                    event_name: eventDetails[eventId].title // Simpan nama penuh event
-                };
+        if(!code) return;
 
-                // 🔥 CARA ASINGKAN DATA DALAM FIREBASE 🔥
-                // Data akan masuk folder: registrations > nightrun > ID_UNIK
-                const databasePath = 'registrations/' + eventId;
+        get(ref(db, 'vouchers/' + code)).then((snapshot) => {
+            if(snapshot.exists()) {
+                const voucher = snapshot.val();
+                const now = new Date();
+                const expiryDate = new Date(voucher.expiry);
+                
+                // A. Check Expiry
+                // Set expiry date to end of day
+                expiryDate.setHours(23, 59, 59);
+                if (now > expiryDate) {
+                    showError(msg, "Voucher has expired.");
+                    return;
+                }
 
-                push(ref(db, databasePath), formData)
-                .then(() => {
-                    // Simpan info untuk page Payment
-                    localStorage.setItem("runnerName", formData.first_name + " " + formData.last_name);
-                    localStorage.setItem("raceCategory", formData.category);
-                    localStorage.setItem("eventName", eventDetails[eventId].title); // Simpan nama event juga
+                // B. Check Limit
+                if (voucher.used >= voucher.limit) {
+                    showError(msg, "Voucher fully redeemed (Limit Reached).");
+                    return;
+                }
 
-                    alert("Registration successful! Redirecting to payment...");
-                    window.location.href = "payment.html"; 
-                })
-                .catch((error) => {
-                    alert("Registration failed: " + error.message);
+                // C. Calculate Discount (Fixed vs Percent)
+                if (voucher.type === 'percent') {
+                    // Contoh: 10% dari RM 50 = RM 5
+                    discountAmount = originalPrice * (parseFloat(voucher.value) / 100);
+                } else {
+                    // Contoh: RM 10 off
+                    discountAmount = parseFloat(voucher.value);
+                }
+
+                // Pastikan diskaun tak lebih dari harga asal (Tak boleh negatif)
+                if(discountAmount > originalPrice) discountAmount = originalPrice;
+                finalAmount = originalPrice - discountAmount;
+
+                // Update UI Success
+                document.getElementById('rowDiscount').style.display = 'flex';
+                document.getElementById('discountVal').innerText = discountAmount.toFixed(2);
+                document.getElementById('appliedCode').innerText = code;
+                
+                msg.style.display = 'block';
+                msg.style.color = '#28a745';
+                msg.innerText = "Voucher Applied Successfully!";
+                
+                codeInput.disabled = true;
+                document.getElementById('btnApply').style.display = 'none';
+                document.getElementById('btnRemove').style.display = 'inline-block';
+
+                currentVoucherCode = code; // Simpan kod untuk update count nanti
+                updatePriceUI();
+
+            } else {
+                showError(msg, "Invalid Voucher Code.");
+            }
+        });
+    });
+
+    function showError(element, text) {
+        element.style.display = 'block';
+        element.style.color = '#d9534f';
+        element.innerText = text;
+        
+        // Reset Price
+        discountAmount = 0;
+        finalAmount = originalPrice;
+        currentVoucherCode = null;
+        document.getElementById('rowDiscount').style.display = 'none';
+        updatePriceUI();
+    }
+
+    // 4. REMOVE VOUCHER
+    document.getElementById('btnRemove').addEventListener('click', () => {
+        const codeInput = document.getElementById('voucherCode');
+        const msg = document.getElementById('voucherMsg');
+
+        discountAmount = 0;
+        finalAmount = originalPrice;
+        currentVoucherCode = null;
+        
+        codeInput.value = "";
+        codeInput.disabled = false;
+        msg.style.display = 'none';
+        document.getElementById('rowDiscount').style.display = 'none';
+        
+        document.getElementById('btnApply').style.display = 'inline-block';
+        document.getElementById('btnRemove').style.display = 'none';
+
+        updatePriceUI();
+    });
+
+    function updatePriceUI() {
+        document.getElementById('displayPrice').innerText = "RM " + originalPrice.toFixed(2);
+        document.getElementById('finalTotal').innerText = "RM " + finalAmount.toFixed(2);
+    }
+
+    // 5. SUBMIT FORM & UPDATE VOUCHER USAGE
+    document.getElementById('payBtn').addEventListener('click', () => {
+        const form = document.getElementById('regForm');
+        if(!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        if(confirm(`Confirm registration and payment of RM ${finalAmount.toFixed(2)}?`)) {
+            
+            // Generate Registration ID
+            const regRef = push(ref(db, 'registrations/' + eventId));
+            
+            const regData = {
+                userId: currentUser.uid,
+                event_code: eventId,
+                event_name: document.getElementById('eventTitle').innerText,
+                
+                first_name: document.getElementById('firstName').value,
+                last_name: document.getElementById('lastName').value,
+                ic: document.getElementById('ic').value,
+                dob: document.getElementById('dob').value,
+                gender: document.getElementById('gender').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                
+                address: document.getElementById('address').value,
+                city: document.getElementById('city').value,
+                postcode: document.getElementById('postcode').value,
+                
+                category: document.getElementById('category').value,
+                tshirt_size: document.getElementById('tshirt').value,
+                
+                emergencyName: document.getElementById('emergencyName').value,
+                emergencyPhone: document.getElementById('emergencyPhone').value,
+                
+                amountPaid: finalAmount,
+                voucherUsed: currentVoucherCode || "NONE",
+                status: 'paid',
+                registration_time: new Date().toLocaleString()
+            };
+
+            set(regRef, regData).then(() => {
+                
+                // A. Update Registered Count di Event
+                const eventCountRef = ref(db, 'events/' + eventId + '/registered');
+                runTransaction(eventCountRef, (currentCount) => {
+                    return (currentCount || 0) + 1;
                 });
+
+                // B. Update Voucher Usage (KALAU ADA VOUCHER)
+                if (currentVoucherCode) {
+                    const voucherUsedRef = ref(db, 'vouchers/' + currentVoucherCode + '/used');
+                    runTransaction(voucherUsedRef, (currentUsed) => {
+                        return (currentUsed || 0) + 1;
+                    });
+                }
+
+                alert("Registration Successful! See you at the race.");
+                window.location.href = "index.html";
+            })
+            .catch((error) => {
+                alert("Error: " + error.message);
             });
         }
-    </script>
+    });
+
+</script>
 
 </body>
 </html>
