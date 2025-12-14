@@ -351,7 +351,7 @@
         set(ref(db, 'events/' + eventId), eventData)
         .then(() => {
             alert("Event Saved Successfully!");
-            window.location.href = "admin-dashboard.html";
+            window.location.href = "admin-manage-events.html";
         })
         .catch((err) => {
             alert("Error: " + err.message);
@@ -361,3 +361,4 @@
 
 </body>
 </html>
+
