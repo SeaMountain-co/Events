@@ -180,8 +180,11 @@
 
                 <img id="entitlementImg" src="" alt="Entitlements" style="width:100%; max-width:600px; margin-top:20px; border-radius:10px; display:none; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
                 </div>
-                <div id="tnc" class="tab-panel"><h3>Terms & Conditions</h3><p>Participants must be 18 years and above. Fees are non-refundable.</p></div>
-                <div id="faq" class="tab-panel"><h3>FAQ</h3><p><strong>Q: Baggage drop?</strong> A: Yes, available at start point.</p></div>
+
+                <div id="tnc" class="tab-panel"><h3>Terms & Conditions</h3><p id="tncList">Loading...</p> </div>
+
+                <div id="faq" class="tab-panel"><h3>FAQ</h3><p id="faqList">Loading...</p></div>
+    
                 <div id="contact" class="tab-panel">
                     <div class="contact-row"><span>Organiser:</span> Sea Mountain Team</div>
                     <div class="contact-row"><span>Email:</span> support@seamountain.com</div>
@@ -320,6 +323,17 @@
                 document.getElementById('eventDate').innerText = data.date || `${data.date_start} - ${data.date_end}`;
                 document.getElementById('kitDate').innerText = data.kit_date || "To be announced";
                 document.getElementById('entitlementList').innerText = data.entitlements || "Event Tee, Finisher Medal, E-Certificate, Bib Number.";
+                
+                const faqElement = document.getElementById('faqList'); 
+                if(faqElement) {
+                faqElement.innerText = data.faq || "No FAQ available yet.";
+            }
+
+                const tncElement = document.getElementById('tncList');
+                if(tncElement) {
+                tncElement.innerText = data.tnc || "Participants must be 18 years and above. Fees are non-refundable.";
+            }
+
 
                 // 2. Masukkan Gambar Entitlement
                 const entImg = document.getElementById('entitlementImg');
@@ -402,4 +416,3 @@
 </body>
 
 </html>
-
