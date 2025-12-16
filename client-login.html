@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizer Login - Sea Mountain</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
+        body { 
+            background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; 
+            margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center;
+            background-image: radial-gradient(circle at 50% 10%, rgba(255, 0, 0, 0.1) 0%, transparent 50%);
+        }
+        .login-card { background: var(--card-bg); padding: 40px 30px; border-radius: 15px; border: 1px solid #333; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
+        .logo { font-family: 'Russo One'; font-size: 2rem; color: #fff; text-decoration: none; display: block; margin-bottom: 20px; font-style: italic; }
+        .logo span { color: var(--brand-red); }
+        
+        /* INPUT STYLE */
+        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #0a0b0e; border: 1px solid #444; color: #fff; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--brand-red); }
+
+        /* BUTTON STYLE */
+        .btn-login { width: 100%; padding: 14px; background: var(--brand-red); color: #fff; border: none; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 5px; }
+        .btn-login:hover { background: #cc0000; }
+        
+        /* STATUS MESSAGE (Dah dibetulkan supaya tak makan ruang) */
+        .status-msg { margin-top: 10px; font-size: 0.85rem; min-height: 0; margin-bottom: 10px; }
+
+        /* FOOTER LINKS */
+        .footer-text { margin-top: 15px; font-size: 0.85rem; color: #888; }
+        .footer-text a { color: var(--brand-red); font-weight: bold; text-decoration: none; }
+        .cancel-link { display: block; margin-top: 10px; color: #555; font-size: 0.8rem; text-decoration: none; transition: 0.3s; }
+        .cancel-link:hover { color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <a href="client-landing.html" class="logo">SEA<span>MOUNTAIN</span></a>
+        <h3 style="margin-top:0; color:#aaa; margin-bottom: 25px;">Event Management Login</h3>
+        
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Client Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit" class="btn-login" id="submitBtn">LOG IN</button>
+        </form>
+
+        <div id="statusMsg" class="status-msg"></div>
+
+        <div class="footer-text">
+            Don't have an account? <a href="client-signup.html">Sign Up Here</a>
+        </div>
+        <a href="client-landing.html" class="cancel-link">Cancel</a>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+
+    const statusMsg = document.getElementById('statusMsg');
+    const targetEventId = sessionStorage.getItem('targetEventId');
+
+    // 1. PAKSA LOGOUT BILA PAGE LOAD (Supaya form sentiasa bersih)
+    signOut(auth).then(() => {
+        console.log("Session cleared.");
+    });
+
+    // 2. CHECK PERMISSION LEPAS LOGIN BERJAYA
+    onAuthStateChanged(auth, (user) => {
+        if (user && targetEventId) {
+            checkPermissionAndRedirect(user.email, targetEventId);
+        }
+    });
+
+    // 3. HANDLE LOGIN BUTTON
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        statusMsg.style.color = "#fff";
+        statusMsg.innerText = "Verifying...";
+
+        signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            if(targetEventId) {
+                checkPermissionAndRedirect(userCredential.user.email, targetEventId);
+            } else {
+                window.location.href = "client-landing.html";
+            }
+        })
+        .catch((error) => {
+            statusMsg.style.color = "#ff4444";
+            statusMsg.innerText = "Login Failed: " + error.message;
+        });
+    });
+
+    // 4. CHECK DATABASE PERMISSION
+    async function checkPermissionAndRedirect(email, eventId) {
+        statusMsg.style.color = "#fff";
+        statusMsg.innerText = "Checking access...";
+
+        const safeEmail = email.replace(/\./g, ','); 
+        const permRef = ref(db, `permissions/${safeEmail}/${eventId}`);
+        
+        try {
+            const snapshot = await get(permRef);
+            
+            if (snapshot.exists() && snapshot.val() === true) {
+                statusMsg.style.color = "#28a745";
+                statusMsg.innerText = "Success! Redirecting...";
+                setTimeout(() => {
+                    window.location.href = `client-analytics.html?id=${eventId}`;
+                }, 1000);
+            } else {
+                statusMsg.style.color = "#ff4444";
+                statusMsg.innerHTML = `<i class="fas fa-lock"></i> ACCESS DENIED for this event.`;
+                signOut(auth);
+            }
+        } catch (err) {
+            console.error(err);
+            statusMsg.innerText = "System Error.";
+        }
+    }
+</script>
+
+</body>
+</html>

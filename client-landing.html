@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Portal - Sea Mountain</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding-bottom: 50px; }
+
+        .header { padding: 20px 5%; background: rgba(0,0,0,0.9); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .logo { font-family: 'Russo One'; font-size: 1.5rem; color: #fff; text-decoration: none; font-style: italic; }
+        .logo span { color: var(--brand-red); }
+
+        .hero { text-align: center; padding: 60px 20px; }
+        .hero h1 { font-family: 'Russo One'; font-size: 2.2rem; text-transform: uppercase; margin-bottom: 10px; }
+        .hero p { color: #888; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 5%; }
+        .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+
+        .event-card { 
+            background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; transition: 0.3s; cursor: pointer; position: relative;
+        }
+        .event-card:hover { transform: translateY(-10px); border-color: var(--brand-red); box-shadow: 0 10px 30px rgba(255, 0, 0, 0.2); }
+        
+        .card-img-wrapper { height: 180px; overflow: hidden; }
+        .card-img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
+        .event-card:hover .card-img { transform: scale(1.1); }
+
+        .card-body { padding: 20px; text-align: center; }
+        .card-title { font-family: 'Russo One'; font-size: 1.1rem; margin: 0 0 10px 0; text-transform: uppercase; }
+        
+        .btn-access { 
+            display: inline-block; padding: 10px 20px; background: #222; color: #fff; 
+            border: 1px solid #444; border-radius: 30px; font-weight: bold; font-size: 0.8rem; margin-top: 10px; text-transform: uppercase;
+        }
+        .event-card:hover .btn-access { background: var(--brand-red); border-color: var(--brand-red); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="#" class="logo">SEA<span>MOUNTAIN</span></a>
+    </div>
+
+    <div class="hero">
+        <h1>Organizer Portal</h1>
+        <p>Select your event to access analytics dashboard.</p>
+    </div>
+
+    <div class="container">
+        <div id="eventsGrid" class="events-grid">
+            <div style="text-align:center; width:100%; color:#666;">Loading events...</div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // CONFIG
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const grid = document.getElementById('eventsGrid');
+
+    // 1. LOAD ALL EVENTS (PUBLIC VIEW)
+    const eventsRef = ref(db, 'events');
+    onValue(eventsRef, (snapshot) => {
+        grid.innerHTML = "";
+        const data = snapshot.val();
+
+        if (data) {
+            Object.keys(data).forEach(key => {
+                const event = data[key];
+                
+                const card = document.createElement('div');
+                card.className = 'event-card';
+                
+                // LOGIC PENTING:
+                // Bila tekan, simpan ID event dalam session, lepastu pergi LOGIN page
+                card.onclick = function() {
+                    sessionStorage.setItem('targetEventId', key);
+                    window.location.href = "client-login.html";
+                };
+
+                card.innerHTML = `
+                    <div class="card-img-wrapper">
+                        <img src="${event.image_url || 'https://via.placeholder.com/400x200'}" class="card-img">
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">${event.title}</h3>
+                        <div style="font-size:0.8rem; color:#888; margin-bottom:10px;">${event.date || '-'}</div>
+                        <div class="btn-access">Manage Event <i class="fas fa-arrow-right"></i></div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        } else {
+            grid.innerHTML = "<p style='text-align:center'>No events found.</p>";
+        }
+    });
+</script>
+</body>
+</html>

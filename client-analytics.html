@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Analytics - Sea Mountain</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
+        
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; padding: 20px; margin: 0; }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* HEADER */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        .event-title { font-family: 'Russo One'; color: var(--brand-red); font-size: 1.5rem; text-transform: uppercase; margin: 0; }
+        .back-btn { color: #888; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+        .back-btn:hover { color: #fff; }
+
+        /* STATS CARDS */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid #333; position: relative; }
+        .stat-card h4 { margin: 0 0 10px 0; font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: #fff; }
+        .stat-sub { font-size: 0.8rem; color: #555; margin-top: 5px; }
+        .icon-bg { position: absolute; top: 20px; right: 20px; font-size: 2rem; color: #252830; }
+
+        /* CHARTS SECTION */
+        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .chart-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid #333; }
+        .chart-header { margin-bottom: 20px; font-weight: 700; color: #ccc; font-size: 0.9rem; text-transform: uppercase; }
+        
+        /* TABLE SECTION */
+        .table-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid #333; }
+        .table-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-csv { background: #28a745; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .btn-csv:hover { background: #218838; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 15px; color: #888; border-bottom: 2px solid #333; font-size: 0.8rem; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #2a2c35; font-size: 0.9rem; vertical-align: middle; }
+        
+        .badge { padding: 5px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .badge-paid { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
+        .badge-pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; border: 1px solid #f1c40f; }
+
+        @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <div style="font-size:0.8rem; color:#888; margin-bottom:5px;">CLIENT ANALYTICS DASHBOARD</div>
+                <h1 id="eventTitleDisplay" class="event-title">Loading Event...</h1>
+            </div>
+            <a href="client-landing.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Events</a>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-users icon-bg"></i>
+                <h4>Total Registered</h4>
+                <div id="totalReg" class="stat-value">0</div>
+                <div class="stat-sub">Participants</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-wallet icon-bg"></i>
+                <h4>Total Revenue (Est.)</h4>
+                <div id="totalRev" class="stat-value" style="color:#2ecc71;">RM 0.00</div>
+                <div id="basePriceDisplay" class="stat-sub">Based on RM 0.00 / pax</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-clock icon-bg"></i>
+                <h4>Event Status</h4>
+                <div id="eventStatus" class="stat-value">OPEN</div>
+                <div id="eventDateRange" class="stat-sub">-</div>
+            </div>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">Participants by Category (Distance)</div>
+                <canvas id="categoryChart" height="150"></canvas>
+            </div>
+            <div class="chart-card">
+                <div class="chart-header">T-Shirt Size Distribution</div>
+                <canvas id="tshirtChart" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-header-row">
+                <div class="chart-header" style="margin:0;">Participant List</div>
+                <button onclick="exportCSV()" class="btn-csv"><i class="fas fa-file-csv"></i> Export CSV</button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Category</th>
+                            <th>T-Shirt</th>
+                            <th>Reg Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="participantTable">
+                        <tr><td colspan="7" style="text-align:center; padding:20px; color:#666;">Loading data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // CONFIG
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+
+    // Ambil ID dari URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('id');
+
+    let allParticipants = []; // Simpan data untuk CSV
+
+    // CHECK AUTH
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            window.location.href = "client-login.html";
+        } else {
+            if(eventId) {
+                loadAnalytics(eventId);
+            } else {
+                alert("No Event Selected");
+                window.location.href = "client-landing.html";
+            }
+        }
+    });
+
+    async function loadAnalytics(id) {
+        // 1. Fetch Event Info (Harga, Tajuk)
+        const eventSnap = await get(ref(db, `events/${id}`));
+        const eventInfo = eventSnap.val();
+
+        if(!eventInfo) return;
+
+        // UI Update: Header Info
+        document.getElementById('eventTitleDisplay').innerText = eventInfo.title;
+        document.getElementById('basePriceDisplay').innerText = `Based on ${eventInfo.price} / pax`;
+        document.getElementById('eventDateRange').innerText = eventInfo.date;
+
+        // Parse Harga (Buang 'RM')
+        let basePrice = parseFloat(String(eventInfo.price).replace(/[^0-9.]/g, '')) || 0;
+
+        // 2. Fetch Registrations
+        const regSnap = await get(ref(db, `registrations/${id}`));
+        const registrations = regSnap.val();
+
+        if (!registrations) {
+            document.getElementById('participantTable').innerHTML = "<tr><td colspan='7' style='text-align:center; padding:20px;'>No participants yet.</td></tr>";
+            return;
+        }
+
+        // --- DATA PROCESSING ---
+        let totalCount = 0;
+        let totalRevenue = 0;
+        let categoryCount = {};
+        let tshirtCount = {};
+        let tableHTML = "";
+        let index = 1;
+
+        Object.keys(registrations).forEach(key => {
+            const r = registrations[key];
+            totalCount++;
+            
+            // Masukkan dalam array global untuk CSV
+            allParticipants.push(r);
+
+            // Kira Revenue (Hanya yang dah Paid)
+            if (r.status === 'paid' || r.status === 'Paid') {
+                // Guna amountPaid jika ada (sebab mungkin guna voucher), kalau tak guna basePrice
+                let paidAmount = r.amountPaid !== undefined ? parseFloat(r.amountPaid) : basePrice;
+                totalRevenue += paidAmount;
+            }
+
+            // Data Charts
+            let cat = r.category || 'Unknown';
+            categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+
+            let size = r.tshirt_size || 'Unknown';
+            tshirtCount[size] = (tshirtCount[size] || 0) + 1;
+
+            // Table Row
+            let badgeClass = r.status === 'paid' || r.status === 'Paid' ? 'badge-paid' : 'badge-pending';
+            
+            tableHTML += `
+                <tr>
+                    <td>${index++}</td>
+                    <td><b>${r.first_name} ${r.last_name}</b></td>
+                    <td>${r.email}</td>
+                    <td>${r.category}</td>
+                    <td style="text-transform:uppercase;">${r.tshirt_size}</td>
+                    <td>${r.registration_time.split(',')[0]}</td>
+                    <td><span class="badge ${badgeClass}">${r.status}</span></td>
+                </tr>
+            `;
+        });
+
+        // Update UI Stats & Table
+        document.getElementById('totalReg').innerText = totalCount;
+        document.getElementById('totalRev').innerText = "RM " + totalRevenue.toFixed(2);
+        document.getElementById('participantTable').innerHTML = tableHTML;
+
+        // Render Charts
+        renderCharts(categoryCount, tshirtCount);
+    }
+
+    function renderCharts(categories, sizes) {
+        // Bar Chart (Category)
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(categories),
+                datasets: [{
+                    label: 'Participants',
+                    data: Object.values(categories),
+                    backgroundColor: '#ff0000',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#333' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Donut Chart (T-Shirt)
+        new Chart(document.getElementById('tshirtChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(sizes),
+                datasets: [{
+                    data: Object.values(sizes),
+                    backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#fff'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'right', labels: { color: '#fff' } } },
+                cutout: '70%'
+            }
+        });
+    }
+
+    // Function Export CSV (Global)
+    window.exportCSV = function() {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "First Name,Last Name,IC,Email,Phone,Category,Size,Status,Date\n";
+
+        allParticipants.forEach(row => {
+            let rowData = [
+                row.first_name, row.last_name, row.ic, row.email, row.phone,
+                row.category, row.tshirt_size, row.status, 
+                (row.registration_time || '').replace(',', '')
+            ];
+            csvContent += rowData.join(",") + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "participants_data.csv");
+        document.body.appendChild(link);
+        link.click();
+    }
+</script>
+
+</body>
+</html>

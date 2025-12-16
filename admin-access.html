@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Client Access - Sea Mountain</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #111; color: #fff; font-family: 'Montserrat', sans-serif; padding: 20px; }
+        
+        /* CONTAINER LEBIH KECIL (COMPACT) */
+        .container { max-width: 700px; margin: 0 auto; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 25px; }
+        .logo { font-family: 'Russo One'; color: #ff0000; font-size: 1.3rem; text-decoration: none;}
+        .btn-nav { color: #888; text-decoration: none; font-weight: 600; margin-left: 15px; font-size: 0.9rem; transition: 0.3s; }
+        .btn-nav:hover { color: #fff; }
+
+        /* CARD STYLE SAMA MACAM VOUCHER */
+        .card { background: #1a1c23; padding: 25px 30px; border-radius: 12px; border: 1px solid #333; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        h3 { margin-top: 0; margin-bottom: 20px; color: #28a745; text-transform: uppercase; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+
+        /* FORM DALAM SATU BARIS */
+        .form-row { display: flex; gap: 20px; } 
+        .form-group { flex: 1; margin-bottom: 0; }
+        
+        label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { width: 100%; padding: 12px; background: #0a0b0e; border: 1px solid #444; color: #fff; border-radius: 6px; outline: none; font-family: 'Montserrat'; transition: 0.3s; box-sizing: border-box; }
+        input:focus, select:focus { border-color: #28a745; }
+
+        .btn-grant { background: #28a745; color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
+        .btn-grant:hover { background: #218838; transform: translateY(-2px); }
+
+        /* LIST PERMISSIONS */
+        .access-list { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .access-item { 
+            display: flex; justify-content: space-between; align-items: center;
+            background: #252830; padding: 15px; border-radius: 8px; 
+            border-left: 4px solid #28a745; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .client-email { font-weight: 700; font-size: 0.95rem; color: #fff; display: block; margin-bottom: 3px; }
+        .event-access { color: #aaa; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
+        .event-access i { color: #28a745; }
+
+        .btn-revoke { background: transparent; color: #d9534f; border: 1px solid #d9534f; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.3s; font-size: 0.8rem; font-weight: 600; }
+        .btn-revoke:hover { background: #d9534f; color: white; }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; color: #555; padding: 20px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <a href="admin-dashboard.html" class="logo">SEA MOUNTAIN ADMIN</a>
+        <div>
+            <a href="admin-dashboard.html" class="btn-nav">Dashboard</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3><i class="fas fa-user-lock"></i> Client Access Control</h3>
+        <p style="color:#888; font-size:0.85rem; margin-bottom:20px; line-height:1.5;">
+            Assign specific events to clients so they can view analytics. Ensure the email matches the client's login.
+        </p>
+        
+        <div class="form-row">
+            <div class="form-group" style="flex: 1.2;"> <label>Client Email</label>
+                <input type="email" id="clientEmail" placeholder="client@example.com">
+            </div>
+            <div class="form-group" style="flex: 1;"> <label>Target Event</label>
+                <select id="eventSelect">
+                    <option value="">Loading events...</option>
+                </select>
+            </div>
+        </div>
+
+        <button onclick="grantAccess()" class="btn-grant">GRANT PERMISSION</button>
+    </div>
+
+    <div class="card">
+        <h3 style="color:#fff; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 15px;">
+            <i class="fas fa-key"></i> Active Permissions
+        </h3>
+        <div id="permissionList" class="access-list">
+            <div class="empty-state">Loading permissions...</div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // --- CONFIG FIREBASE ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // 1. LOAD EVENTS INTO DROPDOWN
+    onValue(ref(db, 'events'), (snapshot) => {
+        const data = snapshot.val();
+        const select = document.getElementById('eventSelect');
+        select.innerHTML = '<option value="">Select Event</option>';
+        if(data) {
+            Object.keys(data).forEach(key => {
+                select.innerHTML += `<option value="${key}">${data[key].title}</option>`;
+            });
+        }
+    });
+
+    // 2. HELPER: CLEAN EMAIL
+    function sanitizeEmail(email) {
+        return email.replace(/\./g, ',');
+    }
+
+    // 3. GRANT ACCESS FUNCTION
+    window.grantAccess = function() {
+        const email = document.getElementById('clientEmail').value.trim().toLowerCase();
+        const eventId = document.getElementById('eventSelect').value;
+
+        if(!email || !eventId) return alert("Please fill all fields");
+
+        const safeEmail = sanitizeEmail(email);
+        
+        set(ref(db, `permissions/${safeEmail}/${eventId}`), true)
+        .then(() => {
+            alert(`Access granted for ${email}`);
+            document.getElementById('clientEmail').value = '';
+        });
+    }
+
+    // 4. LOAD PERMISSIONS LIST
+    onValue(ref(db, 'permissions'), (snapshot) => {
+        const data = snapshot.val();
+        const list = document.getElementById('permissionList');
+        list.innerHTML = "";
+
+        if(data) {
+            Object.keys(data).forEach(emailKey => {
+                const originalEmail = emailKey.replace(/,/g, '.');
+                const events = data[emailKey];
+                
+                Object.keys(events).forEach(eventId => {
+                    list.innerHTML += `
+                        <div class="access-item">
+                            <div>
+                                <span class="client-email">${originalEmail}</span>
+                                <span class="event-access"><i class="fas fa-check-circle"></i> Access to: <b>${eventId}</b></span>
+                            </div>
+                            <button class="btn-revoke" onclick="revokeAccess('${emailKey}', '${eventId}')">
+                                <i class="fas fa-trash-alt"></i> Revoke
+                            </button>
+                        </div>
+                    `;
+                });
+            });
+        } else {
+            list.innerHTML = "<div class='empty-state'>No active permissions found.</div>";
+        }
+    });
+
+    // 5. REVOKE ACCESS
+    window.revokeAccess = function(emailKey, eventId) {
+        if(confirm("Remove access for this user?")) {
+            remove(ref(db, `permissions/${emailKey}/${eventId}`));
+        }
+    }
+</script>
+</body>
+</html>
