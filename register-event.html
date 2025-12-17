@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
     
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            // GANTIKAN DENGAN PUBLIC KEY ANDA DARI EMAILJS DASHBOARD
+            // Contoh: emailjs.init("user_abc123...");
+            emailjs.init("service_434zj9s"); 
+        })();
+    </script>
+
     <style>
         :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
         body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding-bottom: 50px; }
@@ -23,24 +32,22 @@
         h2 { font-family: 'Russo One'; text-transform: uppercase; margin-bottom: 25px; font-size: 1.5rem; border-bottom: 2px solid var(--brand-red); display: inline-block; padding-bottom: 5px; }
         
         .form-card { background: var(--card-bg); padding: 35px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .form-group { margin-bottom: 25px; } /* Jarak bawah setiap input */
+        .form-group { margin-bottom: 25px; } 
         
         .form-group label { display: block; margin-bottom: 10px; font-weight: 600; color: #aaa; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
         .form-control { width: 100%; padding: 14px; background: #0a0b0e; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 1rem; outline: none; transition: 0.3s; font-family: 'Montserrat'; }
         .form-control:focus { border-color: var(--brand-red); box-shadow: 0 0 15px rgba(255,0,0,0.2); background: #111; }
         
-        /* JARAK ANTARA KIRI & KANAN DALAM SATU ROW */
         .form-row { display: flex; gap: 30px; } 
         .form-row .form-group { flex: 1; }
 
         .section-label { color: var(--brand-red); font-weight: 800; margin-top: 40px; margin-bottom: 20px; text-transform: uppercase; border-top: 1px solid #333; padding-top: 25px; font-size: 1.1rem; letter-spacing: 1px; }
 
-        /* CHECKBOX */
         .terms-group { display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; font-size: 0.9rem; color: #888; }
         .terms-group input { margin-top: 4px; accent-color: var(--brand-red); width: 18px; height: 18px; }
         .terms-group a { color: var(--brand-red); text-decoration: none; font-weight: bold; }
 
-        /* RIGHT COLUMN: SUMMARY (STICKY) */
+        /* RIGHT COLUMN: SUMMARY */
         .summary-section { flex: 1; position: sticky; top: 100px; height: fit-content; }
         .summary-card { background: #fff; color: #000; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden; }
         .summary-card::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: repeating-linear-gradient(45deg, #ff0000, #ff0000 10px, #000 10px, #000 20px); }
@@ -50,18 +57,15 @@
         .mini-details h4 { margin: 0 0 5px 0; font-family: 'Russo One'; font-size: 1.1rem; text-transform: uppercase; line-height: 1.2; }
         .mini-details p { margin: 0; color: #666; font-size: 0.85rem; font-weight: 600; }
 
-        /* VOUCHER */
         .voucher-box { display: flex; gap: 10px; margin-bottom: 20px; }
         .voucher-input { flex: 1; padding: 12px; border: 2px dashed #ccc; border-radius: 6px; text-transform: uppercase; font-weight: bold; text-align: center; font-size: 1rem; letter-spacing: 2px; }
         
         .btn-apply { background: #000; color: #fff; border: none; padding: 0 25px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-apply:hover { background: #333; }
         
-        /* Tombol Cancel (Merah) */
         .btn-remove { background: #d9534f; color: #fff; border: none; padding: 0 15px; border-radius: 6px; cursor: pointer; font-weight: bold; display: none; transition: 0.3s; }
         .btn-remove:hover { background: #c9302c; }
 
-        /* PRICE */
         .price-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; color: #555; font-weight: 500; }
         .price-row.total { font-size: 1.6rem; font-weight: 900; color: #000; margin-top: 25px; border-top: 2px solid #000; padding-top: 15px; align-items: center; }
         .discount-text { color: #28a745; font-weight: bold; }
@@ -85,7 +89,6 @@
             <h2>Participant Details</h2>
             <div class="form-card">
                 <form id="regForm">
-                    
                     <div class="section-label" style="margin-top:0;">Personal Information</div>
                     
                     <div class="form-row">
@@ -200,9 +203,7 @@
                 <label style="font-size:0.8rem; font-weight:bold; color:#555; display:block; margin-bottom:8px;">HAVE A PROMO CODE?</label>
                 <div class="voucher-box">
                     <input type="text" id="voucherCode" class="voucher-input" placeholder="CODE">
-                    
                     <button type="button" id="btnApply" class="btn-apply">APPLY</button>
-                    
                     <button type="button" id="btnRemove" class="btn-remove" title="Remove Voucher"><i class="fas fa-times"></i></button>
                 </div>
                 
@@ -240,7 +241,7 @@
     import { getDatabase, ref, get, push, set, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // --- CONFIG FIREBASE ANDA ---
+    // CONFIG FIREBASE ANDA
     const firebaseConfig = {
         apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
         authDomain: "sea-mountain.firebaseapp.com",
@@ -255,28 +256,30 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
-    // Global Variables
+    // --- SETUP EMAILJS ANDA ---
+    // GANTI DENGAN ID YANG ANDA DAPAT DARI EMAILJS
+    const EMAILJS_SERVICE_ID = "service_434zj9s"; 
+    const EMAILJS_TEMPLATE_ID = "template_rmyuzua";
+
     let originalPrice = 0;
     let finalAmount = 0;
     let discountAmount = 0;
     let currentUser = null;
-    let currentVoucherCode = null; // Simpan kod voucher yang sedang diguna
+    let currentVoucherCode = null;
     
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('event') || urlParams.get('id');
 
-    // 1. CHECK AUTH
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
-            document.getElementById('email').value = user.email;
+            document.getElementById('email').value = user.email; 
         } else {
             alert("Please Log In first.");
             window.location.href = "login.html";
         }
     });
 
-    // 2. LOAD EVENT DATA & PRICE
     if(eventId) {
         get(ref(db, 'events/' + eventId)).then((snapshot) => {
             if(snapshot.exists()) {
@@ -301,7 +304,6 @@
         window.location.href = "index.html";
     }
 
-    // 3. VOUCHER LOGIC (ADVANCED: LIMIT & EXPIRY & PERCENT)
     document.getElementById('btnApply').addEventListener('click', () => {
         const codeInput = document.getElementById('voucherCode');
         const code = codeInput.value.trim().toUpperCase();
@@ -314,48 +316,40 @@
                 const voucher = snapshot.val();
                 const now = new Date();
                 const expiryDate = new Date(voucher.expiry);
-                
-                // A. Check Expiry
-                // Set expiry date to end of day
                 expiryDate.setHours(23, 59, 59);
+
                 if (now > expiryDate) {
                     showError(msg, "Voucher has expired.");
                     return;
                 }
 
-                // B. Check Limit
-                if (voucher.used >= voucher.limit) {
-                    showError(msg, "Voucher fully redeemed (Limit Reached).");
+                if (voucher.limit > 0 && voucher.used >= voucher.limit) {
+                    showError(msg, "Voucher fully redeemed.");
                     return;
                 }
 
-                // C. Calculate Discount (Fixed vs Percent)
                 if (voucher.type === 'percent') {
-                    // Contoh: 10% dari RM 50 = RM 5
                     discountAmount = originalPrice * (parseFloat(voucher.value) / 100);
                 } else {
-                    // Contoh: RM 10 off
                     discountAmount = parseFloat(voucher.value);
                 }
 
-                // Pastikan diskaun tak lebih dari harga asal (Tak boleh negatif)
                 if(discountAmount > originalPrice) discountAmount = originalPrice;
                 finalAmount = originalPrice - discountAmount;
 
-                // Update UI Success
                 document.getElementById('rowDiscount').style.display = 'flex';
                 document.getElementById('discountVal').innerText = discountAmount.toFixed(2);
                 document.getElementById('appliedCode').innerText = code;
                 
                 msg.style.display = 'block';
                 msg.style.color = '#28a745';
-                msg.innerText = "Voucher Applied Successfully!";
+                msg.innerText = "Voucher Applied!";
                 
                 codeInput.disabled = true;
                 document.getElementById('btnApply').style.display = 'none';
                 document.getElementById('btnRemove').style.display = 'inline-block';
 
-                currentVoucherCode = code; // Simpan kod untuk update count nanti
+                currentVoucherCode = code; 
                 updatePriceUI();
 
             } else {
@@ -368,8 +362,6 @@
         element.style.display = 'block';
         element.style.color = '#d9534f';
         element.innerText = text;
-        
-        // Reset Price
         discountAmount = 0;
         finalAmount = originalPrice;
         currentVoucherCode = null;
@@ -377,23 +369,18 @@
         updatePriceUI();
     }
 
-    // 4. REMOVE VOUCHER
     document.getElementById('btnRemove').addEventListener('click', () => {
         const codeInput = document.getElementById('voucherCode');
         const msg = document.getElementById('voucherMsg');
-
         discountAmount = 0;
         finalAmount = originalPrice;
         currentVoucherCode = null;
-        
         codeInput.value = "";
         codeInput.disabled = false;
         msg.style.display = 'none';
         document.getElementById('rowDiscount').style.display = 'none';
-        
         document.getElementById('btnApply').style.display = 'inline-block';
         document.getElementById('btnRemove').style.display = 'none';
-
         updatePriceUI();
     });
 
@@ -402,7 +389,6 @@
         document.getElementById('finalTotal').innerText = "RM " + finalAmount.toFixed(2);
     }
 
-    // 5. SUBMIT FORM & UPDATE VOUCHER USAGE
     document.getElementById('payBtn').addEventListener('click', () => {
         const form = document.getElementById('regForm');
         if(!form.checkValidity()) {
@@ -410,62 +396,84 @@
             return;
         }
 
-        if(confirm(`Confirm registration and payment of RM ${finalAmount.toFixed(2)}?`)) {
+        const btn = document.getElementById('payBtn');
+        btn.innerText = "PROCESSING...";
+        btn.disabled = true;
+
+        const regData = {
+            userId: currentUser.uid,
+            event_code: eventId,
+            event_name: document.getElementById('eventTitle').innerText,
+            first_name: document.getElementById('firstName').value,
+            last_name: document.getElementById('lastName').value,
+            ic: document.getElementById('ic').value,
+            dob: document.getElementById('dob').value,
+            gender: document.getElementById('gender').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value,
+            address: document.getElementById('address').value,
+            city: document.getElementById('city').value,
+            postcode: document.getElementById('postcode').value,
+            category: document.getElementById('category').value,
+            tshirt_size: document.getElementById('tshirt').value,
+            emergencyName: document.getElementById('emergencyName').value,
+            emergencyPhone: document.getElementById('emergencyPhone').value,
+            amountPaid: finalAmount.toFixed(2),
+            voucherUsed: currentVoucherCode || "NONE",
+            status: 'paid',
+            registration_time: new Date().toLocaleString()
+        };
+
+        if(confirm(`Confirm payment of RM ${finalAmount.toFixed(2)}?`)) {
             
-            // Generate Registration ID
             const regRef = push(ref(db, 'registrations/' + eventId));
-            
-            const regData = {
-                userId: currentUser.uid,
-                event_code: eventId,
-                event_name: document.getElementById('eventTitle').innerText,
-                
-                first_name: document.getElementById('firstName').value,
-                last_name: document.getElementById('lastName').value,
-                ic: document.getElementById('ic').value,
-                dob: document.getElementById('dob').value,
-                gender: document.getElementById('gender').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                
-                address: document.getElementById('address').value,
-                city: document.getElementById('city').value,
-                postcode: document.getElementById('postcode').value,
-                
-                category: document.getElementById('category').value,
-                tshirt_size: document.getElementById('tshirt').value,
-                
-                emergencyName: document.getElementById('emergencyName').value,
-                emergencyPhone: document.getElementById('emergencyPhone').value,
-                
-                amountPaid: finalAmount,
-                voucherUsed: currentVoucherCode || "NONE",
-                status: 'paid',
-                registration_time: new Date().toLocaleString()
-            };
+            const newRegKey = regRef.key; // AMBIL ID UNIK (PENTING UNTUK QR CODE)
 
             set(regRef, regData).then(() => {
                 
-                // A. Update Registered Count di Event
+                // 1. UPDATE DB COUNTERS
                 const eventCountRef = ref(db, 'events/' + eventId + '/registered');
-                runTransaction(eventCountRef, (currentCount) => {
-                    return (currentCount || 0) + 1;
-                });
+                runTransaction(eventCountRef, (current) => (current || 0) + 1);
 
-                // B. Update Voucher Usage (KALAU ADA VOUCHER)
                 if (currentVoucherCode) {
                     const voucherUsedRef = ref(db, 'vouchers/' + currentVoucherCode + '/used');
-                    runTransaction(voucherUsedRef, (currentUsed) => {
-                        return (currentUsed || 0) + 1;
-                    });
+                    runTransaction(voucherUsedRef, (current) => (current || 0) + 1);
                 }
 
-                alert("Registration Successful! See you at the race.");
-                window.location.href = "index.html";
+                // 2. SEND EMAIL VIA EMAILJS (TERMASUK QR CODE ID)
+                const emailParams = {
+                    to_name: regData.first_name + " " + regData.last_name,
+                    to_email: regData.email,
+                    event_name: regData.event_name,
+                    amount: regData.amountPaid,
+                    date: regData.registration_time,
+                    category: regData.category,
+                    tshirt: regData.tshirt_size,
+                    voucher: regData.voucherUsed,
+                    reg_id: newRegKey, // <--- ID UNTUK QR CODE
+                    reply_to: "support@seamountain.com" 
+                };
+
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams)
+                .then(function(response) {
+                    console.log('EMAIL SENT SUCCESS!', response.status, response.text);
+                    alert("Registration Successful! Receipt sent to email.");
+                    window.location.href = "index.html";
+                }, function(error) {
+                    console.log('EMAIL FAILED...', error);
+                    alert("Registration Successful (Email failed to send).");
+                    window.location.href = "index.html";
+                });
+
             })
             .catch((error) => {
                 alert("Error: " + error.message);
+                btn.innerText = "COMPLETE REGISTRATION";
+                btn.disabled = false;
             });
+        } else {
+            btn.innerText = "COMPLETE REGISTRATION";
+            btn.disabled = false;
         }
     });
 
