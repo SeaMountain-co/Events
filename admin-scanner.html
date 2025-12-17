@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Scanner - Sea Mountain Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <style>
+        body { background-color: #000; color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        .header { width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .logo { font-family: 'Russo One'; color: #ff0000; font-size: 1.2rem; text-decoration: none; }
+        
+        /* PILIH EVENT */
+        .control-panel { width: 100%; max-width: 500px; margin-bottom: 20px; }
+        select { width: 100%; padding: 12px; background: #1a1c23; color: #fff; border: 1px solid #444; border-radius: 8px; font-size: 1rem; outline: none; }
+        
+        /* KOTAK KAMERA */
+        .scanner-container { 
+            width: 100%; max-width: 500px; 
+            background: #111; border: 2px solid #333; border-radius: 15px; 
+            overflow: hidden; position: relative; min-height: 300px;
+        }
+        
+        /* POPUP KEPUTUSAN SCAN */
+        .result-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 100;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; padding: 20px;
+        }
+        
+        .result-card {
+            background: #fff; color: #000; width: 100%; max-width: 350px;
+            padding: 30px; border-radius: 15px; box-shadow: 0 0 50px rgba(255,255,255,0.2);
+            animation: popIn 0.3s ease;
+        }
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .status-icon { font-size: 4rem; margin-bottom: 15px; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        
+        .runner-name { font-size: 1.5rem; font-weight: 800; margin-bottom: 5px; text-transform: uppercase; }
+        .runner-info { font-size: 1rem; color: #555; margin-bottom: 20px; font-weight: 600; }
+        
+        .meta-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; font-size: 0.9rem; border: 1px solid #eee; }
+        .meta-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .meta-label { color: #666; font-weight: 600; }
+        .meta-val { font-weight: 800; }
+
+        .btn-scan-again {
+            background: #000; color: #fff; border: none; padding: 15px 30px;
+            font-weight: bold; font-size: 1rem; border-radius: 50px; cursor: pointer; width: 100%; margin-top: 10px;
+        }
+        .btn-scan-again:hover { background: #333; }
+
+        /* INPUT MANUAL */
+        .manual-input { margin-top: 20px; width: 100%; max-width: 500px; display: flex; gap: 10px; }
+        .manual-input input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; outline: none; }
+        .manual-input button { padding: 12px 20px; background: #333; color: #fff; border: none; border-radius: 8px; cursor: pointer; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="admin-dashboard.html" class="logo">ADMIN SCANNER</a>
+        <a href="admin-dashboard.html" style="color:#aaa; text-decoration:none;"><i class="fas fa-home"></i> Dashboard</a>
+    </div>
+
+    <div class="control-panel">
+        <label style="font-size:0.8rem; color:#888; display:block; margin-bottom:5px;">SELECT EVENT:</label>
+        <select id="eventSelect">
+            <option value="">Loading events...</option>
+        </select>
+    </div>
+
+    <div class="scanner-container">
+        <div id="reader" style="width: 100%;"></div>
+    </div>
+    <p style="color:#666; font-size:0.8rem; margin-top:10px;">Point camera at Participant QR Code</p>
+
+    <div class="manual-input">
+        <input type="text" id="manualId" placeholder="Or enter ID manually...">
+        <button onclick="manualCheck()"><i class="fas fa-search"></i> Check</button>
+    </div>
+
+    <div id="resultModal" class="result-modal">
+        <div class="result-card">
+            <div id="statusIcon" class="status-icon success"><i class="fas fa-check-circle"></i></div>
+            <div id="statusText" style="font-weight:900; font-size:1.5rem; margin-bottom:15px; letter-spacing:1px;">VERIFIED</div>
+            
+            <div class="runner-name" id="rName">ALI BIN ABU</div>
+            <div class="runner-info" id="rDetail">Running Category</div>
+            
+            <div class="meta-box">
+                <div class="meta-row">
+                    <span class="meta-label">Category:</span>
+                    <span class="meta-val" id="rCat">10KM</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">T-Shirt Size:</span>
+                    <span class="meta-val" id="rSize" style="color:#ff0000; font-size:1.1rem;">L</span>
+                </div>
+                <div class="meta-row" style="margin-top:10px; border-top:1px solid #ddd; padding-top:10px;">
+                    <span class="meta-label">Status:</span>
+                    <span class="meta-val" id="rStatus" style="color:green;">PAID</span>
+                </div>
+            </div>
+
+            <button class="btn-scan-again" onclick="resetScanner()">SCAN NEXT</button>
+        </div>
+    </div>
+
+    <audio id="beepSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    // --- PASTE CONFIG FIREBASE ANDA ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let html5QrcodeScanner;
+    let isScanning = true;
+
+    // 1. MUAT TURUN SENARAI EVENT KE DROPDOWN
+    const eventSelect = document.getElementById('eventSelect');
+    onValue(ref(db, 'events'), (snapshot) => {
+        eventSelect.innerHTML = '<option value="">-- Select Event First --</option>';
+        const data = snapshot.val();
+        if(data) {
+            Object.keys(data).forEach(key => {
+                eventSelect.innerHTML += `<option value="${key}">${data[key].title}</option>`;
+            });
+        }
+    });
+
+    // 2. SETUP PENGIMBAS (HTML5-QRCODE)
+    function onScanSuccess(decodedText, decodedResult) {
+        if(!isScanning) return; // Elak scan berulang kali dalam satu masa
+
+        const eventId = eventSelect.value;
+        if(!eventId) {
+            alert("Sila pilih Event dahulu sebelum scan!");
+            return;
+        }
+
+        // Hantar ID yang di-scan ke fungsi verifikasi
+        verifyTicket(eventId, decodedText);
+    }
+
+    function onScanFailure(error) {
+        // Biarkan kosong, scanner akan sentiasa cuba scan frame seterusnya
+    }
+
+    // Mula Scanner
+    html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader",
+        { fps: 10, qrbox: {width: 250, height: 250} },
+        /* verbose= */ false);
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+
+    // 3. FUNGSI SEMAK DATA DI DATABASE
+    function verifyTicket(eventId, regId) {
+        isScanning = false; // Pause scanner sekejap
+        
+        // Cari data peserta di: registrations/EVENT_ID/USER_ID
+        get(ref(db, `registrations/${eventId}/${regId}`)).then((snapshot) => {
+            const modal = document.getElementById('resultModal');
+            modal.style.display = 'flex'; // Tunjuk Popup
+
+            if(snapshot.exists()) {
+                const data = snapshot.val();
+                
+                // Cek Status Pembayaran
+                if(data.status === 'paid' || data.status === 'Paid') {
+                    // BERJAYA: Bunyi Beep & Papar Hijau
+                    document.getElementById('beepSound').play();
+                    showResult('success', data);
+                    
+                    // Optional: Update database untuk rekod kehadiran (Checked-In)
+                    update(ref(db, `registrations/${eventId}/${regId}`), { checked_in: true, check_in_time: new Date().toLocaleString() });
+
+                } else {
+                    // GAGAL: Belum bayar
+                    showResult('pending', data);
+                }
+            } else {
+                // GAGAL: Data tak jumpa (QR Code salah event atau palsu)
+                showResult('error', null);
+            }
+        });
+    }
+
+    // 4. KEMASKINI PAPARAN POPUP
+    function showResult(type, data) {
+        const icon = document.getElementById('statusIcon');
+        const text = document.getElementById('statusText');
+        
+        const name = document.getElementById('rName');
+        const detail = document.getElementById('rDetail');
+        const cat = document.getElementById('rCat');
+        const size = document.getElementById('rSize');
+        const status = document.getElementById('rStatus');
+
+        if(type === 'success') {
+            // UI HIJAU
+            icon.className = "status-icon success";
+            icon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            text.innerText = "VERIFIED";
+            text.style.color = "#28a745";
+            
+            name.innerText = data.first_name + " " + data.last_name;
+            detail.innerText = "Registration Valid";
+            cat.innerText = data.category;
+            size.innerText = data.tshirt_size.toUpperCase();
+            
+            status.innerText = "PAID (Official)";
+            status.style.color = "green";
+
+        } else if (type === 'pending') {
+            // UI OREN (Belum Bayar)
+            icon.className = "status-icon error"; 
+            icon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+            text.innerText = "NOT PAID";
+            text.style.color = "orange";
+            
+            name.innerText = data.first_name + " " + data.last_name;
+            detail.innerText = "Payment is Pending";
+            cat.innerText = data.category;
+            size.innerText = "-";
+            
+            status.innerText = "PENDING";
+            status.style.color = "orange";
+
+        } else {
+            // UI MERAH (Tak Jumpa)
+            icon.className = "status-icon error";
+            icon.innerHTML = '<i class="fas fa-times-circle"></i>';
+            text.innerText = "INVALID TICKET";
+            text.style.color = "#dc3545";
+            
+            name.innerText = "UNKNOWN USER";
+            detail.innerText = "Data not found for this event.";
+            cat.innerText = "-";
+            size.innerText = "-";
+            
+            status.innerText = "ERROR";
+            status.style.color = "red";
+        }
+    }
+
+    // 5. BUTTON 'SCAN NEXT'
+    window.resetScanner = function() {
+        document.getElementById('resultModal').style.display = 'none';
+        document.getElementById('manualId').value = "";
+        
+        // Aktifkan semula scanner selepas 1 saat (elak ter-scan benda sama)
+        setTimeout(() => {
+            isScanning = true;
+        }, 1000);
+    }
+
+    // 6. FUNGSI SEMAK MANUAL (BUTTON SEARCH)
+    window.manualCheck = function() {
+        const id = document.getElementById('manualId').value.trim();
+        const eventId = eventSelect.value;
+        
+        if(!eventId) return alert("Select Event first!");
+        if(!id) return alert("Enter Registration ID");
+
+        verifyTicket(eventId, id);
+    }
+
+</script>
+
+</body>
+</html>

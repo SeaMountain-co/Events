@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Ticket - Sea Mountain</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        body { background-color: #0f1014; color: #fff; font-family: 'Montserrat', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        
+        .ticket-card {
+            background: #fff; color: #000; width: 320px; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.2); position: relative;
+        }
+        
+        /* Bahagian Atas (Merah) */
+        .ticket-header { background: #ff0000; padding: 20px; text-align: center; color: #fff; }
+        .logo { font-family: 'Russo One'; font-size: 1.2rem; font-style: italic; }
+        .event-name { font-weight: 800; font-size: 1rem; margin-top: 5px; text-transform: uppercase; }
+
+        /* Bahagian Tengah (Info) */
+        .ticket-body { padding: 20px; text-align: center; border-bottom: 2px dashed #ccc; position: relative; }
+        .ticket-body::before, .ticket-body::after {
+            content: ""; position: absolute; bottom: -10px; width: 20px; height: 20px; background: #0f1014; border-radius: 50%;
+        }
+        .ticket-body::before { left: -10px; }
+        .ticket-body::after { right: -10px; }
+
+        .runner-name { font-weight: 800; font-size: 1.1rem; margin-bottom: 5px; text-transform: uppercase; }
+        .runner-details { font-size: 0.85rem; color: #555; margin-bottom: 15px; }
+        .badge { background: #000; color: #fff; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; }
+
+        /* Bahagian Bawah (QR) */
+        .ticket-footer { padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #qrcode { margin-bottom: 10px; }
+        .reg-id { font-family: monospace; color: #666; font-size: 0.9rem; letter-spacing: 1px; }
+
+        .download-btn {
+            background: #000; color: #fff; border: none; padding: 10px 20px; width: 100%;
+            font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 0;
+        }
+        .download-btn:hover { background: #333; }
+    </style>
+</head>
+<body>
+
+    <div class="ticket-card" id="ticketContent">
+        <div class="ticket-header">
+            <div class="logo">SEA MOUNTAIN</div>
+            <div class="event-name" id="eventName">Loading...</div>
+        </div>
+        
+        <div class="ticket-body">
+            <div class="runner-name" id="runnerName">...</div>
+            <div class="runner-details">
+                <span id="category">...</span> | Size: <span id="size">...</span>
+            </div>
+            <span class="badge">OFFICIAL TICKET</span>
+        </div>
+
+        <div class="ticket-footer">
+            <div id="qrcode"></div>
+            <div class="reg-id" id="regId">...</div>
+        </div>
+        
+        <button class="download-btn" onclick="window.print()">Print / Save PDF</button>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // URL mesti ada ?eid=EVENT_ID&uid=USER_ID
+    // Contoh: ticket.html?eid=nightrun&uid=123456
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get('eid');
+    const userId = urlParams.get('uid');
+
+    if(eventId && userId) {
+        // Load Data Peserta
+        get(ref(db, `registrations/${eventId}/${userId}`)).then((snapshot) => {
+            if(snapshot.exists()) {
+                const data = snapshot.val();
+                
+                // Isi Data dalam Tiket
+                document.getElementById('eventName').innerText = data.event_name;
+                document.getElementById('runnerName').innerText = data.first_name + " " + data.last_name;
+                document.getElementById('category').innerText = data.category;
+                document.getElementById('size').innerText = data.tshirt_size.toUpperCase();
+                document.getElementById('regId').innerText = userId; // Guna Firebase Key sebagai ID
+
+                // Generate QR Code (Guna Library JS)
+                // Data dalam QR = Registration ID (userId)
+                new QRCode(document.getElementById("qrcode"), {
+                    text: userId, 
+                    width: 128,
+                    height: 128,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+
+            } else {
+                alert("Ticket not found.");
+            }
+        });
+    } else {
+        alert("Invalid Link.");
+    }
+</script>
+
+</body>
+</html>
