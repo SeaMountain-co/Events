@@ -8,40 +8,44 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
     
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            // GANTIKAN DENGAN PUBLIC KEY ANDA
+            emailjs.init("service_434zj9s"); 
+        })();
+    </script>
+
     <style>
-        /* (Style kekal sama dengan sedikit tambahan) */
         :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text-white: #ffffff; --text-gray: #b0b3b8; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-        body { background-color: var(--bg-dark); color: var(--text-white); height: 100vh; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 60%); }
-        .payment-container { display: flex; max-width: 900px; width: 90%; background: var(--card-bg); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); }
+        body { background-color: var(--bg-dark); color: var(--text-white); min-height: 100vh; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 60%); padding: 20px; }
+        .payment-container { display: flex; max-width: 900px; width: 100%; background: var(--card-bg); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; }
         
-        .order-summary { flex: 1; padding: 40px; background: rgba(0,0,0,0.2); border-right: 1px solid rgba(255,255,255,0.05); }
+        .order-summary { flex: 1; padding: 40px; background: rgba(0,0,0,0.2); border-right: 1px solid rgba(255,255,255,0.05); min-width: 300px; }
         .order-summary h2 { font-family: 'Russo One'; margin-bottom: 20px; color: var(--brand-red); text-transform: uppercase; font-style: italic; }
         .summary-item { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--text-gray); font-size: 0.9rem; }
         .summary-item.total { border-top: 1px solid #333; padding-top: 15px; margin-top: 20px; color: #fff; font-weight: bold; font-size: 1.2rem; }
         
-        .payment-details { flex: 1.5; padding: 40px; }
+        .payment-details { flex: 1.5; padding: 40px; min-width: 300px; }
         .payment-header { margin-bottom: 30px; }
         .payment-header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
         
-        /* Bank Info Box */
         .bank-info-box { background: #252830; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
         .bank-name { font-weight: bold; color: var(--brand-red); margin-bottom: 5px; display: block; }
-        .bank-details { font-size: 0.9rem; color: #ccc; }
+        .bank-details { font-size: 0.9rem; color: #ccc; line-height: 1.6; }
         
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-gray); font-weight: 600; }
-        .form-input { width: 100%; padding: 12px; background: #252830; border: 1px solid transparent; border-radius: 8px; color: #fff; outline: none; transition: 0.3s; }
-        .form-input:focus { border-color: var(--brand-red); }
         
-        /* File Upload Style */
         .file-upload-wrapper { border: 2px dashed #444; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; transition: 0.3s; }
         .file-upload-wrapper:hover { border-color: var(--brand-red); background: rgba(255,0,0,0.05); }
         
         .pay-btn { width: 100%; padding: 15px; background: linear-gradient(45deg, var(--brand-red), #aa0000); border: none; border-radius: 8px; color: #fff; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
-        
-        @media (max-width: 768px) { .payment-container { flex-direction: column; height: auto; margin: 20px 0; } .order-summary { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); } }
+        .pay-btn:disabled { background: #555; cursor: not-allowed; }
+
+        @media (max-width: 768px) { .payment-container { flex-direction: column; } .order-summary { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); } }
     </style>
 </head>
 <body>
@@ -52,10 +56,7 @@
             <div class="summary-item"><span>Runner Name</span><span id="display-name" style="color:white; font-weight:bold;">Loading...</span></div>
             <div class="summary-item"><span>Event</span><span id="display-event">Loading...</span></div>
             <div class="summary-item"><span>Category</span><span id="display-cat" style="color:var(--brand-red);">Loading...</span></div>
-            
-            <div class="summary-item"><span>Registration Fee</span><span id="fee-display">RM 0.00</span></div>
-            
-            <div class="summary-item"><span>Processing Fee</span><span>RM 5.00</span></div>
+            <div class="summary-item"><span>Voucher Used</span><span id="display-voucher">-</span></div>
             
             <div class="summary-item total"><span>TOTAL TO PAY</span><span id="total-display" style="color:var(--brand-red);">RM 0.00</span></div>
         </div>
@@ -71,17 +72,17 @@
                 <div class="bank-details">
                     Account Name: <strong>SEA MOUNTAIN ENTERPRISE</strong><br>
                     Account No: <strong>5123 4567 8901</strong><br>
-                    Reference: <span id="ref-code" style="color:yellow">...</span>
+                    Reference: <span id="ref-code" style="color:yellow; font-weight:bold;">...</span>
                 </div>
             </div>
 
             <form id="paymentForm">
                 <div class="form-group">
-                    <label class="form-label">Upload Receipt / Proof of Payment</label>
+                    <label class="form-label">Upload Receipt / Proof of Payment (Image)</label>
                     <div class="file-upload-wrapper" onclick="document.getElementById('receiptFile').click()">
                         <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #666; margin-bottom: 10px;"></i>
                         <p style="color:#aaa; font-size:0.9rem;">Click to upload receipt image</p>
-                        <input type="file" id="receiptFile" style="display:none" required>
+                        <input type="file" id="receiptFile" style="display:none" accept="image/*" required>
                         <p id="fileName" style="color:var(--brand-red); font-size:0.8rem; margin-top:5px;"></p>
                     </div>
                 </div>
@@ -93,76 +94,125 @@
                     </a>
                 </div>
 
-                <button type="submit" class="pay-btn">Submit Payment</button>
+                <button type="submit" id="confirmBtn" class="pay-btn">SUBMIT PAYMENT</button>
             </form>
         </div>
     </div>
 
     <script type="module">
-        // 1. DATA HARGA (Boleh ubah ikut kesesuaian)
-        const priceList = {
-            "5km": 45,
-            "10km": 60,
-            "21km": 85,
-            "50km": 120,
-            "virtual": 40
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // CONFIG FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+            authDomain: "sea-mountain.firebaseapp.com",
+            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sea-mountain",
+            storageBucket: "sea-mountain.firebasestorage.app",
+            messagingSenderId: "812228825024",
+            appId: "1:812228825024:web:717049c1a64b39c8a60225"
         };
 
-        const processingFee = 5; // Cas proses tetap
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        // 2. AMBIL DATA DARI MEMORI
-        const runnerName = localStorage.getItem("runnerName") || "Runner";
-        const raceCategory = localStorage.getItem("raceCategory") || "5km"; // Default 5km kalau tak jumpa
-        const eventName = localStorage.getItem("eventName") || "Sea Mountain Event";
+        // --- SETUP EMAILJS ANDA ---
+        const EMAILJS_SERVICE_ID = "service_434zj9s"; 
+        const EMAILJS_TEMPLATE_ID = "template_rmyuzua";
 
-        // 3. KIRA HARGA
-        // Kita cuba cari harga berdasarkan kategori (cth: "5km" -> 45)
-        // Kita guna .toLowerCase() dan .includes() supaya carian lebih fleksibel
-        let basePrice = 0;
-        let selectedCatKey = "Unknown";
-
-        // Logic ringkas untuk cari harga:
-        if (raceCategory.toLowerCase().includes("5km")) { basePrice = priceList["5km"]; }
-        else if (raceCategory.toLowerCase().includes("10km")) { basePrice = priceList["10km"]; }
-        else if (raceCategory.toLowerCase().includes("21km")) { basePrice = priceList["21km"]; }
-        else if (raceCategory.toLowerCase().includes("50km")) { basePrice = priceList["50km"]; }
-        else if (raceCategory.toLowerCase().includes("virtual")) { basePrice = priceList["virtual"]; }
-        else { basePrice = 50; } // Harga default kalau kategori pelik
-
-        const totalPrice = basePrice + processingFee;
-
-        // 4. PAPARKAN DI HTML
-        document.getElementById("display-name").textContent = runnerName;
-        document.getElementById("display-event").textContent = eventName;
-        document.getElementById("display-cat").textContent = raceCategory;
+        // 1. AMBIL DATA DARI SESSION STORAGE
+        const storedData = sessionStorage.getItem('tempRegistration');
         
-        // Update Harga
-        document.getElementById("fee-display").textContent = "RM " + basePrice.toFixed(2);
-        document.getElementById("total-display").textContent = "RM " + totalPrice.toFixed(2);
-        
-        // Update Butang Pay
-        const payBtn = document.querySelector('.pay-btn'); // Kalau butang submit
-        if(payBtn) payBtn.innerText = "SUBMIT PAYMENT (RM " + totalPrice.toFixed(2) + ")";
+        if (!storedData) {
+            alert("No registration data found. Redirecting to home.");
+            window.location.href = "index.html";
+        }
 
-        // 5. GENERATE REF CODE
-        const refCode = "REF-" + Math.floor(1000 + Math.random() * 9000);
+        const regData = JSON.parse(storedData);
+
+        // 2. PAPARKAN DATA DI UI
+        document.getElementById("display-name").textContent = regData.first_name + " " + regData.last_name;
+        document.getElementById("display-event").textContent = regData.event_name;
+        document.getElementById("display-cat").textContent = regData.category;
+        document.getElementById("display-voucher").textContent = regData.voucherUsed !== "NONE" ? regData.voucherUsed : "-";
+        document.getElementById("total-display").textContent = "RM " + regData.amountPaid;
+
+        // Generate Ref Code Unik (cth: SM-12345)
+        const refCode = "SM-" + Math.floor(10000 + Math.random() * 90000);
         document.getElementById("ref-code").textContent = refCode;
 
-        // 6. SETUP WHATSAPP LINK (Dgn Harga Betul)
-        const whatsappMsg = `Hi Sea Mountain, I have made payment of RM${totalPrice.toFixed(2)} for ${eventName}. Reference: ${refCode}. Name: ${runnerName}.`;
+        // Setup WhatsApp Link
+        const whatsappMsg = `Hi Sea Mountain, I have made payment of RM${regData.amountPaid} for ${regData.event_name}. Ref: ${refCode}. Name: ${regData.first_name}.`;
         document.getElementById("whatsappBtn").href = `https://wa.me/60179832739?text=${encodeURIComponent(whatsappMsg)}`;
 
-        // 7. FILE UPLOAD LOGIC
+        // File Upload Name Display
         document.getElementById('receiptFile').addEventListener('change', function(){
-            const fileName = this.files[0] ? this.files[0].name : "No file selected";
+            const fileName = this.files[0] ? this.files[0].name : "";
             document.getElementById('fileName').textContent = fileName;
         });
 
-        // 8. HANDLE SUBMIT
+        // 3. HANDLE SUBMIT (SIMPAN KE DB & HANTAR EMAIL)
         document.getElementById("paymentForm").addEventListener("submit", function(e){
             e.preventDefault();
-            alert("Terima kasih! Bukti pembayaran RM" + totalPrice.toFixed(2) + " telah dihantar. Pihak kami akan mengesahkan pendaftaran anda.");
-            window.location.href = "index.html";
+
+            const btn = document.getElementById('confirmBtn');
+            btn.innerText = "PROCESSING...";
+            btn.disabled = true;
+
+            // Tambah info tambahan sebelum save
+            regData.paymentRef = refCode;
+            regData.status = "Paid"; // Terus set Paid sebab dah upload resit (atau boleh set 'Pending Verification')
+            regData.paymentMethod = "Bank Transfer";
+
+            // A. SIMPAN KE FIREBASE
+            const regRef = push(ref(db, 'registrations/' + regData.event_code));
+            const newRegKey = regRef.key; // ID Unik
+
+            set(regRef, regData).then(() => {
+                
+                // B. UPDATE COUNTER PESERTA
+                const eventCountRef = ref(db, 'events/' + regData.event_code + '/registered');
+                runTransaction(eventCountRef, (current) => (current || 0) + 1);
+
+                // C. UPDATE VOUCHER (JIKA ADA)
+                if (regData.voucherUsed && regData.voucherUsed !== "NONE") {
+                    const voucherRef = ref(db, 'vouchers/' + regData.voucherUsed + '/used');
+                    runTransaction(voucherRef, (current) => (current || 0) + 1);
+                }
+
+                // D. HANTAR EMAIL (RESIT)
+                const emailParams = {
+                    to_name: regData.first_name + " " + regData.last_name,
+                    to_email: regData.email,
+                    event_name: regData.event_name,
+                    amount: regData.amountPaid,
+                    date: regData.registration_time,
+                    category: regData.category,
+                    tshirt: regData.tshirt_size,
+                    voucher: regData.voucherUsed,
+                    reg_id: newRegKey, // QR Code ID
+                    reply_to: "support@seamountain.com" 
+                };
+
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams)
+                .then(() => {
+                    console.log("Email sent");
+                });
+
+                // E. BERSIHKAN SESSION & SELESAI
+                sessionStorage.removeItem('tempRegistration');
+                
+                alert("Payment Submitted! Please check your email for the receipt and QR Code.");
+                
+                // Redirect ke Ticket Page (Bawa ID sekali)
+                window.location.href = `ticket.html?eid=${regData.event_code}&uid=${newRegKey}`;
+
+            }).catch((error) => {
+                alert("Error saving data: " + error.message);
+                btn.innerText = "SUBMIT PAYMENT";
+                btn.disabled = false;
+            });
         });
     </script>
 
