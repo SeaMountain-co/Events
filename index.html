@@ -9,459 +9,107 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,900;1,300;1,900&family=Russo+One&display=swap" rel="stylesheet">
     
     <style>
-        /* --- ASAS & WARNA --- */
-        :root {
-            --brand-orange: #ff0000;
-            --sport-blue: #ff0000; /* Warna aksen baru (Neon Blue) */
-            --bg-dark: #0f1014;
-            --card-bg: #1a1c23;
-            --text-white: #ffffff;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-white);
-            background-image: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 20%);
-        }
-
+        :root { --brand-orange: #ff0000; --sport-blue: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text-white: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-white); background-image: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 20%); }
         a { text-decoration: none; color: inherit; transition: 0.3s; }
 
-        /* --- HEADER MODEN --- */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 5%;
-            background: rgba(15, 16, 20, 0.9);
-            backdrop-filter: blur(10px); /* Kesan kaca */
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center; 
-            gap: 10px; 
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 900;    
-            font-style: italic;   
-            font-size: 1.5rem;    
-            color: #fff;
-            text-transform: uppercase;
-            text-decoration: none;
-            letter-spacing: -1px; 
-        }
-
-        .logo img {
-            height: 40px; 
-            width: auto;
-            display: block;
-        }
-
-        .logo span {
-            color: var(--brand-orange); 
-            font-weight: 300;        
-        }
-        .nav-links {
-            display: flex;
-            gap: 25px;
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.85rem;
-        }
-
+        /* HEADER */
+        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: rgba(15, 16, 20, 0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; font-size: 1.5rem; color: #fff; text-transform: uppercase; letter-spacing: -1px; }
+        .logo img { height: 40px; width: auto; }
+        .logo span { color: var(--brand-orange); font-weight: 300; }
+        .nav-links { display: flex; gap: 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
         .nav-links a:hover { color: var(--brand-orange); }
+        .login-btn { background: linear-gradient(45deg, var(--brand-orange), #ff7b00); padding: 10px 25px; border-radius: 30px; font-weight: 800; text-transform: uppercase; color: #000; box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3); }
+        .login-btn:hover { transform: translateY(-2px); }
 
-        .login-btn {
-            background: linear-gradient(45deg, var(--brand-orange), #ff7b00);
-            padding: 10px 25px;
-            border-radius: 30px; 
-            font-weight: 800;
-            text-transform: uppercase;
-            color: #000;
-            box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3);
-        }
-        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 170, 0, 0.5); }
+        /* HERO SECTION */
+        .hero { position: relative; min-height: 500px; display: flex; align-items: center; justify-content: center; padding: 40px 5%; overflow: hidden; margin-bottom: 40px; }
+        .hero-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; background-size: cover; background-position: center; filter: brightness(0.4); z-index: 1; transition: 0.5s; }
+        .hero-content { position: relative; z-index: 2; width: 100%; max-width: 1200px; display: flex; align-items: center; justify-content: space-between; gap: 50px; }
+        .hero-text { flex: 1; max-width: 600px; }
+        .badge-featured { background-color: var(--sport-blue); color: #ffffff; padding: 5px 15px; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; display: inline-block; margin-bottom: 15px; border-radius: 4px; transform: skew(-10deg); }
+        .hero h1 { font-family: 'Russo One', sans-serif; font-size: 3.5rem; line-height: 1.1; margin-bottom: 15px; text-transform: uppercase; font-style: italic; }
+        .hero p { font-size: 1.1rem; color: #ddd; margin-bottom: 25px; border-left: 4px solid var(--brand-orange); padding-left: 15px; }
+        .cta-btn { background: linear-gradient(45deg, var(--brand-orange), #ff7b00); color: #000; padding: 15px 40px; font-weight: 900; text-transform: uppercase; border: none; cursor: pointer; font-size: 1rem; clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%); transition: 0.3s; }
+        .cta-btn:hover { background: var(--brand-orange); padding-left: 50px; }
+        .featured-image { flex: 1; max-width: 550px; position: relative; }
+        .featured-image img { width: 100%; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--brand-orange); transform: perspective(1000px) rotateY(-10deg); transition: transform 0.5s; }
+        .featured-image:hover img { transform: perspective(1000px) rotateY(0deg) scale(1.02); }
 
-        /* --- HERO SECTION (BANNER UTAMA) --- */
-        .hero {
-            position: relative;
-            min-height: 500px; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 5%; 
-            overflow: hidden;
-            margin-bottom: 40px;
-        }
-
-        .hero-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('https://images.unsplash.com/photo-1552674605-46d5c4e5176c?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
-            filter: brightness(0.4);
-            z-index: 1;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 1200px; 
-            display: flex;
-            align-items: center; 
-            justify-content: space-between; 
-            gap: 50px; 
-        }
-
-        .hero-text {
-            flex: 1; 
-            max-width: 600px;
-        }
-
-        .badge-featured {
-            background-color: var(--sport-blue);
-            color: #ffffff;
-            padding: 5px 15px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            display: inline-block;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            transform: skew(-10deg); 
-        }
-
-        .hero h1 {
-            font-family: 'Russo One', sans-serif;
-            font-size: 3.5rem;
-            line-height: 1.1;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            font-style: italic;
-        }
-
-        .hero p {
-            font-size: 1.1rem;
-            color: #ddd;
-            margin-bottom: 25px;
-            border-left: 4px solid var(--brand-orange);
-            padding-left: 15px;
-        }
-
-        .cta-btn {
-            background: linear-gradient(45deg, var(--brand-orange), #ff7b00);
-            color: #000;
-            padding: 15px 40px;
-            font-weight: 900;
-            text-transform: uppercase;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%); 
-            transition: 0.3s;
-        }
-
-        .cta-btn:hover {
-            background: var(--brand-orange);
-            padding-left: 50px; 
-        }
-
-        .featured-image {
-            flex: 1; 
-            max-width: 550px;
-            position: relative;
-        }
-
-        .featured-image img {
-            width: 100%;
-            border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            border: 2px solid var(--brand-orange); 
-            transform: perspective(1000px) rotateY(-10deg); 
-            transition: transform 0.5s;
-        }
-
-        .featured-image:hover img {
-            transform: perspective(1000px) rotateY(0deg) scale(1.02);
-        }
-
-        /* --- SEARCH BAR --- */
-        .search-container {
-            padding: 0 5%;
-            margin-top: -30px; 
-            position: relative;
-            z-index: 10;
-        }
-
-        .search-box {
-            background: #252830;
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .search-box input {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 1.1rem;
-            width: 100%;
-            outline: none;
-            padding-left: 15px;
-        }
-
+        /* SEARCH & GRID */
+        .search-container { padding: 0 5%; margin-top: -30px; position: relative; z-index: 10; }
+        .search-box { background: #252830; display: flex; align-items: center; padding: 15px; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        .search-box input { background: transparent; border: none; color: #fff; font-size: 1.1rem; width: 100%; outline: none; padding-left: 15px; }
         .search-box i { color: var(--brand-orange); font-size: 1.2rem; }
 
-        /* --- EVENTS GRID --- */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding: 40px 5% 20px;
-        }
-
-        .section-title h2 {
-            font-family: 'Russo One', sans-serif;
-            font-size: 2rem;
-            text-transform: uppercase;
-            font-style: italic;
-        }
-        
+        .section-header { display: flex; justify-content: space-between; align-items: flex-end; padding: 40px 5% 20px; }
+        .section-title h2 { font-family: 'Russo One', sans-serif; font-size: 2rem; text-transform: uppercase; font-style: italic; }
         .section-title span { color: var(--sport-blue); }
+        .view-all { color: var(--brand-orange); font-weight: bold; font-size: 0.9rem; }
 
-        .view-all {
-            color: var(--brand-orange);
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        .events-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 30px;
-            padding: 0 5% 60px;
-            min-height: 200px; /* Supaya tak kuncup bila loading */
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            position: relative;
-            border: 1px solid transparent;
-        }
-
-        .card:hover {
-            transform: translateY(-10px); 
-            box-shadow: 0 10px 30px rgba(0, 210, 255, 0.2);
-            border-color: var(--sport-blue);
-        }
-
-        .card-img-wrapper {
-            height: 200px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .card-img-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .card:hover .card-img-wrapper img {
-            transform: scale(1.1); 
-        }
-
-        .distance-tags {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            display: flex;
-            gap: 5px;
-        }
-
-        .tag {
-            background: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 4px 8px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border-radius: 4px;
-            border-left: 2px solid var(--brand-orange);
-        }
-
-        .card-body {
-            padding: 20px;
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        .card-info {
-            font-size: 0.85rem;
-            color: #aaa;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
+        .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; padding: 0 5% 60px; min-height: 200px; }
+        .card { background: var(--card-bg); border-radius: 15px; overflow: hidden; transition: 0.4s; border: 1px solid transparent; }
+        .card:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(255, 0, 0, 0.2); border-color: var(--sport-blue); }
+        .card-img-wrapper { height: 200px; overflow: hidden; position: relative; }
+        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .card:hover img { transform: scale(1.1); }
+        .distance-tags { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 5px; }
+        .tag { background: rgba(0,0,0,0.8); color: #fff; padding: 4px 8px; font-size: 0.7rem; font-weight: bold; border-radius: 4px; border-left: 2px solid var(--brand-orange); }
+        .card-body { padding: 20px; }
+        .card-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; line-height: 1.4; }
+        .card-info { font-size: 0.85rem; color: #aaa; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
         .card-info i { color: var(--brand-orange); width: 15px;}
+        .card-btn { display: block; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--brand-orange); color: var(--brand-orange); text-align: center; font-weight: bold; text-transform: uppercase; margin-top: 15px; border-radius: 8px; transition: 0.3s; }
+        .card-btn:hover { background: var(--brand-orange); color: #000; }
+        .card-btn.disabled { background: #333 !important; color: #777 !important; border-color: #555 !important; cursor: not-allowed; pointer-events: none; }
 
-        .card-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            border: 1px solid var(--brand-orange);
-            color: var(--brand-orange);
-            text-align: center;
-            font-weight: bold;
-            text-transform: uppercase;
-            margin-top: 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .card-btn:hover {
-            background: var(--brand-orange);
-            color: #000;
-        }
-
-        /* NEW: Button bila SOLD OUT */
-        .card-btn.disabled {
-            background: #333 !important;
-            color: #777 !important;
-            border-color: #555 !important;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        /* --- FOOTER --- */
-        footer {
-            background-color: var(--footer-bg); padding: 60px 5% 20px;
-            border-top: 1px solid #222; margin-top: auto;
-        }
-        .footer-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px; max-width: 1200px; margin: 0 auto 50px;
-        }
-        .footer-col h4 {
-            color: var(--brand-red); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;
-        }
+        /* FOOTER */
+        footer { background-color: #0f1014; padding: 60px 5% 20px; border-top: 1px solid #222; margin-top: auto; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto 50px; }
+        .footer-col h4 { color: var(--brand-orange); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; }
         .footer-col p { color: #888; font-size: 0.9rem; line-height: 1.6; }
-        
-        .app-buttons { display: flex; gap: 10px; margin-top: 15px; }
-        .app-btn {
-            background: #222; color: #fff; padding: 10px 15px; border-radius: 5px; border: 1px solid #333;
-            display: flex; align-items: center; gap: 10px; font-size: 0.8rem; cursor: pointer; transition: 0.3s;
-        }
-        .app-btn:hover { border-color: #fff; background: #000; }
-        .app-btn i { font-size: 1.5rem; }
+        .footer-bottom { text-align: center; border-top: 1px solid #222; padding-top: 20px; color: #555; font-size: 0.8rem; }
+        .visitor-counter { margin-top: 10px; font-size: 0.8rem; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; display: inline-block; padding: 5px 15px; background: #000; border: 1px solid #333; border-radius: 20px; }
+        .visitor-counter span { color: #fff; font-family: 'Courier New', monospace; }
 
-        .social-icons { display: flex; gap: 15px; }
-        .social-icons a {
-            width: 40px; height: 40px; background: #222; color: #fff;
-            display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s;
-        }
-        .social-icons a:hover { background: var(--brand-red); transform: translateY(-3px); }
-
-        .footer-bottom {
-            text-align: center; border-top: 1px solid #222; padding-top: 20px; color: #555; font-size: 0.8rem;
-        }
-        .footer-links { margin-bottom: 10px; }
-        .footer-links a { color: #888; margin: 0 10px; font-weight: 600; }
-        .footer-links a:hover { color: #fff; }
-
-        /* VISITOR COUNTER STYLE */
-        .visitor-counter {
-        margin-top: 10px;
-        font-size: 0.8rem;
-        color: #555;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: bold;
-        display: inline-block;
-        padding: 5px 15px;
-        background: #000; /* Latar belakang hitam pekat */
-        border: 1px solid #333;
-        border-radius: 20px;
-        }
-
-        .visitor-counter i {
-        color: var(--brand-orange); /* Ikon mata warna oren */
-        margin-right: 5px;
-        }
-
-        .visitor-counter span {
-            color: #fff; /* Nombor warna putih */
-            font-family: 'Courier New', monospace; /* Font stail digital */
-        }
-
-        @media (max-width: 900px) {
-            .hero-content { flex-direction: column; text-align: center; }
-            .nav-links { display: none; }
-            .hero h1 { font-size: 2.5rem; }
-            .hero-text { margin-bottom: 30px; }
-            .featured-image img { transform: none; }
-        }
+        @media (max-width: 900px) { .hero-content { flex-direction: column; text-align: center; } .nav-links { display: none; } .hero h1 { font-size: 2.5rem; } .hero-text { margin-bottom: 30px; } .featured-image img { transform: none; } }
     </style>
 </head>
 <body>
 
     <header>
-    <a href="index.html" class="logo">
-        <img src="seaMLogo.png" alt="Sea Mountain Logo">
-        SEA<span>MOUNTAIN</span>
-    </a>
-
-    <nav class="nav-links">
-        <a href="index.html">Events</a>
-        <a href="results.html">Results</a>
-        <a href="photos.html">Photos</a>
-        <a href="leaderboard.html">Leaderboard</a>
-    </nav>
-    <a href="login.html" class="login-btn">Log In</a>
-</header>
+        <a href="index.html" class="logo">
+            <img src="seaMLogo.png" alt="Sea Mountain Logo">
+            SEA<span>MOUNTAIN</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html">Events</a>
+            <a href="results.html">Results</a>
+            <a href="photos.html">Photos</a>
+            <a href="leaderboard.html">Leaderboard</a>
+        </nav>
+        <a href="login.html" class="login-btn">Log In</a>
+    </header>
 
     <section class="hero">
-        <div class="hero-bg"></div>
+        <div class="hero-bg" id="heroBg"></div> 
         <div class="hero-content">
             <div class="hero-text">
                 <span class="badge-featured">Featured Event</span>
-                <h1>Tunggul Melati<br>Trail 2026</h1>
+                
+                <h1 id="heroTitle">Loading Event...</h1>
                 <p>
-                    <i class="far fa-calendar-alt"></i> 4-6 Sept 2026 &nbsp;|&nbsp; 
-                    <i class="fas fa-map-marker-alt"></i> Sepang, Selangor
+                    <i class="far fa-calendar-alt"></i> <span id="heroDate">-</span> &nbsp;|&nbsp; 
+                    <i class="fas fa-map-marker-alt"></i> <span id="heroVenue">-</span>
                 </p>
-                <a href="event-details.html?id=tmt2025" class="cta-btn">Register Race <i class="fas fa-arrow-right"></i></a>
+                
+                <a href="#" id="heroLink" class="cta-btn">Register Race <i class="fas fa-arrow-right"></i></a>
             </div>
+            
             <div class="featured-image">
-                <img src="https://heyjom-v5.s3.ap-southeast-5.amazonaws.com/events/event_banner_1738908182.png" alt="Featured Event">
+                <img id="heroImage" src="https://via.placeholder.com/600x400?text=Loading..." alt="Featured Event">
             </div>
         </div>
     </section>
@@ -475,26 +123,16 @@
     </div>
 
     <div class="section-header">
-        <div class="section-title">
-            <h2>Latest <span>Run</span></h2>
-        </div>
+        <div class="section-title"><h2>Latest <span>Run</span></h2></div>
         <a href="#" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
     </div>
-
-    <div class="events-grid" id="latest-events-container">
-        <p style="color:#666;">Loading latest events...</p>
-    </div>
+    <div class="events-grid" id="latest-events-container"><p style="color:#666;">Loading latest events...</p></div>
 
     <div class="section-header">
-        <div class="section-title">
-            <h2>UPCOMING <span>Run</span></h2>
-        </div>
+        <div class="section-title"><h2>UPCOMING <span>Run</span></h2></div>
         <a href="#" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
     </div>
-
-    <div class="events-grid" id="upcoming-events-container">
-         <p style="color:#666;">Loading upcoming events...</p>
-    </div>
+    <div class="events-grid" id="upcoming-events-container"><p style="color:#666;">Loading upcoming events...</p></div>
 
     <footer>
         <div class="footer-grid">
@@ -503,62 +141,29 @@
                 <p>THE SPORTS AND FITNESS ONLINE EVENT REGISTRATION SOLUTION.</p>
                 <p style="margin-top:10px; color:#fff;"><strong>info@seamountain.com</strong></p>
             </div>
-
-            <div class="footer-col">
-                <h4>Get The App</h4>
-                <div class="app-buttons">
-                    <div class="app-btn">
-                        <i class="fab fa-apple"></i>
-                        <div style="text-align:left; line-height:1.2;">
-                            <span style="font-size:0.6rem; display:block;">Available on the</span>App Store
-                        </div>
-                    </div>
-                    <div class="app-btn">
-                        <i class="fab fa-google-play"></i>
-                        <div style="text-align:left; line-height:1.2;">
-                            <span style="font-size:0.6rem; display:block;">GET IT ON</span>Google Play
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="footer-col">
                 <h4>Follow Us</h4>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-tiktok"></i></a>
-                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                </div>
+                <p>Stay connected on social media.</p>
             </div>
         </div>
-
         <div class="footer-bottom">
-            <div class="footer-links">
-                <a href="#">Privacy Policy</a> | 
-                <a href="#">Refund Policy</a> | 
-                <a href="#">Terms & Conditions</a>
-                <a href="admin-login.html" style="color:#333; text-decoration:none; font-size:0.7rem;">Admin Access</a>
-                <a href="participants.html" style="color:#0f1014; text-decoration:none; font-size:0.7rem;">Participants</a>
-            </div>
             <p>&copy; 2025 Sea Mountain.Co. All Rights Reserved.</p>
             <div class="visitor-counter">
-            <i class="fas fa-eye"></i> Total Views: <span id="visitCount">...</span>
-        </div>
+                <i class="fas fa-eye"></i> Total Views: <span id="visitCount">...</span>
+            </div>
         </div>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        // IMPORT runTransaction DI SINI!
         import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIG FIREBASE (SAYA GUNA YANG AWAK BAGI DULU)
+        // CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
             authDomain: "sea-mountain.firebaseapp.com",
-            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app", 
+            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "sea-mountain",
             storageBucket: "sea-mountain.appspot.com",
             messagingSenderId: "812228825024",
@@ -569,35 +174,25 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // --- BAHAGIAN VISITOR COUNTER (BARU) ---
+        // --- 1. VISITOR COUNTER ---
         const visitRef = ref(db, 'site_stats/visits');
-
-        runTransaction(visitRef, (currentVisits) => {
-            return (currentVisits || 0) + 1;
-        }).then((result) => {
+        runTransaction(visitRef, (currentVisits) => (currentVisits || 0) + 1)
+        .then((result) => {
             if (result.snapshot.exists()) {
-                const count = result.snapshot.val();
-                const counterElement = document.getElementById('visitCount');
-                if(counterElement) counterElement.innerText = count.toLocaleString();
+                document.getElementById('visitCount').innerText = result.snapshot.val().toLocaleString();
             }
-        }).catch(err => console.log("Counter Error:", err));
+        });
 
-        // --- 1. LOGIC LOGIN / LOGOUT ---
+        // --- 2. AUTHENTICATION ---
         const loginBtn = document.querySelector('.login-btn'); 
-        
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log("Logged in as:", user.email);
                 loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.displayName || 'User'}`;
                 loginBtn.href = "#"; 
                 loginBtn.style.background = "#28a745"; 
-                
                 loginBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    signOut(auth).then(() => {
-                        alert("You have logged out.");
-                        window.location.reload(); 
-                    });
+                    signOut(auth).then(() => window.location.reload());
                 });
             } else {
                 loginBtn.innerHTML = "Log In";
@@ -606,38 +201,50 @@
             }
         });
 
-        // --- 2. FETCH EVENTS DARI FIREBASE ---
+        // --- 3. FETCH EVENTS & FEATURED LOGIC ---
         const eventsRef = ref(db, 'events');
 
         onValue(eventsRef, (snapshot) => {
             const data = snapshot.val();
-            
             const latestContainer = document.getElementById('latest-events-container');
             const upcomingContainer = document.getElementById('upcoming-events-container');
 
             latestContainer.innerHTML = '';
             upcomingContainer.innerHTML = '';
 
-            if (data) {
-                Object.entries(data).forEach(([key, event]) => {
-                    
-                    const registered = parseInt(event.registered) || 0;
-                    const quota = parseInt(event.quota) || 99999; 
-                    let buttonHTML = '';
+            let hasFeatured = false;
 
-                    if (registered >= quota) {
-                        buttonHTML = `<a href="#" class="card-btn disabled">SOLD OUT</a>`;
-                    } else {
-                        buttonHTML = `<a href="event-details.html?id=${key}" class="card-btn">Register Race <i class="fas fa-arrow-right"></i></a>`;
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    const event = data[key];
+
+                    // A. FEATURED EVENT LOGIC
+                    if (event.isFeatured === true) {
+                        hasFeatured = true;
+                        document.getElementById('heroTitle').innerHTML = event.title;
+                        document.getElementById('heroDate').innerText = event.date;
+                        document.getElementById('heroVenue').innerText = event.venue;
+                        document.getElementById('heroLink').href = `event-details.html?id=${key}`;
+                        if (event.image_url) {
+                            document.getElementById('heroImage').src = event.image_url;
+                            // Optional: document.getElementById('heroBg').style.backgroundImage = `url('${event.image_url}')`;
+                        }
                     }
+
+                    // B. RENDER GRID CARDS
+                    const registered = parseInt(event.registered) || 0;
+                    const quota = parseInt(event.quota) || 99999;
+                    const isSoldOut = registered >= quota;
+                    
+                    const buttonHTML = isSoldOut 
+                        ? `<a href="#" class="card-btn disabled">SOLD OUT</a>` 
+                        : `<a href="event-details.html?id=${key}" class="card-btn">Register Race <i class="fas fa-arrow-right"></i></a>`;
 
                     const cardHTML = `
                         <div class="card">
                             <div class="card-img-wrapper">
-                                <img src="${event.image_url || 'https://via.placeholder.com/400x200?text=No+Image'}" alt="${event.title}">
-                                <div class="distance-tags">
-                                    <span class="tag">${event.distance || 'RUN'}</span>
-                                </div>
+                                <img src="${event.image_url || 'https://via.placeholder.com/400x200'}" alt="${event.title}">
+                                <div class="distance-tags"><span class="tag">${event.distance || 'RUN'}</span></div>
                             </div>
                             <div class="card-body">
                                 <div class="card-title">${event.title}</div>
@@ -648,29 +255,34 @@
                         </div>
                     `;
 
-                    if (event.category === 'latest') {
-                        latestContainer.innerHTML += cardHTML;
-                    } else {
-                        upcomingContainer.innerHTML += cardHTML;
-                    }
+                    if (event.category === 'latest') latestContainer.innerHTML += cardHTML;
+                    else upcomingContainer.innerHTML += cardHTML;
                 });
-            } else {
-                latestContainer.innerHTML = '<p>No events found.</p>';
             }
-            setupSearch(); 
+
+            // Fallback Featured (Kalau Admin lupa set bintang, ambil event pertama)
+            if (!hasFeatured && data) {
+                const firstKey = Object.keys(data)[0];
+                const event = data[firstKey];
+                document.getElementById('heroTitle').innerHTML = event.title;
+                document.getElementById('heroDate').innerText = event.date;
+                document.getElementById('heroVenue').innerText = event.venue;
+                document.getElementById('heroLink').href = `event-details.html?id=${firstKey}`;
+                if (event.image_url) document.getElementById('heroImage').src = event.image_url;
+            }
+
+            setupSearch();
         });
 
-        // --- 3. LOGIC SEARCH BAR ---
+        // --- 4. SEARCH FUNCTION ---
         function setupSearch() {
             const searchInput = document.getElementById('searchInput');
             if(searchInput) {
                 const newSearchInput = searchInput.cloneNode(true);
                 searchInput.parentNode.replaceChild(newSearchInput, searchInput);
-
                 newSearchInput.addEventListener('keyup', (e) => {
                     const val = e.target.value.toLowerCase();
-                    const cards = document.querySelectorAll('.card');
-                    cards.forEach(card => {
+                    document.querySelectorAll('.card').forEach(card => {
                         const title = card.querySelector('.card-title').textContent.toLowerCase();
                         card.style.display = title.includes(val) ? 'block' : 'none';
                     });
@@ -680,4 +292,3 @@
     </script>
 </body>
 </html>
-
