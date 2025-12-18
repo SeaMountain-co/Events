@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
     <style>
         body { background-color: #111; color: #fff; font-family: 'Montserrat', sans-serif; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
+        .container { max-width: 900px; margin: 0 auto; }
         
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 25px; }
         .logo { font-family: 'Russo One'; color: #ff0000; font-size: 1.3rem; text-decoration: none;}
@@ -19,29 +19,27 @@
         .card { background: #1a1c23; padding: 25px 30px; border-radius: 12px; border: 1px solid #333; margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
         h3 { margin-top: 0; margin-bottom: 20px; color: #28a745; text-transform: uppercase; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
 
-        .form-row { display: flex; gap: 20px; margin-bottom: 15px; }
-        .form-group { flex: 1; margin-bottom: 0; }
+        .form-row { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; }
+        .form-group { flex: 1; margin-bottom: 0; min-width: 150px; }
         
         label { display: block; margin-bottom: 8px; color: #aaa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         input, select { width: 100%; padding: 12px; background: #0a0b0e; border: 1px solid #444; color: #fff; border-radius: 6px; outline: none; font-family: 'Montserrat'; transition: 0.3s; box-sizing: border-box; }
         input:focus, select:focus { border-color: #28a745; }
 
-        /* --- CSS UNTUK DATE PICKER CANTIK --- */
-        /* Ini akan tukar icon kalendar jadi warna putih */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-            cursor: pointer;
-        }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
         .btn-save { background: #28a745; color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
         .btn-save:hover { background: #218838; transform: translateY(-2px); }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; min-width: 700px; }
         th { text-align: left; padding: 12px; background: #252830; color: #aaa; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; border-radius: 4px; }
         td { padding: 15px 12px; border-bottom: 1px solid #2a2c35; vertical-align: middle; font-size: 0.9rem; }
         
         .code-tag { background: #333; padding: 6px 10px; border-radius: 4px; font-family: monospace; color: #ffeb3b; font-size: 1rem; border: 1px solid #444; display: inline-block; font-weight: bold; }
-        
+        .event-tag { font-size: 0.8rem; background: #007bff; color: white; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+        .event-tag.all { background: #6c757d; } /* Kelabu untuk All Events */
+
         .btn-del { background: transparent; color: #d9534f; border: 1px solid #d9534f; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.3s; font-size: 0.8rem; }
         .btn-del:hover { background: #d9534f; color: white; }
     </style>
@@ -61,18 +59,28 @@
         <h3><i class="fas fa-plus-circle"></i> Create Voucher</h3>
         <form id="voucherForm">
             <div class="form-row">
-                <div class="form-group" style="flex: 2;">
+                <div class="form-group" style="flex: 1;">
                     <label>Voucher Code</label>
                     <input type="text" id="vCode" placeholder="e.g. MERDEKA50" required style="text-transform: uppercase;">
                 </div>
                 <div class="form-group" style="flex: 1;">
+                    <label>Applicable Event</label>
+                    <select id="vEvent">
+                        <option value="ALL">-- All Events --</option>
+                        <option disabled>Loading events...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
                     <label>Discount Type</label>
                     <select id="vType">
                         <option value="fixed">RM (Ringgit)</option>
                         <option value="percent">% (Percent)</option>
                     </select>
                 </div>
-                <div class="form-group" style="flex: 1;">
+                <div class="form-group">
                     <label>Value</label>
                     <input type="number" id="vAmount" placeholder="10" required>
                 </div>
@@ -97,26 +105,28 @@
         <h3 style="color:#fff; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 10px;">
             <i class="fas fa-list-ul"></i> Active Vouchers
         </h3>
-        <table>
-            <thead>
-                <tr>
-                    <th width="30%">Code</th>
-                    <th>Discount</th>
-                    <th>Usage / Limit</th>
-                    <th>Expires</th>
-                    <th style="text-align:right;">Action</th>
-                </tr>
-            </thead>
-            <tbody id="voucherTable">
-                <tr><td colspan="5" align="center" style="color:#666; padding:20px;">Loading vouchers...</td></tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="25%">Code / Event</th>
+                        <th>Discount</th>
+                        <th>Usage / Limit</th>
+                        <th>Expires</th>
+                        <th style="text-align:right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="voucherTable">
+                    <tr><td colspan="5" align="center" style="color:#666; padding:20px;">Loading vouchers...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     // CONFIG
     const firebaseConfig = {
@@ -132,18 +142,33 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // 1. ADD VOUCHER
+    // --- 1. LOAD EVENTS INTO DROPDOWN ---
+    const eventSelect = document.getElementById('vEvent');
+    onValue(ref(db, 'events'), (snapshot) => {
+        eventSelect.innerHTML = '<option value="ALL">-- All Events (Global) --</option>';
+        const data = snapshot.val();
+        if(data) {
+            Object.keys(data).forEach(key => {
+                const event = data[key];
+                const option = document.createElement("option");
+                option.value = key; 
+                option.text = event.title;
+                eventSelect.appendChild(option);
+            });
+        }
+    });
+
+    // --- 2. ADD VOUCHER ---
     document.getElementById('voucherForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const code = document.getElementById('vCode').value.trim().toUpperCase();
+        const eventId = document.getElementById('vEvent').value;
         const type = document.getElementById('vType').value;
         const amount = parseFloat(document.getElementById('vAmount').value);
         
-        // Handle Limit (Kalau kosong = 0/Unlimited)
         let limitInput = document.getElementById('vLimit').value;
         const limit = limitInput ? parseInt(limitInput) : 0; 
 
-        // Handle Expiry (Kalau kosong = Tahun 9999)
         let expiryInput = document.getElementById('vExpiry').value;
         const expiry = expiryInput ? expiryInput : "9999-12-31";
 
@@ -151,6 +176,7 @@
 
         set(ref(db, 'vouchers/' + code), {
             code: code,
+            eventId: eventId,
             type: type,
             value: amount,
             limit: limit, 
@@ -162,53 +188,77 @@
         });
     });
 
-    // 2. LOAD VOUCHERS
-    onValue(ref(db, 'vouchers'), (snapshot) => {
+    // --- 3. LOAD VOUCHERS LIST ---
+    let eventMap = {}; 
+    
+    get(ref(db, 'events')).then((snapshot) => {
         const data = snapshot.val();
-        const tbody = document.getElementById('voucherTable');
-        tbody.innerHTML = "";
-
         if(data) {
-            Object.values(data).forEach(v => {
-                let displayVal = v.type === 'percent' ? `${v.value}%` : `RM ${v.value}`;
-                
-                // Paparan Limit
-                let usageDisplay;
-                if (v.limit > 0) {
-                    let isFull = v.used >= v.limit ? '<span style="color:red; font-weight:bold;">(FULL)</span>' : '';
-                    usageDisplay = `${v.used} / ${v.limit} ${isFull}`;
-                } else {
-                    usageDisplay = `${v.used} / <span style="font-size:1.2rem;">∞</span>`;
-                }
-
-                // Paparan Expiry
-                let expiryDisplay;
-                if (v.expiry === "9999-12-31") {
-                    expiryDisplay = '<span style="color:#28a745; font-weight:bold;">∞ Lifetime</span>';
-                } else {
-                    expiryDisplay = v.expiry;
-                }
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td><span class="code-tag">${v.code}</span></td>
-                        <td style="color:#28a745; font-weight:bold;">${displayVal} OFF</td>
-                        <td>${usageDisplay}</td>
-                        <td style="color:#ccc;">${expiryDisplay}</td>
-                        <td style="text-align:right;">
-                            <button onclick="window.delVoucher('${v.code}')" class="btn-del">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
+            Object.keys(data).forEach(key => {
+                eventMap[key] = data[key].title;
             });
-        } else {
-            tbody.innerHTML = "<tr><td colspan='5' align='center' style='color:#555; padding:20px;'>No vouchers active.</td></tr>";
         }
+        loadVoucherTable();
     });
 
-    // 3. DELETE FUNCTION
+    function loadVoucherTable() {
+        onValue(ref(db, 'vouchers'), (snapshot) => {
+            const data = snapshot.val();
+            const tbody = document.getElementById('voucherTable');
+            tbody.innerHTML = "";
+
+            if(data) {
+                Object.values(data).forEach(v => {
+                    let displayVal = v.type === 'percent' ? `${v.value}%` : `RM ${v.value}`;
+                    
+                    let usageDisplay;
+                    if (v.limit > 0) {
+                        let isFull = v.used >= v.limit ? '<span style="color:red; font-weight:bold;">(FULL)</span>' : '';
+                        usageDisplay = `${v.used} / ${v.limit} ${isFull}`;
+                    } else {
+                        usageDisplay = `${v.used} / <span style="font-size:1.2rem;">∞</span>`;
+                    }
+
+                    let expiryDisplay;
+                    if (v.expiry === "9999-12-31") {
+                        expiryDisplay = '<span style="color:#28a745; font-weight:bold;">∞ Lifetime</span>';
+                    } else {
+                        expiryDisplay = v.expiry;
+                    }
+
+                    let eventNameDisplay = "";
+                    if (!v.eventId || v.eventId === "ALL") {
+                        eventNameDisplay = `<span class="event-tag all">ALL EVENTS</span>`;
+                    } else {
+                        const name = eventMap[v.eventId] || "Unknown Event";
+                        eventNameDisplay = `<span class="event-tag">${name}</span>`;
+                    }
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>
+                                <span class="code-tag">${v.code}</span><br>
+                                ${eventNameDisplay}
+                            </td>
+                            <td style="color:#28a745; font-weight:bold;">${displayVal} OFF</td>
+                            <td>${usageDisplay}</td>
+                            <td style="color:#ccc;">${expiryDisplay}</td>
+                            <td style="text-align:right;">
+                                <button onclick="window.delVoucher('${v.code}')" class="btn-del">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                // SINI YG ERROR TADI: Saya tukar align="center" jadi align='center'
+                tbody.innerHTML = "<tr><td colspan='5' align='center' style='color:#555; padding:20px;'>No vouchers active.</td></tr>";
+            }
+        });
+    }
+
+    // --- 4. DELETE FUNCTION ---
     window.delVoucher = (code) => {
         if(confirm("Delete voucher " + code + "?")) {
             remove(ref(db, 'vouchers/' + code));
@@ -216,5 +266,4 @@
     }
 </script>
 </body>
-
 </html>
