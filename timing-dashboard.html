@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SM Smart Timing</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --bg: #0f1014; --card: #1a1c23; --accent: #00d2ff; --text: #fff; --success: #2ecc71; --error: #e74c3c; --pending: #f39c12; }
+        * { box-sizing: border-box; }
+        
+        body { background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; min-height: 100vh; }
+
+        /* --- HEADER --- */
+        .header { padding: 15px 30px; background: rgba(0,0,0,0.8); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+        .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -1px; }
+        .logo span { color: var(--accent); }
+        .live-clock { font-family: monospace; color: #aaa; font-size: 1rem; border: 1px solid #333; padding: 5px 15px; border-radius: 5px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .screen { display: none; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+        /* --- HOME SCREEN --- */
+        .home-wrapper { max-width: 600px; margin: 40px auto; text-align: center; }
+        .event-select { width: 100%; padding: 15px; background: var(--card); border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 1rem; margin-bottom: 30px; }
+        .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .role-card { background: var(--card); padding: 40px 20px; border-radius: 15px; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
+        .role-card:hover { transform: translateY(-5px); border-color: #555; }
+        .role-card i { font-size: 3rem; margin-bottom: 15px; display: block; color: #555; }
+        .role-repc:hover { border-color: #f39c12; } .role-repc:hover i { color: #f39c12; }
+        .role-race:hover { border-color: var(--accent); } .role-race:hover i { color: var(--accent); }
+
+        /* --- DASHBOARD GRID --- */
+        .scanner-layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; align-items: start; }
+        
+        /* LEFT PANEL: SCANNER */
+        .left-panel { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; position: sticky; top: 90px; }
+        .top-controls { display: flex; gap: 10px; margin-bottom: 20px; }
+        .btn-home { background: #333; border: none; color: #fff; width: 45px; height: 45px; border-radius: 8px; cursor: pointer; }
+        .mode-badge { flex:1; background:#000; border:1px solid #333; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--accent); letter-spacing: 1px; }
+
+        .scan-status { background: #000; padding: 30px; border-radius: 12px; text-align: center; border: 2px solid #333; margin-bottom: 20px; transition: 0.2s; }
+        .scan-status.success { border-color: var(--success); background: rgba(46, 204, 113, 0.05); }
+        .scan-status.error { border-color: var(--error); background: rgba(231, 76, 60, 0.05); }
+        .scan-msg { color: #888; font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; }
+        .scan-name { font-size: 1.8rem; font-weight: 800; margin-bottom: 10px; line-height: 1.2; }
+        .scan-bib { font-family: monospace; color: var(--accent); font-size: 1.4rem; cursor: pointer; text-decoration: underline; background: #222; padding: 5px 15px; border-radius: 5px; display: inline-block; }
+        .scan-time { margin-top: 15px; color: #666; font-size: 0.9rem; }
+
+        .manual-input { width: 100%; padding: 15px; background: #111; border: 1px solid #444; color: #fff; text-align: center; font-size: 1.1rem; border-radius: 8px; margin-bottom: 20px; }
+        .manual-input:focus { border-color: var(--accent); outline: none; }
+
+        .stats-row { display: flex; gap: 10px; }
+        .stat-box { flex: 1; background: #111; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #333; }
+        .stat-num { font-size: 1.5rem; font-weight: 800; }
+        .stat-label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+
+        /* RIGHT PANEL: TABLES */
+        .right-panel { display: flex; flex-direction: column; gap: 20px; }
+        
+        .table-card { background: var(--card); border-radius: 15px; border: 1px solid #333; overflow: hidden; }
+        .table-header { padding: 15px; background: #111; border-bottom: 1px solid #333; font-weight: bold; color: #888; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; font-size: 0.85rem; }
+        
+        .data-table-container { overflow-x: auto; max-height: 400px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; background: #151515; color: #aaa; font-size: 0.75rem; text-transform: uppercase; position: sticky; top: 0; }
+        td { padding: 12px; border-bottom: 1px solid #2a2c35; font-size: 0.85rem; }
+        tr:hover { background: #222; }
+        
+        .row-time { font-family: monospace; font-weight: bold; color: var(--success); }
+        .row-pending { color: var(--pending); font-weight: bold; font-size: 0.8rem; }
+        .row-id { font-family: monospace; color: #888; cursor: pointer; }
+        .row-id:hover { color: #fff; text-decoration: underline; }
+
+        .btn-toggle-mobile { display: none; }
+        #rfidInput { position: fixed; top: -1000px; opacity: 0; }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            .header { padding: 15px; }
+            .container { padding: 10px; }
+            .role-grid { grid-template-columns: 1fr; }
+            .scanner-layout { grid-template-columns: 1fr; gap: 10px; }
+            .left-panel { position: static; padding: 15px; }
+            .scan-name { font-size: 1.5rem; }
+            .btn-toggle-mobile { display: block; width: 100%; padding: 15px; background: #333; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
+            .right-panel { display: none; } 
+            .right-panel.show { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <input type="text" id="rfidInput" autofocus autocomplete="off">
+
+    <div class="header">
+        <div class="logo">SEA <span>TIMING</span></div>
+        <div class="live-clock" id="clock">00:00:00</div>
+    </div>
+
+    <div class="container">
+
+        <div id="screen-home" class="screen active">
+            <div class="home-wrapper">
+                <h2 style="margin-bottom:20px;">SYSTEM SETUP</h2>
+                <select id="globalEventSelect" class="event-select"><option value="">-- Loading Events --</option></select>
+                <div class="role-grid">
+                    <div class="role-card role-repc" onclick="selectRole('REPC')">
+                        <i class="fas fa-box-open"></i><h3>REPC STAFF</h3><p style="color:#888; font-size:0.8rem;">Kit Collection</p>
+                    </div>
+                    <div class="role-card role-race" onclick="selectRole('RACE')">
+                        <i class="fas fa-flag-checkered"></i><h3>RACE MARSHAL</h3><p style="color:#888; font-size:0.8rem;">Race Day Timing</p>
+                    </div>
+                </div>
+                <div style="margin-top:30px;"><a href="admin-dashboard.html" style="color:#666; text-decoration:none; font-size:0.8rem;"><i class="fas fa-arrow-left"></i> Back to Admin Dashboard</a></div>
+            </div>
+        </div>
+
+        <div id="screen-cp-select" class="screen">
+            <div class="home-wrapper">
+                <button class="btn-home" onclick="goHome()" style="margin-bottom:20px;"><i class="fas fa-arrow-left"></i></button>
+                <h2>SELECT CHECKPOINT</h2>
+                <div class="role-grid">
+                    <div class="role-card" onclick="startScanner('TA1')"><h3>TA1</h3></div>
+                    <div class="role-card" onclick="startScanner('TA2')"><h3>TA2</h3></div>
+                    <div class="role-card" onclick="startScanner('TA3')"><h3>TA3</h3></div>
+                    <div class="role-card role-race" onclick="startScanner('FINISH')"><h3>FINISH LINE</h3></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-scanner" class="screen">
+            <div class="scanner-layout">
+                
+                <div class="left-panel">
+                    <div class="top-controls">
+                        <button class="btn-home" onclick="goHome()"><i class="fas fa-home"></i></button>
+                        <div class="mode-badge" id="displayMode">LOADING...</div>
+                    </div>
+                    <div id="scanStatusCard" class="scan-status">
+                        <div class="scan-msg" id="statusMsg">READY TO SCAN</div>
+                        <div class="scan-name" id="statusName">...</div>
+                        <div class="scan-bib" id="statusBib" onclick="copyText(this.innerText)" title="Click to Copy">---</div>
+                        <div class="scan-time" id="statusTime">--:--:--</div>
+                    </div>
+                    <input type="text" id="manualInput" class="manual-input" placeholder="Type ID Manual & Enter">
+                    <div class="stats-row">
+                        <div class="stat-box"><div class="stat-num" id="countScanned">0</div><div class="stat-label">SCANNED</div></div>
+                        <div class="stat-box"><div class="stat-num" id="countPending">0</div><div class="stat-label">PENDING</div></div>
+                        <div class="stat-box"><div class="stat-num" id="countTotal">0</div><div class="stat-label">TOTAL</div></div>
+                    </div>
+                </div>
+
+                <button class="btn-toggle-mobile" onclick="toggleTableMobile()"><i class="fas fa-list"></i> SHOW LISTS</button>
+
+                <div class="right-panel" id="tablePanel">
+                    
+                    <div class="table-card">
+                        <div class="table-header">
+                            <span style="color:var(--success);">LIVE FEED (SCANNED)</span>
+                            <i class="fas fa-check-circle" style="color:var(--success);"></i>
+                        </div>
+                        <div class="data-table-container">
+                            <table id="tableScanned">
+                                <thead><tr><th>Time</th><th>ID (Copy)</th><th>Name</th><th>Status</th></tr></thead>
+                                <tbody id="tbodyScanned"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="table-card">
+                        <div class="table-header">
+                            <span style="color:var(--pending);">PENDING LIST (NOT SCANNED)</span>
+                            <i class="fas fa-hourglass-half" style="color:var(--pending);"></i>
+                        </div>
+                        <div class="data-table-container">
+                            <table id="tablePending">
+                                <thead><tr><th>Category</th><th>ID (Copy)</th><th>Name</th><th>Status</th></tr></thead>
+                                <tbody id="tbodyPending"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let currentEventId = "";
+    let activeMode = "";
+    let allParticipants = [];
+
+    const beepSuccess = new Audio("https://www.soundjay.com/button/beep-07.wav");
+    const beepError = new Audio("https://www.soundjay.com/button/button-10.mp3");
+
+    setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString(), 1000);
+
+    window.copyText = function(text) {
+        if(text === "---" || text === "...") return;
+        navigator.clipboard.writeText(text).then(() => alert("ID Copied: " + text));
+    }
+
+    window.selectRole = function(role) {
+        currentEventId = document.getElementById('globalEventSelect').value;
+        if(!currentEventId) { alert("Please select an event first!"); return; }
+        if(role === 'REPC') startScanner('REPC');
+        else showScreen('screen-cp-select');
+    }
+
+    window.startScanner = function(mode) {
+        activeMode = mode;
+        document.getElementById('displayMode').innerText = (mode === 'REPC') ? "REPC COUNTER" : mode + " CHECKPOINT";
+        showScreen('screen-scanner');
+        loadData();
+    }
+
+    window.goHome = function() {
+        if(confirm("Exit session?")) { activeMode = ""; showScreen('screen-home'); }
+    }
+
+    window.toggleTableMobile = function() {
+        document.getElementById('tablePanel').classList.toggle('show');
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    const eventSelect = document.getElementById('globalEventSelect');
+    onValue(ref(db, 'events'), (snap) => {
+        eventSelect.innerHTML = '<option value="">-- Select Event First --</option>';
+        const data = snap.val();
+        if(data) Object.keys(data).forEach(k => eventSelect.innerHTML += `<option value="${k}">${data[k].title}</option>`);
+    });
+
+    function loadData() {
+        onValue(ref(db, `registrations/${currentEventId}`), (snap) => {
+            const data = snap.val();
+            allParticipants = [];
+            if(data) Object.keys(data).forEach(k => allParticipants.push({id: k, ...data[k]}));
+            renderUI();
+        });
+    }
+
+    function renderUI() {
+        const total = allParticipants.length;
+        let scannedCount = 0;
+        
+        const tbodyScanned = document.getElementById('tbodyScanned');
+        const tbodyPending = document.getElementById('tbodyPending');
+        tbodyScanned.innerHTML = "";
+        tbodyPending.innerHTML = "";
+
+        const scannedList = [];
+        const pendingList = [];
+
+        // FILTER DATA
+        allParticipants.forEach(p => {
+            let isScanned = false;
+            let timeDisplay = "-";
+
+            if(activeMode === 'REPC' && p.kit_collected) { isScanned = true; timeDisplay = "Collected"; }
+            else if(activeMode === 'TA1' && p.time_TA1) { isScanned = true; timeDisplay = p.time_TA1; }
+            else if(activeMode === 'TA2' && p.time_TA2) { isScanned = true; timeDisplay = p.time_TA2; }
+            else if(activeMode === 'TA3' && p.time_TA3) { isScanned = true; timeDisplay = p.time_TA3; }
+            else if(activeMode === 'FINISH' && p.race_status === 'FINISHER') { isScanned = true; timeDisplay = p.finish_time; }
+
+            p.displayTime = timeDisplay; // Simpan untuk display
+
+            if(isScanned) scannedList.push(p);
+            else pendingList.push(p);
+        });
+
+        scannedCount = scannedList.length;
+        scannedList.reverse(); // Latest on top
+
+        // RENDER TABLE SCANNED
+        scannedList.forEach(p => {
+            tbodyScanned.innerHTML += `
+                <tr>
+                    <td class="row-time">${p.displayTime}</td>
+                    <td class="row-id" onclick="copyText('${p.id}')">${p.id.substring(0,6)}..</td>
+                    <td>${p.first_name}</td>
+                    <td><i class="fas fa-check-circle" style="color:var(--success)"></i></td>
+                </tr>`;
+        });
+
+        // RENDER TABLE PENDING
+        pendingList.forEach(p => {
+            tbodyPending.innerHTML += `
+                <tr>
+                    <td>${p.category}</td>
+                    <td class="row-id" onclick="copyText('${p.id}')">${p.id.substring(0,6)}..</td>
+                    <td>${p.first_name}</td>
+                    <td class="row-pending">PENDING</td>
+                </tr>`;
+        });
+
+        // UPDATE STATS
+        document.getElementById('countTotal').innerText = total;
+        document.getElementById('countScanned').innerText = scannedCount;
+        document.getElementById('countPending').innerText = total - scannedCount;
+    }
+
+    // SCANNER LOGIC
+    const rfidInput = document.getElementById('rfidInput');
+    const manualInput = document.getElementById('manualInput');
+
+    document.addEventListener('click', (e) => {
+        if(e.target !== manualInput && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'A') {
+            rfidInput.focus();
+        }
+    });
+
+    rfidInput.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') { processScan(rfidInput.value.trim()); rfidInput.value = ""; }
+    });
+
+    manualInput.addEventListener('keyup', (e) => {
+        if(e.key === 'Enter') { processScan(manualInput.value.trim()); manualInput.value = ""; rfidInput.focus(); }
+    });
+
+    function processScan(tagId) {
+        if(!tagId || !activeMode) return;
+        const userRef = ref(db, `registrations/${currentEventId}/${tagId}`);
+        
+        onValue(userRef, (snap) => {
+            if(snap.exists()) {
+                const data = snap.val();
+                const updates = {};
+                const now = new Date().toLocaleTimeString();
+                let success = false;
+
+                if(activeMode === 'REPC') {
+                    if(data.kit_collected) { showFeedback(false, "ALREADY COLLECTED", data); return; }
+                    updates['kit_collected'] = true; success = true;
+                } else if(activeMode === 'FINISH') {
+                    if(data.race_status === 'FINISHER') { showFeedback(false, "ALREADY FINISHED", data); return; }
+                    updates['race_status'] = 'FINISHER'; updates['finish_time'] = now; success = true;
+                } else {
+                    const keyName = `time_${activeMode}`;
+                    if(data[keyName]) { showFeedback(false, "ALREADY SCANNED", data); return; }
+                    updates[keyName] = now; success = true;
+                }
+
+                if(success) {
+                    update(userRef, updates).then(() => showFeedback(true, "SUCCESS: " + activeMode, data));
+                }
+            } else {
+                showFeedback(false, "TAG NOT FOUND", { first_name: "UNKNOWN", last_name: "", id: tagId });
+            }
+        }, {onlyOnce: true});
+    }
+
+    function showFeedback(isSuccess, msg, pData) {
+        const card = document.getElementById('scanStatusCard');
+        document.getElementById('statusMsg').innerText = msg;
+        document.getElementById('statusName').innerText = pData.first_name + " " + (pData.last_name || "");
+        document.getElementById('statusBib').innerText = pData.id || "---";
+        document.getElementById('statusTime').innerText = new Date().toLocaleTimeString();
+
+        card.className = "scan-status"; 
+        if(isSuccess) { card.classList.add('success'); beepSuccess.play(); } 
+        else { card.classList.add('error'); beepError.play(); }
+    }
+</script>
+</body>
+</html>

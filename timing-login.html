@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timing Access - Sea Mountain</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- RESET & BODY --- */
+        * { box-sizing: border-box; }
+        body {
+            background-color: #050505;
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(circle at 50% 50%, #001a33 0%, #000 80%);
+        }
+
+        /* --- WRAPPER UNTUK PERFECT CENTERING --- */
+        .login-wrapper {
+            width: 100%;
+            max-width: 480px; /* Kunci lebar supaya tak melebar sangat */
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- KAD LOGIN (WOW EFFECT) --- */
+        .login-card {
+            background: #111;
+            padding: 40px;
+            border-radius: 20px; /* Bucu lebih bulat */
+            width: 100%;
+            text-align: center;
+            border: 1px solid #333;
+            /* Shadow biru yang lebih "hidup" */
+            box-shadow: 0 15px 35px rgba(0, 210, 255, 0.15);
+            
+            /* Animasi Masuk */
+            opacity: 0;
+            animation: cardEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        /* Keyframes untuk animasi */
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* --- LOGO & BADGE --- */
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            letter-spacing: -1px;
+        }
+        .logo span { color: #00d2ff; }
+        
+        .badge {
+            background: rgba(0, 210, 255, 0.15);
+            color: #00d2ff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 35px;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+        }
+
+        /* --- FORM INPUTS --- */
+        .form-group { margin-bottom: 25px; text-align: left; }
+        label { display: block; margin-bottom: 10px; font-size: 0.85rem; color: #aaa; font-weight: 600; margin-left: 5px; }
+        
+        input {
+            width: 100%;
+            padding: 15px 20px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            color: #fff;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        /* Efek glow bila klik input */
+        input:focus { 
+            border-color: #00d2ff; 
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+            background: #0f0f0f;
+        }
+
+        /* --- BUTTON --- */
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00d2ff, #007bff);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 1rem;
+            text-transform: uppercase;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+        .btn-login:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.3); 
+        }
+        .btn-login:active { transform: translateY(-1px); }
+
+        /* --- ERROR & FOOTER --- */
+        .error-msg {
+            color: #ff4444;
+            font-size: 0.85rem;
+            margin-top: 20px;
+            display: none;
+            background: rgba(255, 68, 68, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 68, 68, 0.3);
+        }
+        
+        .footer { margin-top: 40px; font-size: 0.7rem; color: #555; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="logo">SEA <span>TIMING</span></div>
+            <div class="badge"><i class="fas fa-user-shield"></i> OFFICIAL CREW ACCESS</div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email">Crew ID / Email</label>
+                    <input type="email" id="email" placeholder="crew@seamountain.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Access Code</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" id="btnSubmit" class="btn-login">Let Me In</button>
+                <div id="errorMsg" class="error-msg"></div>
+            </form>
+
+            <div class="footer">
+                AUTHORIZED PERSONNEL ONLY<br>
+                SEA MOUNTAIN &copy; 2025
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    // CONFIG FIREBASE
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loginForm = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const btnSubmit = document.getElementById('btnSubmit');
+
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        btnSubmit.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> VERIFYING...';
+        btnSubmit.style.opacity = "0.8";
+        errorMsg.style.display = 'none';
+
+        signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // Login Berjaya
+            console.log("Login Success:", userCredential.user.email);
+            btnSubmit.innerHTML = '<i class="fas fa-check"></i> SUCCESS!';
+            btnSubmit.style.background = "#2ecc71";
+            
+            setTimeout(() => {
+                window.location.href = "timing-dashboard.html"; // Redirect
+            }, 1000);
+        })
+        .catch((error) => {
+            // Login Gagal
+            console.error(error.code, error.message);
+            errorMsg.style.display = 'block';
+            
+            let niceErrorMessage = "Access Denied: Wrong ID or Password.";
+            if(error.code === 'auth/too-many-requests') {
+                niceErrorMessage = "Too many failed attempts. Please try again later.";
+            }
+
+            errorMsg.innerText = niceErrorMessage;
+            btnSubmit.innerHTML = 'LET ME IN';
+            btnSubmit.style.opacity = "1";
+        });
+    });
+
+</script>
+
+</body>
+</html>
