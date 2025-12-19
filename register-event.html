@@ -65,7 +65,13 @@
         .btn-pay { background: var(--brand-red); color: #fff; width: 100%; padding: 18px; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 25px; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
         .btn-pay:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,0,0,0.6); }
 
-        @media (max-width: 900px) { .container { flex-direction: column; } .summary-section { order: -1; position: relative; top: 0; } .form-row { flex-direction: column; gap: 0; } }
+        @media (max-width: 900px) { .container { flex-direction: column; } .summary-section { position: relative; top: 0; margin-top: 30px; } .form-row { flex-direction: column; gap: 0; } }
+
+        /* --- DATE PICKER FIX (ADDED) --- */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -137,6 +143,18 @@
                         <div class="form-group">
                             <label>Postcode</label>
                             <input type="text" id="postcode" class="form-control" placeholder="Poscode" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Country</label>
+                            <select id="country" class="form-control">
+                            <option value="my">Malaysia</option>
+                            <option value="sg">Singapore</option>
+                            <option value="id">Indonesia</option>
+                            <option value="th">Thailand</option>
+                            <option value="bn">Brunei</option>
+                            <option value="vn">Vietnam</option>
+                            <option value="ph">Philippines</option>
+                            </select>
                         </div>
                     </div>
 
@@ -414,6 +432,7 @@
             address: document.getElementById('address').value,
             city: document.getElementById('city').value,
             postcode: document.getElementById('postcode').value,
+            country: document.getElementById('country').value,
             
             category: document.getElementById('category').value,
             tshirt_size: document.getElementById('tshirt').value,
