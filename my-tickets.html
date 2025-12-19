@@ -6,75 +6,111 @@
     <title>My Tickets - Sea Mountain</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
-        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding-bottom: 50px; }
-        
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding-bottom: 80px; background-image: radial-gradient(circle at 50% 0%, rgba(255, 0, 0, 0.15) 0%, transparent 60%); min-height: 100vh; }
+        * { box-sizing: border-box; }
+
         /* HEADER */
-        .header { padding: 20px 5%; background: rgba(0,0,0,0.9); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-        .logo { font-family: 'Russo One'; font-size: 1.2rem; color: #fff; text-decoration: none; }
+        .header { padding: 25px 5%; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-family: 'Russo One'; font-size: 1.4rem; color: #fff; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
         .logo span { color: var(--brand-red); }
-        .btn-back { color: #aaa; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
-        .btn-back:hover { color: #fff; }
+        .btn-back { color: #aaa; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-back:hover { color: #fff; transform: translateX(-5px); }
 
-        .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
-        h2 { font-family: 'Russo One'; text-transform: uppercase; margin-bottom: 30px; text-align: center; font-size: 2rem; }
+        .container { max-width: 700px; margin: 20px auto; padding: 0 20px; }
+        h2 { font-family: 'Russo One'; text-transform: uppercase; margin-bottom: 40px; text-align: center; font-size: 2.2rem; text-shadow: 0 0 20px rgba(255,0,0,0.3); }
 
-        /* TICKET CARD */
-        .ticket-list { display: flex; flex-direction: column; gap: 25px; }
+        /* TICKET CARD (PREMIUM STYLE) */
+        .ticket-list { display: flex; flex-direction: column; gap: 35px; }
         
         .ticket-card { 
             background: var(--card-bg); 
-            border-radius: 15px; 
-            border: 1px solid #333; 
+            border-radius: 20px; 
             overflow: hidden; 
             display: flex; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
             position: relative;
-            transition: 0.3s;
+            transition: 0.4s;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        .ticket-card:hover { transform: translateY(-5px); border-color: #555; }
+        .ticket-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(255,0,0,0.15); border-color: rgba(255,0,0,0.3); }
 
-        /* Left Side: Info */
-        .ticket-info { flex: 2; padding: 25px; display: flex; flex-direction: column; justify-content: center; border-right: 2px dashed #333; position: relative; }
-        .ticket-info::after { content:""; position: absolute; right: -10px; top: -10px; width: 20px; height: 20px; background: var(--bg-dark); border-radius: 50%; }
-        .ticket-info::before { content:""; position: absolute; right: -10px; bottom: -10px; width: 20px; height: 20px; background: var(--bg-dark); border-radius: 50%; }
-
-        .event-name { font-family: 'Russo One'; font-size: 1.4rem; color: #fff; line-height: 1.2; margin-bottom: 10px; text-transform: uppercase; }
-        .runner-name { font-size: 1rem; color: #ccc; margin-bottom: 20px; font-weight: 600; }
+        /* Left Side: Info Area */
+        .ticket-info { 
+            flex: 1; padding: 35px; display: flex; flex-direction: column; justify-content: center; 
+            position: relative; 
+            background: linear-gradient(135deg, #1a1c23 0%, #252830 100%);
+        }
         
-        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.85rem; color: #888; }
-        .meta-item strong { display: block; color: #fff; font-size: 1rem; margin-bottom: 3px; }
+        /* Dashed Line Divider */
+        .ticket-divider {
+            width: 0; border-left: 2px dashed #333; position: relative;
+            margin: 20px 0;
+        }
+        .ticket-divider::before, .ticket-divider::after {
+            content: ""; position: absolute; left: -12px; width: 24px; height: 24px;
+            background-color: var(--bg-dark); border-radius: 50%;
+        }
+        .ticket-divider::before { top: -32px; } /* Atas */
+        .ticket-divider::after { bottom: -32px; } /* Bawah */
 
-        /* Right Side: QR */
-        .ticket-qr { flex: 1; background: #fff; display: flex; align-items: center; justify-content: center; padding: 20px; flex-direction: column; min-width: 180px; }
-        .qr-code-box { width: 120px; height: 120px; }
-        .qr-label { color: #000; font-size: 0.7rem; font-weight: bold; margin-top: 10px; text-transform: uppercase; text-align: center; }
+        .event-name { font-family: 'Russo One'; font-size: 1.6rem; color: #fff; line-height: 1.1; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .runner-name { font-size: 1.1rem; color: #ccc; margin-bottom: 25px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .meta-item { display: flex; flex-direction: column; }
+        .meta-label { font-size: 0.7rem; color: #666; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
+        .meta-value { font-size: 1rem; color: #fff; font-weight: 600; }
+        .meta-value.highlight { color: var(--brand-red); font-family: 'Russo One'; font-size: 1.2rem; }
+
+        /* Right Side: QR Area */
+        .ticket-qr { 
+            width: 260px; background: #fff; display: flex; align-items: center; justify-content: center; 
+            padding: 30px; flex-direction: column; text-align: center;
+        }
+        .qr-code-box { 
+            background: #fff; 
+            padding: 10px; 
+            border-radius: 10px; 
+            /* QR lebih besar */
+            transform: scale(1.3); 
+            margin-bottom: 15px; 
+        }
+        .qr-label { color: #000; font-size: 0.75rem; font-weight: 900; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .ticket-id { font-family: monospace; color: #555; font-size: 0.8rem; margin-top: 5px; letter-spacing: 1px; }
 
         /* STATUS BADGE */
         .status-badge { 
-            position: absolute; top: 15px; right: 15px; 
-            padding: 5px 12px; border-radius: 20px; 
-            font-size: 0.7rem; font-weight: 800; text-transform: uppercase; 
+            position: absolute; top: 20px; right: 20px; 
+            padding: 6px 14px; border-radius: 30px; 
+            font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .status-paid { background: #2ecc71; color: #000; }
         .status-pending { background: #f1c40f; color: #000; }
 
         /* EMPTY STATE */
-        .empty-state { text-align: center; padding: 50px; color: #555; }
-        .empty-state i { font-size: 3rem; margin-bottom: 15px; }
+        .empty-state { text-align: center; padding: 80px 20px; color: #555; }
+        .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.5; }
+        .empty-state p { font-size: 1.2rem; margin-bottom: 20px; }
+        .btn-browse { background: var(--brand-red); color: #fff; padding: 12px 30px; border-radius: 50px; font-weight: 800; text-transform: uppercase; text-decoration: none; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,0,0,0.3); }
+        .btn-browse:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,0,0,0.5); }
 
         /* Responsive */
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
             .ticket-card { flex-direction: column; }
-            .ticket-info { border-right: none; border-bottom: 2px dashed #333; }
-            .ticket-info::after { right: auto; bottom: -10px; left: -10px; top: auto; }
-            .ticket-info::before { right: -10px; bottom: -10px; top: auto; }
-            .ticket-qr { padding: 30px; }
+            .ticket-divider { 
+                width: 100%; height: 0; border-left: none; border-top: 2px dashed #ddd; margin: 0; 
+                display: none; /* Hide divider on mobile for cleaner look */
+            }
+            .ticket-qr { width: 100%; padding: 40px 20px; border-top: 4px solid var(--brand-red); }
+            .ticket-info { padding: 30px 25px; }
+            .qr-code-box { transform: scale(1.5); margin: 10px 0; }
         }
     </style>
 </head>
@@ -82,13 +118,15 @@
 
     <div class="header">
         <a href="index.html" class="logo">SEA<span>MOUNTAIN</span></a>
-        <a href="index.html" class="btn-back"><i class="fas fa-home"></i> Back to Home</a>
+        <a href="index.html" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Home</a>
     </div>
 
     <div class="container">
         <h2>My Digital Tickets</h2>
         
-        <div id="loading" style="text-align:center; color:#888;">Checking records...</div>
+        <div id="loading" style="text-align:center; color:#666; margin-top:50px; font-weight:bold;">
+            <i class="fas fa-circle-notch fa-spin"></i> Checking your records...
+        </div>
         
         <div id="ticketList" class="ticket-list">
             </div>
@@ -96,7 +134,7 @@
         <div id="emptyState" class="empty-state" style="display:none;">
             <i class="fas fa-ticket-alt"></i>
             <p>You haven't registered for any events yet.</p>
-            <a href="index.html" style="color:var(--brand-red); font-weight:bold; margin-top:10px; display:inline-block;">Browse Events</a>
+            <a href="index.html" class="btn-browse">Browse Events</a>
         </div>
     </div>
 
@@ -135,7 +173,6 @@
             const loading = document.getElementById('loading');
             const emptyState = document.getElementById('emptyState');
 
-            // Ambil semua registrations
             get(ref(db, 'registrations')).then((snapshot) => {
                 loading.style.display = 'none';
                 
@@ -147,15 +184,12 @@
                 const allEvents = snapshot.val();
                 let hasTickets = false;
 
-                // Loop setiap Event
                 Object.keys(allEvents).forEach(eventId => {
                     const participants = allEvents[eventId];
-                    
-                    // Loop setiap Peserta dalam Event tu
                     Object.keys(participants).forEach(regId => {
                         const data = participants[regId];
-
-                        // Filter: Kalau ID User sama ATAU Email sama
+                        
+                        // Check ownership
                         if (data.userId === user.uid || data.email === user.email) {
                             hasTickets = true;
                             renderTicket(regId, eventId, data);
@@ -169,73 +203,73 @@
             });
         }
 
-        // 3. RENDER TICKET CARD
+        // 3. RENDER TICKET CARD (PREMIUM)
         function renderTicket(regId, eventId, data) {
             const container = document.getElementById('ticketList');
             
             // Logic Status Badge
-            let statusHtml = '<span class="status-badge status-pending">PENDING PAYMENT</span>';
+            let statusHtml = '<span class="status-badge status-pending"><i class="fas fa-clock"></i> Pending Payment</span>';
             if (data.status && data.status.toLowerCase() === 'paid') {
-                statusHtml = '<span class="status-badge status-paid">PAID & CONFIRMED</span>';
+                statusHtml = '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Paid & Confirmed</span>';
             }
 
-            // Nama Event (Fallback kalau takde dalam data registration)
             const eventName = data.event_name || eventId.toUpperCase();
-
-            // Create Unique ID untuk QR container
             const qrContainerId = `qr-${regId}`;
+            const regDate = data.registration_time ? data.registration_time.split(',')[0] : 'N/A';
 
             const html = `
                 <div class="ticket-card">
                     <div class="ticket-info">
                         ${statusHtml}
                         <div class="event-name">${eventName}</div>
-                        <div class="runner-name">${data.first_name} ${data.last_name}</div>
+                        <div class="runner-name">${data.first_name} ${data.last_name || ''}</div>
                         
                         <div class="meta-grid">
                             <div class="meta-item">
-                                <strong>${data.category}</strong>
-                                Category
+                                <span class="meta-label">Category</span>
+                                <span class="meta-value highlight">${data.category}</span>
                             </div>
                             <div class="meta-item">
-                                <strong>${data.tshirt_size}</strong>
-                                T-Shirt
+                                <span class="meta-label">T-Shirt Size</span>
+                                <span class="meta-value">${data.tshirt_size}</span>
                             </div>
                             <div class="meta-item">
-                                <strong>${data.registration_time ? data.registration_time.split(',')[0] : 'N/A'}</strong>
-                                Reg Date
+                                <span class="meta-label">Date Registered</span>
+                                <span class="meta-value">${regDate}</span>
                             </div>
                             <div class="meta-item">
-                                <strong>${regId.substring(0,8)}...</strong>
-                                Ref ID
+                                <span class="meta-label">Bib Number</span>
+                                <span class="meta-value" style="color:#aaa;">To be assigned</span>
                             </div>
                         </div>
                     </div>
                     
+                    <div class="ticket-divider"></div>
+
                     <div class="ticket-qr">
                         <div id="${qrContainerId}" class="qr-code-box"></div>
                         <div class="qr-label">Scan for Check-in</div>
+                        <div class="ticket-id">REF: ${regId.substring(0,8).toUpperCase()}</div>
                     </div>
                 </div>
             `;
 
             container.innerHTML += html;
 
-            // Generate QR Code (Kita kena tunggu elemen wujud dalam DOM dulu)
-            // Guna setTimeout 0ms untuk pastikan render HTML siap
+            // Generate QR Code (Delayed slightly to ensure DOM render)
             setTimeout(() => {
                 const qrElement = document.getElementById(qrContainerId);
                 if (qrElement) {
                     new QRCode(qrElement, {
-                        text: regId, // QR Code pegang Registration ID
-                        width: 120,
-                        height: 120,
+                        text: regId, 
+                        width: 150,  // SAIZ ASAL QR SEBELUM SCALE
+                        height: 150,
                         colorDark : "#000000",
                         colorLight : "#ffffff",
                         correctLevel : QRCode.CorrectLevel.H
                     });
                 }
-            }, 100);
+            }, 150);
         }
 
     </script>
