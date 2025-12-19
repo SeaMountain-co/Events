@@ -3,189 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sea Mountain - ADMIN DASHBOARD</title>
+    <title>My Tickets - Sea Mountain</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
-        /* --- ASAS --- */
-        :root { --bg-dark: #111; --card-bg: #1a1c23; --text: #fff; --border: #333; }
-        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; }
-        * { box-sizing: border-box; }
-
-        /* --- HEADER / NAVBAR --- */
-        .navbar {
-            background-color: #000;
-            border-bottom: 1px solid var(--border);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo-section { display: flex; align-items: center; gap: 15px; }
-        .logo { font-family: 'Russo One'; color: #ff0000; font-size: 1.4rem; text-decoration: none; }
-        .admin-badge { color: #888; font-size: 0.8rem; background: #222; padding: 5px 10px; border-radius: 4px; }
-
-        /* MENU BUTTONS */
-        .nav-menu { display: flex; gap: 10px; align-items: center; }
+        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding-bottom: 50px; }
         
-        .btn-nav {
-            text-decoration: none;
-            color: #fff; /* SEMUA TULISAN PUTIH */
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        /* HEADER */
+        .header { padding: 20px 5%; background: rgba(0,0,0,0.9); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+        .logo { font-family: 'Russo One'; font-size: 1.2rem; color: #fff; text-decoration: none; }
+        .logo span { color: var(--brand-red); }
+        .btn-back { color: #aaa; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
+        .btn-back:hover { color: #fff; }
+
+        .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        h2 { font-family: 'Russo One'; text-transform: uppercase; margin-bottom: 30px; text-align: center; font-size: 2rem; }
+
+        /* TICKET CARD */
+        .ticket-list { display: flex; flex-direction: column; gap: 25px; }
+        
+        .ticket-card { 
+            background: var(--card-bg); 
+            border-radius: 15px; 
+            border: 1px solid #333; 
+            overflow: hidden; 
+            display: flex; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
             transition: 0.3s;
-            border: 1px solid transparent;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3); /* Tambah shadow sikit supaya nampak jelas */
         }
-        .btn-nav:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .ticket-card:hover { transform: translateY(-5px); border-color: #555; }
 
-        /* WARNA BUTANG (Fixed Text Color) */
-        .nav-manage { background: #e67e22; }
-        .nav-add { background: #35a1ff; }
-        .nav-voucher { background: #c0540c; }
+        /* Left Side: Info */
+        .ticket-info { flex: 2; padding: 25px; display: flex; flex-direction: column; justify-content: center; border-right: 2px dashed #333; position: relative; }
+        .ticket-info::after { content:""; position: absolute; right: -10px; top: -10px; width: 20px; height: 20px; background: var(--bg-dark); border-radius: 50%; }
+        .ticket-info::before { content:""; position: absolute; right: -10px; bottom: -10px; width: 20px; height: 20px; background: var(--bg-dark); border-radius: 50%; }
+
+        .event-name { font-family: 'Russo One'; font-size: 1.4rem; color: #fff; line-height: 1.2; margin-bottom: 10px; text-transform: uppercase; }
+        .runner-name { font-size: 1rem; color: #ccc; margin-bottom: 20px; font-weight: 600; }
         
-        /* WARNA HIJAU & BIRU (Tulisan Putih) */
-        .nav-scanner { background: #2ecc71; color: #fff; } 
-        .nav-lock { background: #3498db; color: #fff; }
-        .nav-timing { background: #00d2ff; color: #fff; } 
-        .nav-client { background: #9b59b6; color: #fff; }
-        .nav-logout { background: #333; border: 1px solid #555; }
-        .nav-logout:hover { background: #ff0000; border-color: #ff0000; }
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 0.85rem; color: #888; }
+        .meta-item strong { display: block; color: #fff; font-size: 1rem; margin-bottom: 3px; }
 
-        .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        /* Right Side: QR */
+        .ticket-qr { flex: 1; background: #fff; display: flex; align-items: center; justify-content: center; padding: 20px; flex-direction: column; min-width: 180px; }
+        .qr-code-box { width: 120px; height: 120px; }
+        .qr-label { color: #000; font-size: 0.7rem; font-weight: bold; margin-top: 10px; text-transform: uppercase; text-align: center; }
 
-        /* --- CONTENT --- */
-        .main-content { padding: 20px; max-width: 1400px; margin: 0 auto; }
+        /* STATUS BADGE */
+        .status-badge { 
+            position: absolute; top: 15px; right: 15px; 
+            padding: 5px 12px; border-radius: 20px; 
+            font-size: 0.7rem; font-weight: 800; text-transform: uppercase; 
+        }
+        .status-paid { background: #2ecc71; color: #000; }
+        .status-pending { background: #f1c40f; color: #000; }
 
-        /* STATS */
-        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border-left: 5px solid #ff0000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .stat-card h3 { margin: 0; font-size: 0.8rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-card .value { font-size: 2.2rem; font-weight: bold; margin-top: 10px; }
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 50px; color: #555; }
+        .empty-state i { font-size: 3rem; margin-bottom: 15px; }
 
-        /* TOOLBAR */
-        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--card-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
-        .filter-group { display: flex; gap: 10px; align-items: center; flex: 1; }
-        .filter-select { padding: 10px; background: #111; color: #fff; border: 1px solid #444; border-radius: 6px; flex: 1; max-width: 300px; }
-        
-        .btn-download { background: #28a745; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-        .btn-download:hover { background: #218838; }
-
-        /* TABLE */
-        .table-container { overflow-x: auto; background: var(--card-bg); border-radius: 10px; padding: 5px; border: 1px solid var(--border); }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th { text-align: left; padding: 15px; background: #222; color: #aaa; font-size: 0.75rem; border-bottom: 2px solid #333; cursor: pointer; text-transform: uppercase; }
-        th:hover { color: #fff; background: #333; }
-        td { padding: 15px; border-bottom: 1px solid #2a2c35; font-size: 0.9rem; }
-        tr:hover { background: #252830; }
-
-        .badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; text-transform: uppercase; }
-        .pending { background: rgba(255, 165, 0, 0.15); color: orange; border: 1px solid orange; }
-        .paid { background: rgba(0, 255, 0, 0.15); color: #2ecc71; border: 1px solid #2ecc71; }
-
-        .btn-action { border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin-right: 5px; color: white; transition: 0.2s; width: 35px; height: 35px; }
-        .btn-delete { background: #ff0000; } .btn-delete:hover { background: #cc0000; }
-        .btn-approve { background: #28a745; } .btn-approve:hover { background: #218838; }
-
-        /* MOBILE RESPONSIVE */
-        @media (max-width: 900px) {
-            .navbar { flex-wrap: wrap; padding: 15px; }
-            .menu-toggle { display: block; }
-            .nav-menu { display: none; flex-direction: column; width: 100%; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px; }
-            .nav-menu.active { display: flex; }
-            .btn-nav { width: 100%; justify-content: center; padding: 12px; font-size: 1rem; }
-            .toolbar { flex-direction: column; align-items: stretch; }
-            .filter-select { max-width: 100%; }
-            .btn-download { width: 100%; justify-content: center; }
+        /* Responsive */
+        @media (max-width: 600px) {
+            .ticket-card { flex-direction: column; }
+            .ticket-info { border-right: none; border-bottom: 2px dashed #333; }
+            .ticket-info::after { right: auto; bottom: -10px; left: -10px; top: auto; }
+            .ticket-info::before { right: -10px; bottom: -10px; top: auto; }
+            .ticket-qr { padding: 30px; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="logo-section">
-            <div class="logo">ADMIN PANEL</div>
-            <span id="adminDisplay" class="admin-badge"><i class="fas fa-spinner fa-spin"></i> Verifying...</span>
-        </div>
+    <div class="header">
+        <a href="index.html" class="logo">SEA<span>MOUNTAIN</span></a>
+        <a href="index.html" class="btn-back"><i class="fas fa-home"></i> Back to Home</a>
+    </div>
 
-        <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-
-        <div class="nav-menu" id="navMenu">
-            <a href="admin-manage-events.html" class="btn-nav nav-manage"><i class="fas fa-calendar-alt"></i> Manage Events</a>
-            <a href="admin-add-event.html" class="btn-nav nav-add"><i class="fa-solid fa-plus"></i> Add Event</a>
-            <a href="admin-vouchers.html" class="btn-nav nav-voucher"><i class="fa-solid fa-ticket"></i> Voucher</a>
-            <a href="admin-scanner.html" class="btn-nav nav-scanner"><i class="fa-solid fa-camera"></i> QR Scanner</a>
-            <a href="admin-access.html" class="btn-nav nav-lock"><i class="fa-solid fa-key"></i> Client Access</a>
-            <a href="timing-login.html" class="btn-nav nav-timing"><i class="fa-solid fa-stopwatch"></i> Timing System</a>
-            <a href="client-login.html" class="btn-nav nav-client"><i class="fa-solid fa-user-shield"></i> Client Landing</a>
-
-            <button id="logoutBtn" class="btn-nav nav-logout"><i class="fas fa-sign-out-alt"></i> Log Out</button>
-        </div>
-    </nav>
-
-    <div class="main-content">
-
-        <div class="stats-container">
-            <div class="stat-card" style="border-color: #3498db;">
-                <h3>Total Registrations</h3>
-                <div class="value" id="totalReg">0</div>
+    <div class="container">
+        <h2>My Digital Tickets</h2>
+        
+        <div id="loading" style="text-align:center; color:#888;">Checking records...</div>
+        
+        <div id="ticketList" class="ticket-list">
             </div>
-            <div class="stat-card" style="border-color: #2ecc71;">
-                <h3>Paid Participants</h3>
-                <div class="value" id="totalPaid">0</div>
-            </div>
-            <div class="stat-card" style="border-color: #f1c40f;">
-                <h3>Pending Payment</h3>
-                <div class="value" id="totalPending">0</div>
-            </div>
-        </div>
 
-        <div class="toolbar">
-            <div class="filter-group">
-                <select id="eventFilter" class="filter-select">
-                    <option value="all">All Events</option>
-                </select>
-                <a id="btnClientView" href="#" class="btn-nav" style="background:#555; display:none;">
-                    <i class="fas fa-chart-pie"></i> Analytics
-                </a>
-            </div>
-            <button onclick="downloadCSV()" class="btn-download"><i class="fas fa-file-csv"></i> Export CSV</button>
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <i class="fas fa-ticket-alt"></i>
+            <p>You haven't registered for any events yet.</p>
+            <a href="index.html" style="color:var(--brand-red); font-weight:bold; margin-top:10px; display:inline-block;">Browse Events</a>
         </div>
-
-        <div class="table-container">
-            <table id="adminTable">
-                <thead>
-                    <tr>
-                        <th onclick="sortTable(0)">EVENT <i class="fas fa-sort"></i></th>
-                        <th onclick="sortTable(1)">NAME <i class="fas fa-sort"></i></th>
-                        <th>CONTACT</th>
-                        <th>CATEGORY</th>
-                        <th onclick="sortTable(4)">STATUS <i class="fas fa-sort"></i></th>
-                        <th>ACTIONS</th>
-                    </tr>
-                </thead>
-                <tbody id="adminTableBody"></tbody>
-            </table>
-            <p id="loadingMsg" style="text-align:center; padding:30px; color:#666;">Loading Data...</p>
-        </div>
-
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
@@ -200,146 +118,126 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        const ALLOWED_ADMIN = "admin@sm.com"; 
 
-        window.toggleMenu = function() {
-            document.getElementById('navMenu').classList.toggle('active');
-        }
-
-        let allRegistrations = [];
-
+        // 1. CHECK LOGIN
         onAuthStateChanged(auth, (user) => {
-            if (user && user.email === ALLOWED_ADMIN) {
-                document.getElementById('adminDisplay').innerHTML = `<i class="fas fa-user-shield"></i> Hello, Admin`;
-                loadData();
+            if (user) {
+                loadUserTickets(user);
             } else {
-                alert("ACCESS DENIED");
-                window.location.href = "admin-login.html"; 
+                alert("Please log in to view your tickets.");
+                window.location.href = "login.html";
             }
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            signOut(auth).then(() => { window.location.href = "admin-login.html"; });
-        });
+        // 2. LOAD DATA
+        function loadUserTickets(user) {
+            const ticketContainer = document.getElementById('ticketList');
+            const loading = document.getElementById('loading');
+            const emptyState = document.getElementById('emptyState');
 
-        function loadData() {
-            const dbRef = ref(db, 'registrations');
-            onValue(dbRef, (snapshot) => {
-                const data = snapshot.val();
-                const tableBody = document.getElementById('adminTableBody');
-                const eventFilter = document.getElementById('eventFilter');
+            // Ambil semua registrations
+            get(ref(db, 'registrations')).then((snapshot) => {
+                loading.style.display = 'none';
                 
-                document.getElementById('loadingMsg').style.display = 'none';
-                tableBody.innerHTML = ""; 
-                allRegistrations = []; 
-                let stats = { total: 0, paid: 0, pending: 0 };
-                let eventList = new Set(); 
+                if (!snapshot.exists()) {
+                    emptyState.style.display = 'block';
+                    return;
+                }
 
-                if (data) {
-                    Object.keys(data).forEach(eventId => {
-                        eventList.add(eventId); 
-                        const eventData = data[eventId];
-                        Object.keys(eventData).forEach(userId => {
-                            const runner = eventData[userId];
-                            allRegistrations.push({ eventId: eventId, userId: userId, ...runner });
-                            stats.total++;
-                            if(runner.status === 'Paid') stats.paid++; else stats.pending++;
-                        });
+                const allEvents = snapshot.val();
+                let hasTickets = false;
+
+                // Loop setiap Event
+                Object.keys(allEvents).forEach(eventId => {
+                    const participants = allEvents[eventId];
+                    
+                    // Loop setiap Peserta dalam Event tu
+                    Object.keys(participants).forEach(regId => {
+                        const data = participants[regId];
+
+                        // Filter: Kalau ID User sama ATAU Email sama
+                        if (data.userId === user.uid || data.email === user.email) {
+                            hasTickets = true;
+                            renderTicket(regId, eventId, data);
+                        }
                     });
+                });
 
-                    document.getElementById('totalReg').innerText = stats.total;
-                    document.getElementById('totalPaid').innerText = stats.paid;
-                    document.getElementById('totalPending').innerText = stats.pending;
-
-                    if(eventFilter.options.length === 1) {
-                        eventList.forEach(ev => {
-                            let option = document.createElement("option");
-                            option.value = ev;
-                            option.text = ev.toUpperCase();
-                            eventFilter.add(option);
-                        });
-                    }
-                    renderTable(allRegistrations);
-                } else {
-                    tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No Data Found</td></tr>";
+                if (!hasTickets) {
+                    emptyState.style.display = 'block';
                 }
             });
         }
 
-        window.renderTable = function(dataArray) {
-            const tableBody = document.getElementById('adminTableBody');
-            tableBody.innerHTML = "";
-            dataArray.forEach(row => {
-                const statusClass = (row.status && row.status.toLowerCase() === 'paid') ? "paid" : "pending";
-                const htmlRow = `
-                    <tr>
-                        <td style="color:#ff0000; font-weight:bold;">${row.eventId.toUpperCase()}</td>
-                        <td>${row.first_name} ${row.last_name}</td>
-                        <td>${row.email}<br><small style="color:#888;">${row.phone}</small></td>
-                        <td>${row.category} (${row.tshirt_size})</td>
-                        <td><span class="badge ${statusClass}">${row.status}</span></td>
-                        <td>
-                            <button class="btn-action btn-approve" onclick="updateStatus('${row.eventId}', '${row.userId}')"><i class="fas fa-check"></i></button>
-                            <button class="btn-action btn-delete" onclick="deleteRunner('${row.eventId}', '${row.userId}')"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>`;
-                tableBody.innerHTML += htmlRow;
-            });
-        }
-
-        document.getElementById('eventFilter').addEventListener('change', function() {
-            const selectedEvent = this.value;
-            const btnAnalytics = document.getElementById('btnClientView');
-            if(selectedEvent === 'all') {
-                renderTable(allRegistrations);
-                btnAnalytics.style.display = 'none'; 
-            } else {
-                const filtered = allRegistrations.filter(r => r.eventId === selectedEvent);
-                renderTable(filtered);
-                btnAnalytics.href = `participants.html?id=${selectedEvent}`;
-                btnAnalytics.style.display = 'inline-flex';
+        // 3. RENDER TICKET CARD
+        function renderTicket(regId, eventId, data) {
+            const container = document.getElementById('ticketList');
+            
+            // Logic Status Badge
+            let statusHtml = '<span class="status-badge status-pending">PENDING PAYMENT</span>';
+            if (data.status && data.status.toLowerCase() === 'paid') {
+                statusHtml = '<span class="status-badge status-paid">PAID & CONFIRMED</span>';
             }
-        });
 
-        window.downloadCSV = function() {
-            let csvContent = "data:text/csv;charset=utf-8,";
-            csvContent += "Event,First Name,Last Name,Email,Phone,Category,Size,Status,Reg Date\n"; 
-            allRegistrations.forEach(row => {
-                let rowData = [ row.eventId, row.first_name, row.last_name, row.email, row.phone, row.category, row.tshirt_size, row.status, (row.registration_time || "").replace(',', '') ];
-                csvContent += rowData.join(",") + "\n";
-            });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "participants_data.csv");
-            document.body.appendChild(link);
-            link.click();
-        }
+            // Nama Event (Fallback kalau takde dalam data registration)
+            const eventName = data.event_name || eventId.toUpperCase();
 
-        window.sortTable = function(n) {
-            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-            table = document.getElementById("adminTable");
-            switching = true; dir = "asc"; 
-            while (switching) {
-                switching = false; rows = table.rows;
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("TD")[n];
-                    y = rows[i + 1].getElementsByTagName("TD")[n];
-                    if (dir == "asc") { if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) { shouldSwitch = true; break; } } 
-                    else if (dir == "desc") { if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) { shouldSwitch = true; break; } }
+            // Create Unique ID untuk QR container
+            const qrContainerId = `qr-${regId}`;
+
+            const html = `
+                <div class="ticket-card">
+                    <div class="ticket-info">
+                        ${statusHtml}
+                        <div class="event-name">${eventName}</div>
+                        <div class="runner-name">${data.first_name} ${data.last_name}</div>
+                        
+                        <div class="meta-grid">
+                            <div class="meta-item">
+                                <strong>${data.category}</strong>
+                                Category
+                            </div>
+                            <div class="meta-item">
+                                <strong>${data.tshirt_size}</strong>
+                                T-Shirt
+                            </div>
+                            <div class="meta-item">
+                                <strong>${data.registration_time ? data.registration_time.split(',')[0] : 'N/A'}</strong>
+                                Reg Date
+                            </div>
+                            <div class="meta-item">
+                                <strong>${regId.substring(0,8)}...</strong>
+                                Ref ID
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ticket-qr">
+                        <div id="${qrContainerId}" class="qr-code-box"></div>
+                        <div class="qr-label">Scan for Check-in</div>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML += html;
+
+            // Generate QR Code (Kita kena tunggu elemen wujud dalam DOM dulu)
+            // Guna setTimeout 0ms untuk pastikan render HTML siap
+            setTimeout(() => {
+                const qrElement = document.getElementById(qrContainerId);
+                if (qrElement) {
+                    new QRCode(qrElement, {
+                        text: regId, // QR Code pegang Registration ID
+                        width: 120,
+                        height: 120,
+                        colorDark : "#000000",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
                 }
-                if (shouldSwitch) { rows[i].parentNode.insertBefore(rows[i + 1], rows[i]); switching = true; switchcount ++; } 
-                else { if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; } }
-            }
+            }, 100);
         }
 
-        window.deleteRunner = function(eventId, userId) {
-            if(confirm("Delete this runner permanently?")) { remove(ref(db, `registrations/${eventId}/${userId}`)).then(() => alert("User Deleted")); }
-        }
-        window.updateStatus = function(eventId, userId) {
-            if(confirm("Confirm payment received?")) { update(ref(db, `registrations/${eventId}/${userId}`), { status: "Paid" }).then(() => alert("Status Updated!")); }
-        }
     </script>
 </body>
 </html>
