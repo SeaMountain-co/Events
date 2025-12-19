@@ -21,8 +21,22 @@
         .logo span { color: var(--brand-orange); font-weight: 300; }
         .nav-links { display: flex; gap: 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
         .nav-links a:hover { color: var(--brand-orange); }
+        
+        /* AUTH GROUP (NEW WRAPPER) */
+        .auth-group { display: flex; align-items: center; gap: 15px; }
+
         .login-btn { background: linear-gradient(45deg, var(--brand-orange), #ff7b00); padding: 10px 25px; border-radius: 30px; font-weight: 800; text-transform: uppercase; color: #000; box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3); }
         .login-btn:hover { transform: translateY(-2px); }
+
+        /* QR BUTTON STYLE */
+        .qr-btn { 
+            width: 40px; height: 40px; 
+            background: #222; border: 1px solid #444; 
+            border-radius: 50%; display: none; /* Hidden default */
+            align-items: center; justify-content: center; 
+            color: #fff; font-size: 1.2rem; cursor: pointer; transition: 0.3s;
+        }
+        .qr-btn:hover { background: var(--brand-orange); border-color: var(--brand-orange); color: #000; }
 
         /* HERO SECTION */
         .hero { position: relative; min-height: 500px; display: flex; align-items: center; justify-content: center; padding: 40px 5%; overflow: hidden; margin-bottom: 40px; }
@@ -120,7 +134,13 @@
             <a href="photos.html">Photos</a>
             <a href="leaderboard.html">Leaderboard</a>
         </nav>
-        <a href="login.html" class="login-btn">Log In</a>
+        
+        <div class="auth-group">
+            <a href="my-tickets.html" id="qrBtn" class="qr-btn" title="My History & Tickets">
+                <i class="fas fa-qrcode"></i>
+            </a>
+            <a href="login.html" class="login-btn">Log In</a>
+        </div>
     </header>
 
     <section class="hero">
@@ -223,19 +243,32 @@
 
         // --- 2. AUTHENTICATION ---
         const loginBtn = document.querySelector('.login-btn'); 
+        const qrBtn = document.getElementById('qrBtn'); // Ambil butang QR
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                // USER LOGGED IN
                 loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.displayName || 'User'}`;
                 loginBtn.href = "#"; 
                 loginBtn.style.background = "#28a745"; 
+                
+                // Show QR Button
+                qrBtn.style.display = "flex";
+
                 loginBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    signOut(auth).then(() => window.location.reload());
+                    if(confirm("Log Out?")) {
+                        signOut(auth).then(() => window.location.reload());
+                    }
                 });
             } else {
+                // USER LOGGED OUT
                 loginBtn.innerHTML = "Log In";
                 loginBtn.href = "login.html";
                 loginBtn.style.background = ""; 
+                
+                // Hide QR Button
+                qrBtn.style.display = "none";
             }
         });
 
@@ -265,7 +298,6 @@
                         document.getElementById('heroLink').href = `event-details.html?id=${key}`;
                         if (event.image_url) {
                             document.getElementById('heroImage').src = event.image_url;
-                            // Optional: document.getElementById('heroBg').style.backgroundImage = `url('${event.image_url}')`;
                         }
                     }
 
