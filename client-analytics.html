@@ -29,11 +29,20 @@
         .stat-sub { font-size: 0.8rem; color: #555; margin-top: 5px; }
         .icon-bg { position: absolute; top: 20px; right: 20px; font-size: 2rem; color: #252830; }
 
-        /* CHARTS SECTION */
-        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .chart-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid #333; }
-        .chart-header { margin-bottom: 20px; font-weight: 700; color: #ccc; font-size: 0.9rem; text-transform: uppercase; }
+        /* CHARTS SECTION (FIXED LAYOUT) */
+        .charts-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .chart-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; }
+        .chart-header { margin-bottom: 15px; font-weight: 700; color: #ccc; font-size: 0.9rem; text-transform: uppercase; display: flex; justify-content: space-between; }
         
+        /* WRAPPER PENTING UNTUK FIX BUG CHART LARI */
+        .chart-box-wrapper {
+            position: relative;
+            height: 250px; /* Tetapkan tinggi supaya chart tak tarik ke bawah */
+            width: 100%;
+        }
+
+        .no-data-msg { text-align: center; color: #555; font-style: italic; margin-top: 80px; }
+
         /* TABLE SECTION */
         .table-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid #333; }
         .table-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -48,7 +57,10 @@
         .badge-paid { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
         .badge-pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; border: 1px solid #f1c40f; }
 
-        @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1000px) { 
+            .charts-grid { grid-template-columns: 1fr; } 
+            .chart-box-wrapper { height: 300px; } /* Lebih tinggi sikit di mobile */
+        }
     </style>
 </head>
 <body>
@@ -84,13 +96,30 @@
         </div>
 
         <div class="charts-grid">
+            
             <div class="chart-card">
-                <div class="chart-header">Participants by Category (Distance)</div>
-                <canvas id="categoryChart" height="150"></canvas>
+                <div class="chart-header">Participants by Category</div>
+                <div class="chart-box-wrapper">
+                    <canvas id="categoryChart"></canvas>
+                </div>
             </div>
+
             <div class="chart-card">
-                <div class="chart-header">T-Shirt Size Distribution</div>
-                <canvas id="tshirtChart" height="200"></canvas>
+                <div class="chart-header">
+                    <span>Voucher Usage</span>
+                    <span id="voucherTotalUsed" style="color:#aaa; font-size:0.8rem;">0 Used</span>
+                </div>
+                <div class="chart-box-wrapper">
+                    <canvas id="voucherChart"></canvas>
+                    <div id="noVoucherMsg" class="no-data-msg" style="display:none;">No vouchers used yet.</div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">T-Shirt Sizes</div>
+                <div class="chart-box-wrapper">
+                    <canvas id="tshirtChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -108,7 +137,7 @@
                             <th>Email</th>
                             <th>Category</th>
                             <th>T-Shirt</th>
-                            <th>Reg Date</th>
+                            <th>Voucher</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -140,11 +169,10 @@
     const db = getDatabase(app);
     const auth = getAuth(app);
 
-    // Ambil ID dari URL
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
 
-    let allParticipants = []; // Simpan data untuk CSV
+    let allParticipants = [];
 
     // CHECK AUTH
     onAuthStateChanged(auth, (user) => {
@@ -161,21 +189,17 @@
     });
 
     async function loadAnalytics(id) {
-        // 1. Fetch Event Info (Harga, Tajuk)
         const eventSnap = await get(ref(db, `events/${id}`));
         const eventInfo = eventSnap.val();
 
         if(!eventInfo) return;
 
-        // UI Update: Header Info
         document.getElementById('eventTitleDisplay').innerText = eventInfo.title;
         document.getElementById('basePriceDisplay').innerText = `Based on ${eventInfo.price} / pax`;
         document.getElementById('eventDateRange').innerText = eventInfo.date;
 
-        // Parse Harga (Buang 'RM')
         let basePrice = parseFloat(String(eventInfo.price).replace(/[^0-9.]/g, '')) || 0;
 
-        // 2. Fetch Registrations
         const regSnap = await get(ref(db, `registrations/${id}`));
         const registrations = regSnap.val();
 
@@ -184,11 +208,13 @@
             return;
         }
 
-        // --- DATA PROCESSING ---
         let totalCount = 0;
         let totalRevenue = 0;
+        
         let categoryCount = {};
         let tshirtCount = {};
+        let voucherCount = {};
+
         let tableHTML = "";
         let index = 1;
 
@@ -196,63 +222,63 @@
             const r = registrations[key];
             totalCount++;
             
-            // Masukkan dalam array global untuk CSV
             allParticipants.push(r);
 
-            // Kira Revenue (Hanya yang dah Paid)
-            if (r.status === 'paid' || r.status === 'Paid') {
-                // Guna amountPaid jika ada (sebab mungkin guna voucher), kalau tak guna basePrice
+            if (r.status && r.status.toLowerCase() === 'paid') {
                 let paidAmount = r.amountPaid !== undefined ? parseFloat(r.amountPaid) : basePrice;
                 totalRevenue += paidAmount;
             }
 
-            // Data Charts
             let cat = r.category || 'Unknown';
             categoryCount[cat] = (categoryCount[cat] || 0) + 1;
 
             let size = r.tshirt_size || 'Unknown';
             tshirtCount[size] = (tshirtCount[size] || 0) + 1;
 
-            // Table Row
-            let badgeClass = r.status === 'paid' || r.status === 'Paid' ? 'badge-paid' : 'badge-pending';
-            
+            if(r.voucherUsed && r.voucherUsed !== "NONE") {
+                voucherCount[r.voucherUsed] = (voucherCount[r.voucherUsed] || 0) + 1;
+            }
+
+            let badgeClass = (r.status && r.status.toLowerCase() === 'paid') ? 'badge-paid' : 'badge-pending';
+            let vCodeDisplay = (r.voucherUsed && r.voucherUsed !== "NONE") ? `<span style="color:#f1c40f; font-family:monospace;">${r.voucherUsed}</span>` : "-";
+
             tableHTML += `
                 <tr>
                     <td>${index++}</td>
-                    <td><b>${r.first_name} ${r.last_name}</b></td>
+                    <td><b>${r.first_name} ${r.last_name || ''}</b></td>
                     <td>${r.email}</td>
                     <td>${r.category}</td>
                     <td style="text-transform:uppercase;">${r.tshirt_size}</td>
-                    <td>${r.registration_time.split(',')[0]}</td>
+                    <td>${vCodeDisplay}</td>
                     <td><span class="badge ${badgeClass}">${r.status}</span></td>
                 </tr>
             `;
         });
 
-        // Update UI Stats & Table
         document.getElementById('totalReg').innerText = totalCount;
         document.getElementById('totalRev').innerText = "RM " + totalRevenue.toFixed(2);
         document.getElementById('participantTable').innerHTML = tableHTML;
 
-        // Render Charts
-        renderCharts(categoryCount, tshirtCount);
+        renderCharts(categoryCount, tshirtCount, voucherCount);
     }
 
-    function renderCharts(categories, sizes) {
+    function renderCharts(categories, sizes, vouchers) {
+        
         // Bar Chart (Category)
         new Chart(document.getElementById('categoryChart'), {
             type: 'bar',
             data: {
                 labels: Object.keys(categories),
                 datasets: [{
-                    label: 'Participants',
+                    label: 'Pax',
                     data: Object.values(categories),
                     backgroundColor: '#ff0000',
-                    borderRadius: 5
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false, // PENTING
                 plugins: { legend: { display: false } },
                 scales: {
                     y: { beginAtZero: true, grid: { color: '#333' } },
@@ -260,6 +286,41 @@
                 }
             }
         });
+
+        // Donut Chart (Voucher)
+        const voucherKeys = Object.keys(vouchers);
+        const voucherCanvas = document.getElementById('voucherChart');
+        const noVoucherMsg = document.getElementById('noVoucherMsg');
+        const voucherTotalLabel = document.getElementById('voucherTotalUsed');
+
+        if(voucherKeys.length > 0) {
+            let totalUsed = Object.values(vouchers).reduce((a, b) => a + b, 0);
+            voucherTotalLabel.innerText = `${totalUsed} Used`;
+            noVoucherMsg.style.display = 'none';
+            
+            new Chart(voucherCanvas, {
+                type: 'doughnut',
+                data: {
+                    labels: voucherKeys,
+                    datasets: [{
+                        data: Object.values(vouchers),
+                        backgroundColor: ['#f1c40f', '#e67e22', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // PENTING
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: '#fff', boxWidth: 10, font: {size:10} } } 
+                    },
+                    cutout: '60%'
+                }
+            });
+        } else {
+            voucherCanvas.style.display = 'none';
+            noVoucherMsg.style.display = 'block';
+        }
 
         // Donut Chart (T-Shirt)
         new Chart(document.getElementById('tshirtChart'), {
@@ -274,21 +335,24 @@
             },
             options: {
                 responsive: true,
-                plugins: { legend: { position: 'right', labels: { color: '#fff' } } },
-                cutout: '70%'
+                maintainAspectRatio: false, // PENTING
+                plugins: { 
+                    legend: { position: 'right', labels: { color: '#fff', boxWidth: 10, font: {size:10} } } 
+                },
+                cutout: '60%'
             }
         });
     }
 
-    // Function Export CSV (Global)
+    // Export CSV
     window.exportCSV = function() {
         let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "First Name,Last Name,IC,Email,Phone,Category,Size,Status,Date\n";
+        csvContent += "First Name,Last Name,Email,Category,Size,Voucher,Status,Date\n";
 
         allParticipants.forEach(row => {
             let rowData = [
-                row.first_name, row.last_name, row.ic, row.email, row.phone,
-                row.category, row.tshirt_size, row.status, 
+                row.first_name, row.last_name, row.email,
+                row.category, row.tshirt_size, (row.voucherUsed || '-'), row.status, 
                 (row.registration_time || '').replace(',', '')
             ];
             csvContent += rowData.join(",") + "\n";
