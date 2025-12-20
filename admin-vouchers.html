@@ -180,7 +180,7 @@
             type: type,
             value: amount,
             limit: limit, 
-            used: 0,
+            used: 0, // Mula dengan 0
             expiry: expiry
         }).then(() => {
             alert("Voucher Created Successfully!");
@@ -191,6 +191,7 @@
     // --- 3. LOAD VOUCHERS LIST ---
     let eventMap = {}; 
     
+    // Kita ambil eventMap dulu, lepas tu baru load voucher table
     get(ref(db, 'events')).then((snapshot) => {
         const data = snapshot.val();
         if(data) {
@@ -198,6 +199,7 @@
                 eventMap[key] = data[key].title;
             });
         }
+        // Panggil function load table
         loadVoucherTable();
     });
 
@@ -211,12 +213,16 @@
                 Object.values(data).forEach(v => {
                     let displayVal = v.type === 'percent' ? `${v.value}%` : `RM ${v.value}`;
                     
+                    // PASTIKAN USED ADALAH NOMBOR (Fix Bug)
+                    const usedCount = v.used ? parseInt(v.used) : 0;
+                    const limitCount = v.limit ? parseInt(v.limit) : 0;
+
                     let usageDisplay;
-                    if (v.limit > 0) {
-                        let isFull = v.used >= v.limit ? '<span style="color:red; font-weight:bold;">(FULL)</span>' : '';
-                        usageDisplay = `${v.used} / ${v.limit} ${isFull}`;
+                    if (limitCount > 0) {
+                        let isFull = usedCount >= limitCount ? '<span style="color:red; font-weight:bold;">(FULL)</span>' : '';
+                        usageDisplay = `${usedCount} / ${limitCount} ${isFull}`;
                     } else {
-                        usageDisplay = `${v.used} / <span style="font-size:1.2rem;">∞</span>`;
+                        usageDisplay = `${usedCount} / <span style="font-size:1.2rem;">∞</span>`;
                     }
 
                     let expiryDisplay;
@@ -252,7 +258,6 @@
                     `;
                 });
             } else {
-                // SINI YG ERROR TADI: Saya tukar align="center" jadi align='center'
                 tbody.innerHTML = "<tr><td colspan='5' align='center' style='color:#555; padding:20px;'>No vouchers active.</td></tr>";
             }
         });
