@@ -6,70 +6,51 @@
     <title>Sea Mountain - ADMIN DASHBOARD</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
     
     <style>
         /* --- ASAS --- */
-        :root { --bg-dark: #111; --card-bg: #1a1c23; --text: #fff; --border: #333; }
-        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; }
+        :root { --bg-dark: #111; --card-bg: #1a1c23; --text: #fff; --border: #333; --sidebar-w: 260px; --brand-red: #ff0000; }
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; display: flex; height: 100vh; overflow: hidden; }
         * { box-sizing: border-box; }
 
-        /* --- HEADER / NAVBAR --- */
-        .navbar {
-            background-color: #000;
-            border-bottom: 1px solid var(--border);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-w); background: #000; border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; height: 100%; position: fixed; left: 0; top: 0; z-index: 1000;
+            transition: 0.3s;
         }
-
-        .logo-section { display: flex; align-items: center; gap: 15px; }
-        .logo { font-family: 'Russo One'; color: #ff0000; font-size: 1.4rem; text-decoration: none; }
-        .admin-badge { color: #888; font-size: 0.8rem; background: #222; padding: 5px 10px; border-radius: 4px; }
-
-        /* MENU BUTTONS */
-        .nav-menu { display: flex; gap: 10px; align-items: center; }
+        .sidebar-header { padding: 25px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-family: 'Russo One'; color: #fff; font-size: 1.4rem; text-decoration: none; }
+        .logo span { color: var(--brand-red); }
+        
+        .nav-menu { flex: 1; overflow-y: auto; padding: 20px 10px; }
+        .nav-label { font-size: 0.7rem; color: #666; text-transform: uppercase; font-weight: bold; margin: 15px 10px 5px; letter-spacing: 1px; }
         
         .btn-nav {
-            text-decoration: none;
-            color: #fff; /* SEMUA TULISAN PUTIH */
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.3s;
-            border: 1px solid transparent;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3); /* Tambah shadow sikit supaya nampak jelas */
+            text-decoration: none; color: #aaa; padding: 12px 15px; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+            display: flex; align-items: center; gap: 12px; transition: 0.2s; margin-bottom: 5px;
         }
-        .btn-nav:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .btn-nav:hover, .btn-nav.active { background: var(--brand-red); color: #fff; transform: translateX(5px); }
+        .btn-nav i { width: 20px; text-align: center; }
 
-        /* WARNA BUTANG (Fixed Text Color) */
-        .nav-manage { background: #e67e22; }
-        .nav-add { background: #35a1ff; }
-        .nav-voucher { background: #c0540c; }
+        /* --- MAIN CONTENT AREA --- */
+        .main-wrapper { flex: 1; margin-left: var(--sidebar-w); display: flex; flex-direction: column; height: 100%; transition: 0.3s; }
         
-        /* WARNA HIJAU & BIRU (Tulisan Putih) */
-        .nav-access { background: #3498db; color: #fff; }
-        .nav-scanner { background: #2ecc71; color: #fff; } 
-        .nav-timing { background: #00d2ff; color: #fff; } 
-        .nav-client { background: #9b59b6; color: #fff; }
-        .nav-partners { background: #2d0cb1; color: #fff; }
-        .nav-logout { background: #333; border: 1px solid #555; }
-        .nav-logout:hover { background: #ff0000; border-color: #ff0000; }
-
+        /* TOP BAR */
+        .topbar {
+            background: var(--card-bg); padding: 15px 30px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
         .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        .admin-badge { display: flex; align-items: center; gap: 10px; background: #000; padding: 8px 15px; border-radius: 30px; border: 1px solid #333; font-size: 0.85rem; color: #ccc; }
+        .btn-logout { background: transparent; border: 1px solid #ff4d4d; color: #ff4d4d; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.3s; }
+        .btn-logout:hover { background: #ff4d4d; color: #fff; }
 
-        /* --- CONTENT --- */
-        .main-content { padding: 20px; max-width: 1400px; margin: 0 auto; }
+        /* CONTENT SCROLLABLE */
+        .content-scroll { flex: 1; overflow-y: auto; padding: 30px; }
 
-        /* STATS */
+        /* STATS CARDS */
         .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border-left: 5px solid #ff0000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .stat-card h3 { margin: 0; font-size: 0.8rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
@@ -78,10 +59,11 @@
         /* TOOLBAR */
         .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--card-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
         .filter-group { display: flex; gap: 10px; align-items: center; flex: 1; }
-        .filter-select { padding: 10px; background: #111; color: #fff; border: 1px solid #444; border-radius: 6px; flex: 1; max-width: 300px; }
+        .filter-select { padding: 10px; background: #111; color: #fff; border: 1px solid #444; border-radius: 6px; flex: 1; max-width: 300px; outline: none; }
         
         .btn-download { background: #28a745; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; }
         .btn-download:hover { background: #218838; }
+        .btn-analytics { text-decoration: none; background: #3498db; color: #fff; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; display: none; align-items: center; gap: 8px; }
 
         /* TABLE */
         .table-container { overflow-x: auto; background: var(--card-bg); border-radius: 10px; padding: 5px; border: 1px solid var(--border); }
@@ -100,88 +82,113 @@
         .btn-approve { background: #28a745; } .btn-approve:hover { background: #218838; }
 
         /* MOBILE RESPONSIVE */
-        @media (max-width: 900px) {
-            .navbar { flex-wrap: wrap; padding: 15px; }
+        @media (max-width: 1000px) {
+            .sidebar { transform: translateX(-100%); width: 280px; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+            .sidebar.active { transform: translateX(0); }
+            .main-wrapper { margin-left: 0; }
             .menu-toggle { display: block; }
-            .nav-menu { display: none; flex-direction: column; width: 100%; margin-top: 15px; border-top: 1px solid #333; padding-top: 15px; }
-            .nav-menu.active { display: flex; }
-            .btn-nav { width: 100%; justify-content: center; padding: 12px; font-size: 1rem; }
+            .content-scroll { padding: 15px; }
             .toolbar { flex-direction: column; align-items: stretch; }
             .filter-select { max-width: 100%; }
-            .btn-download { width: 100%; justify-content: center; }
+            .btn-download, .btn-analytics { justify-content: center; }
+            
+            /* Overlay bila sidebar buka */
+            .overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index: 900; }
+            .overlay.active { display: block; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="logo-section">
-            <div class="logo">ADMIN PANEL</div>
-            <span id="adminDisplay" class="admin-badge"><i class="fas fa-spinner fa-spin"></i> Verifying...</span>
+    <div class="overlay" onclick="toggleMenu()"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="logo">SEA<span>MOUNTAIN</span></a>
+            <button class="menu-toggle" onclick="toggleMenu()" style="font-size:1.2rem;"><i class="fas fa-times"></i></button>
         </div>
 
-        <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
-
-        <div class="nav-menu" id="navMenu">
-            <a href="admin-manage-events.html" class="btn-nav nav-manage"><i class="fas fa-calendar-alt"></i> Manage Events</a>
-            <a href="admin-add-event.html" class="btn-nav nav-add"><i class="fa-solid fa-plus"></i> Add Event</a>
-            <a href="admin-vouchers.html" class="btn-nav nav-voucher"><i class="fa-solid fa-ticket"></i> Voucher</a>
-            <a href="admin-access.html" class="btn-nav nav-access"><i class="fa-solid fa-key"></i> Client Access</a>
-            <a href="admin-scanner.html" class="btn-nav nav-scanner"><i class="fa-solid fa-camera"></i> QR Scanner</a>
-            <a href="timing-login.html" class="btn-nav nav-timing"><i class="fa-solid fa-stopwatch"></i> Timing System</a>
-            <a href="client-login.html" class="btn-nav nav-client"><i class="fa-solid fa-user-tie"></i> Client Landing</a>
-            <a href="admin-partners.html" class="btn-nav nav-partners"><i class="fa-regular fa-handshake fa-bounce"></i> Sponsors</a>
-
-            <button id="logoutBtn" class="btn-nav nav-logout"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+        <div class="nav-menu">
+            <div class="nav-label">Main</div>
+            <a href="admin-dashboard.html" class="btn-nav active"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="admin-manage-events.html" class="btn-nav"><i class="fas fa-calendar-alt"></i> Manage Events</a>
+            <a href="admin-add-event.html" class="btn-nav"><i class="fas fa-plus-circle"></i> Add Event</a>
+            
+            <div class="nav-label">Tools</div>
+            <a href="admin-vouchers.html" class="btn-nav"><i class="fas fa-ticket-alt"></i> Vouchers</a>
+            <a href="admin-access.html" class="btn-nav"><i class="fas fa-key"></i> Client Access</a>
+            <a href="admin-partners.html" class="btn-nav"><i class="fas fa-handshake"></i> Sponsors & Ads</a>
+            
+            <div class="nav-label">System</div>
+            <a href="admin-scanner.html" class="btn-nav"><i class="fas fa-qrcode"></i> QR Scanner</a>
+            <a href="timing-login.html" class="btn-nav"><i class="fas fa-stopwatch"></i> Timing System</a>
+            <a href="client-login.html" class="btn-nav"><i class="fas fa-user-tie"></i> Client View</a>
         </div>
     </nav>
 
-    <div class="main-content">
-
-        <div class="stats-container">
-            <div class="stat-card" style="border-color: #3498db;">
-                <h3>Total Registrations</h3>
-                <div class="value" id="totalReg">0</div>
+    <div class="main-wrapper">
+        
+        <div class="topbar">
+            <div style="display:flex; align-items:center; gap:15px;">
+                <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+                <h2 style="margin:0; font-size:1.2rem;">Overview</h2>
             </div>
-            <div class="stat-card" style="border-color: #2ecc71;">
-                <h3>Paid Participants</h3>
-                <div class="value" id="totalPaid">0</div>
-            </div>
-            <div class="stat-card" style="border-color: #f1c40f;">
-                <h3>Pending Payment</h3>
-                <div class="value" id="totalPending">0</div>
+            
+            <div style="display:flex; align-items:center; gap:15px;">
+                <div class="admin-badge" id="adminDisplay">
+                    <i class="fas fa-spinner fa-spin"></i> Verifying...
+                </div>
+                <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </div>
         </div>
 
-        <div class="toolbar">
-            <div class="filter-group">
-                <select id="eventFilter" class="filter-select">
-                    <option value="all">All Events</option>
-                </select>
-                <a id="btnClientView" href="#" class="btn-nav" style="background:#555; display:none;">
-                    <i class="fas fa-chart-pie"></i> Analytics
-                </a>
+        <div class="content-scroll">
+            
+            <div class="stats-container">
+                <div class="stat-card" style="border-color: #3498db;">
+                    <h3>Total Registrations</h3>
+                    <div class="value" id="totalReg">0</div>
+                </div>
+                <div class="stat-card" style="border-color: #2ecc71;">
+                    <h3>Paid Participants</h3>
+                    <div class="value" id="totalPaid">0</div>
+                </div>
+                <div class="stat-card" style="border-color: #f1c40f;">
+                    <h3>Pending Payment</h3>
+                    <div class="value" id="totalPending">0</div>
+                </div>
             </div>
-            <button onclick="downloadCSV()" class="btn-download"><i class="fas fa-file-csv"></i> Export CSV</button>
-        </div>
 
-        <div class="table-container">
-            <table id="adminTable">
-                <thead>
-                    <tr>
-                        <th onclick="sortTable(0)">EVENT <i class="fas fa-sort"></i></th>
-                        <th onclick="sortTable(1)">NAME <i class="fas fa-sort"></i></th>
-                        <th>CONTACT</th>
-                        <th>CATEGORY</th>
-                        <th onclick="sortTable(4)">STATUS <i class="fas fa-sort"></i></th>
-                        <th>ACTIONS</th>
-                    </tr>
-                </thead>
-                <tbody id="adminTableBody"></tbody>
-            </table>
-            <p id="loadingMsg" style="text-align:center; padding:30px; color:#666;">Loading Data...</p>
-        </div>
+            <div class="toolbar">
+                <div class="filter-group">
+                    <select id="eventFilter" class="filter-select">
+                        <option value="all">All Events</option>
+                    </select>
+                    <a id="btnClientView" href="#" class="btn-analytics">
+                        <i class="fas fa-chart-pie"></i> View Analytics
+                    </a>
+                </div>
+                <button onclick="downloadCSV()" class="btn-download"><i class="fas fa-file-csv"></i> Export CSV</button>
+            </div>
 
+            <div class="table-container">
+                <table id="adminTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">EVENT <i class="fas fa-sort"></i></th>
+                            <th onclick="sortTable(1)">NAME <i class="fas fa-sort"></i></th>
+                            <th>CONTACT</th>
+                            <th>CATEGORY</th>
+                            <th onclick="sortTable(4)">STATUS <i class="fas fa-sort"></i></th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody"></tbody>
+                </table>
+                <p id="loadingMsg" style="text-align:center; padding:30px; color:#666;">Loading Data...</p>
+            </div>
+
+        </div>
     </div>
 
     <script type="module">
@@ -204,15 +211,17 @@
         const db = getDatabase(app);
         const ALLOWED_ADMIN = "admin@sm.com"; 
 
+        // SIDEBAR TOGGLE
         window.toggleMenu = function() {
-            document.getElementById('navMenu').classList.toggle('active');
+            document.getElementById('sidebar').classList.toggle('active');
+            document.querySelector('.overlay').classList.toggle('active');
         }
 
         let allRegistrations = [];
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.email === ALLOWED_ADMIN) {
-                document.getElementById('adminDisplay').innerHTML = `<i class="fas fa-user-shield"></i> Hello, Admin`;
+                document.getElementById('adminDisplay').innerHTML = `<i class="fas fa-user-shield"></i> ${user.email}`;
                 loadData();
             } else {
                 alert("ACCESS DENIED");
@@ -221,7 +230,9 @@
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            signOut(auth).then(() => { window.location.href = "admin-login.html"; });
+            if(confirm("Log out form dashboard?")) {
+                signOut(auth).then(() => { window.location.href = "admin-login.html"; });
+            }
         });
 
         function loadData() {
@@ -245,7 +256,7 @@
                             const runner = eventData[userId];
                             allRegistrations.push({ eventId: eventId, userId: userId, ...runner });
                             stats.total++;
-                            if(runner.status === 'Paid') stats.paid++; else stats.pending++;
+                            if(runner.status && runner.status.toLowerCase() === 'paid') stats.paid++; else stats.pending++;
                         });
                     });
 
@@ -268,21 +279,19 @@
             });
         }
 
-        // --- RENDER TABLE (FIXED LOGIC) ---
         window.renderTable = function(dataArray) {
             const tableBody = document.getElementById('adminTableBody');
             tableBody.innerHTML = "";
 
             dataArray.forEach(row => {
-                // FIX: Check huruf kecil 'paid' supaya "PAID" atau "Paid" tetap jadi hijau
                 const statusClass = (row.status && row.status.toLowerCase() === 'paid') ? "paid" : "pending";
                 
                 const htmlRow = `
                     <tr>
-                        <td style="color:#ff0000; font-weight:bold;">${row.eventId.toUpperCase()}</td>
+                        <td style="color:var(--brand-red); font-weight:bold;">${row.eventId.toUpperCase()}</td>
                         <td>${row.first_name} ${row.last_name}</td>
                         <td>${row.email}<br><small style="color:#888;">${row.phone}</small></td>
-                        <td>${row.category} (${row.tshirt_size})</td>
+                        <td>${row.category} <span style="color:#aaa; font-size:0.8rem;">(${row.tshirt_size})</span></td>
                         <td><span class="badge ${statusClass}">${row.status}</span></td>
                         <td>
                             <button class="btn-action btn-approve" title="Approve Payment" onclick="updateStatus('${row.eventId}', '${row.userId}')"><i class="fas fa-check"></i></button>
@@ -304,7 +313,7 @@
                 const filtered = allRegistrations.filter(r => r.eventId === selectedEvent);
                 renderTable(filtered);
                 btnAnalytics.href = `participants.html?id=${selectedEvent}`;
-                btnAnalytics.style.display = 'inline-flex';
+                btnAnalytics.style.display = 'flex';
             }
         });
 
