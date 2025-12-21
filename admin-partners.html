@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Partners - Sea Mountain Admin</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
+        
+        .card { background: var(--card-bg); padding: 30px; border-radius: 12px; border: 1px solid #333; }
+        h2 { font-family: 'Russo One'; color: var(--brand-red); margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 0.8rem; color: #888; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 12px; background: #000; border: 1px solid #444; color: #fff; border-radius: 6px; outline: none; }
+        input:focus { border-color: var(--brand-red); }
+
+        .btn-submit { width: 100%; padding: 15px; background: var(--brand-red); color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-submit:hover { background: #cc0000; }
+
+        /* LIST STYLE */
+        .partner-list { display: grid; gap: 15px; max-height: 600px; overflow-y: auto; padding-right: 5px; }
+        .partner-item { background: #252830; padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 15px; border: 1px solid #333; }
+        .p-img { width: 60px; height: 60px; object-fit: contain; background: #fff; border-radius: 4px; padding: 5px; }
+        .p-info { flex: 1; }
+        .p-name { font-weight: bold; font-size: 1rem; }
+        .p-type { font-size: 0.75rem; text-transform: uppercase; color: #aaa; background: #111; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+        .btn-delete { background: #ff4d4d; color: #fff; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; }
+
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div style="margin-bottom: 20px;">
+        <a href="admin-dashboard.html" style="color:#aaa; text-decoration:none;"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+    <div class="container">
+        
+        <div class="card">
+            <h2>Add New Partner</h2>
+            <form id="partnerForm">
+                <div class="form-group">
+                    <label>Partner / Brand Name</label>
+                    <input type="text" id="pName" required placeholder="e.g. Nike">
+                </div>
+                <div class="form-group">
+                    <label>Category Type</label>
+                    <select id="pType" required>
+                        <option value="gold">Gold Sponsor (Big Logo)</option>
+                        <option value="silver">Silver Sponsor (Small Logo)</option>
+                        <option value="market">Marketplace Vendor (Ad Card)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Logo / Image URL</label>
+                    <input type="url" id="pImg" required placeholder="https://..." onchange="document.getElementById('preview').src = this.value">
+                    <img id="preview" style="width:100px; margin-top:10px; display:block; background:#fff; padding:5px;">
+                </div>
+                <div class="form-group">
+                    <label>Website / Shop Link</label>
+                    <input type="url" id="pLink" placeholder="https://..." required>
+                </div>
+                <div class="form-group" id="descGroup" style="display:none;">
+                    <label>Short Description (For Marketplace)</label>
+                    <textarea id="pDesc" rows="3" placeholder="e.g. Menjual kasut larian..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">ADD PARTNER</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Manage List</h2>
+            <div id="partnerList" class="partner-list">
+                <p style="color:#666; text-align:center;">Loading list...</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+            authDomain: "sea-mountain.firebaseapp.com",
+            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sea-mountain",
+            storageBucket: "sea-mountain.firebasestorage.app",
+            messagingSenderId: "812228825024",
+            appId: "1:812228825024:web:717049c1a64b39c8a60225"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        // AUTH CHECK
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email !== "admin@sm.com") {
+                window.location.href = "admin-login.html";
+            }
+        });
+
+        // UI LOGIC
+        document.getElementById('pType').addEventListener('change', function() {
+            const descGroup = document.getElementById('descGroup');
+            if(this.value === 'market') descGroup.style.display = 'block';
+            else descGroup.style.display = 'none';
+        });
+
+        // 1. ADD PARTNER
+        document.getElementById('partnerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newPartner = {
+                name: document.getElementById('pName').value,
+                type: document.getElementById('pType').value,
+                image: document.getElementById('pImg').value,
+                link: document.getElementById('pLink').value,
+                desc: document.getElementById('pDesc').value || ""
+            };
+
+            push(ref(db, 'partners'), newPartner)
+            .then(() => {
+                alert("Partner Added!");
+                document.getElementById('partnerForm').reset();
+                document.getElementById('preview').src = "";
+            });
+        });
+
+        // 2. LIST PARTNERS
+        onValue(ref(db, 'partners'), (snapshot) => {
+            const list = document.getElementById('partnerList');
+            list.innerHTML = "";
+            const data = snapshot.val();
+
+            if(data) {
+                Object.entries(data).forEach(([key, p]) => {
+                    const item = `
+                        <div class="partner-item">
+                            <img src="${p.image}" class="p-img">
+                            <div class="p-info">
+                                <div class="p-name">${p.name}</div>
+                                <span class="p-type" style="color:${getColor(p.type)}">${p.type}</span>
+                            </div>
+                            <button onclick="window.deletePartner('${key}')" class="btn-delete"><i class="fas fa-trash"></i></button>
+                        </div>
+                    `;
+                    list.innerHTML += item;
+                });
+            } else {
+                list.innerHTML = "<p style='color:#666; text-align:center;'>No partners yet.</p>";
+            }
+        });
+
+        function getColor(type) {
+            if(type === 'gold') return '#FFD700';
+            if(type === 'silver') return '#C0C0C0';
+            return '#ff0000';
+        }
+
+        // 3. DELETE FUNCTION (Global Scope)
+        window.deletePartner = (key) => {
+            if(confirm("Remove this partner?")) {
+                remove(ref(db, `partners/${key}`));
+            }
+        };
+    </script>
+</body>
+</html>
