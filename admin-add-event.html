@@ -67,8 +67,8 @@
         .form-input:disabled { background: #151515; color: #555; border-color: #222; cursor: not-allowed; }
         
         /* GRID SYSTEM (ROW & COL) - RESPONSIVE */
-        .row { display: flex; gap: 25px; }
-        .col { flex: 1; min-width: 0; }
+        .row { display: flex; gap: 25px; flex-wrap: wrap; } /* Tambah flex-wrap */
+        .col { flex: 1; min-width: 250px; } /* Tambah min-width supaya tak jadi terlalu kurus */
 
         /* BUTTON */
         .btn-submit { 
@@ -217,7 +217,7 @@
 
             <div class="form-section">
                 <span class="section-title"><i class="fas fa-image"></i> Event Visuals</span>
-                
+
                 <div class="row">
                     <div class="col">
                         <label class="form-label">Main Poster URL</label>
@@ -230,12 +230,14 @@
                         <img id="previewEnt" class="img-preview">
                     </div>
                 </div>
-
-                <div class="form-group" style="margin-top: 20px;">
+            
+                <div class="form-group" style="margin-top: 25px;">
                     <label class="form-label">E-Certificate Template URL (Landscape A4)</label>
                     <input type="url" id="certTemplate" class="form-input" placeholder="https://... (Kosongkan nama & masa)" onchange="previewImg(this, 'previewCert')">
-                    <img id="previewCert" class="img-preview" style="border: 2px dashed #444;">
-                    <small style="color:#666; font-size: 0.75rem; margin-top: 5px; display:block;">Gunakan gambar saiz A4 Landscape (Melintang). Pastikan ruang tengah kosong untuk nama.</small>
+                    <img id="previewCert" class="img-preview" style="border: 2px dashed #444; max-height: 200px;">
+                    <small style="color:#888; font-size: 0.75rem; margin-top: 5px; display:block;">
+                        <i class="fas fa-info-circle"></i> Gunakan gambar saiz A4 Landscape (Melintang). Pastikan ruang tengah kosong untuk nama.
+                    </small>
                 </div>
             </div>
 
