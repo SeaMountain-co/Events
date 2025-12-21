@@ -61,13 +61,23 @@
         }
         .page-subtitle { text-align: center; color: var(--text-gray); margin-bottom: 30px; }
 
-        .event-selector-bar { display: flex; justify-content: center; margin-bottom: 50px; }
+        /* SELECTOR BAR (UPDATED: FLEX GAP) */
+        .event-selector-bar { 
+            display: flex; justify-content: center; align-items: center; gap: 15px; 
+            margin-bottom: 50px; flex-wrap: wrap;
+        }
         .event-dropdown {
             background: #000; border: 2px solid var(--brand-red); color: #fff; padding: 15px 30px;
             border-radius: 50px; font-size: 1.1rem; font-weight: bold; outline: none; cursor: pointer;
             text-align: center; min-width: 300px;
         }
-        .event-dropdown:hover { box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
+        /* CATEGORY FILTER STYLE (NEW) */
+        .category-dropdown {
+            background: #1a1c23; border: 2px solid #444; color: #fff; padding: 15px 25px;
+            border-radius: 50px; font-size: 1rem; font-weight: 600; outline: none; cursor: pointer;
+            text-align: center; min-width: 200px;
+        }
+        .event-dropdown:hover, .category-dropdown:hover { box-shadow: 0 0 15px rgba(255, 0, 0, 0.2); border-color: var(--brand-red); }
 
         /* PODIUM SECTION */
         .podium-wrapper {
@@ -136,10 +146,11 @@
 
         @media (max-width: 768px) {
             .nav-links { display: none; }
+            .event-selector-bar { flex-direction: column; }
+            .event-dropdown, .category-dropdown { width: 100%; min-width: unset; }
             .podium-wrapper { flex-direction: column; align-items: center; }
             .rank-1, .rank-2, .rank-3 { order: unset; width: 100%; height: auto; border-bottom: none; border-left: 5px solid; transform: none; margin-bottom: 10px;}
             .rank-1 { border-color: var(--gold); } .rank-2 { border-color: var(--silver); } .rank-3 { border-color: var(--bronze); }
-            .event-dropdown { width: 100%; min-width: unset; }
         }
     </style>
 </head>
@@ -169,6 +180,10 @@
             <select id="eventSelector" class="event-dropdown">
                 <option value="" disabled selected>-- Select an Event --</option>
                 <option value="loading">Loading Events...</option>
+            </select>
+
+            <select id="categoryFilter" class="category-dropdown" disabled>
+                <option value="ALL">All Categories</option>
             </select>
         </div>
 
@@ -221,6 +236,8 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
+        let allRunnersData = []; // Simpan data global untuk filtering
+
         // 1. AUTH HEADER LOGIC
         const loginBtn = document.querySelector('.login-btn'); 
         onAuthStateChanged(auth, (user) => {
@@ -235,6 +252,7 @@
 
         // 2. POPULATE DROPDOWN
         const eventSelector = document.getElementById('eventSelector');
+        const categoryFilter = document.getElementById('categoryFilter');
         
         onValue(ref(db, 'events'), (snapshot) => {
             const data = snapshot.val();
@@ -257,114 +275,150 @@
             loadLeaderboard(this.value);
         });
 
-        // 4. LOAD LEADERBOARD DATA (Improved Logic with Flags)
+        // HANDLE CATEGORY FILTER CHANGE
+        categoryFilter.addEventListener('change', function() {
+            renderTable(this.value); // Render semula table ikut kategori
+        });
+
+        // 4. LOAD LEADERBOARD DATA
         function loadLeaderboard(eventId) {
             const tableBody = document.getElementById('leaderboardTable');
             const podiumSection = document.getElementById('podiumSection');
             
             tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:40px;">Fetching Live Results...</td></tr>';
             podiumSection.style.display = 'none';
+            
+            // Reset Category Filter
+            categoryFilter.innerHTML = '<option value="ALL">All Categories</option>';
+            categoryFilter.disabled = true;
 
             // Ambil Nama Event
             onValue(ref(db, `events/${eventId}/title`), (snap) => {
                 if(snap.exists()) document.getElementById('eventSubtitle').innerText = snap.val();
             });
 
-            // Ambil Data Peserta (Dari folder registrations)
+            // Ambil Data Peserta
             onValue(ref(db, `registrations/${eventId}`), (snapshot) => {
                 const data = snapshot.val();
-                tableBody.innerHTML = ""; 
                 
                 if (!data) {
                     tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:40px;">No participants found.</td></tr>';
+                    allRunnersData = [];
                     return;
                 }
 
-                // Convert object to Array
-                let runners = [];
+                // Convert to Array & Sort
+                allRunnersData = [];
+                const categoriesFound = new Set(); // Set untuk simpan kategori unik
+
                 Object.keys(data).forEach(key => {
-                    runners.push({ id: key, ...data[key] });
+                    const r = { id: key, ...data[key] };
+                    allRunnersData.push(r);
+                    if(r.category) categoriesFound.add(r.category);
                 });
 
-                // SORTING LOGIC
-                runners.sort((a, b) => {
+                // Populate Category Filter
+                categoriesFound.forEach(cat => {
+                    categoryFilter.innerHTML += `<option value="${cat}">${cat}</option>`;
+                });
+                if(categoriesFound.size > 0) categoryFilter.disabled = false;
+
+                // Default Sort (Overall)
+                allRunnersData.sort((a, b) => {
                     if (a.finish_time && b.finish_time) return a.finish_time.localeCompare(b.finish_time);
                     if (a.finish_time) return -1;
                     if (b.finish_time) return 1;
                     return 0; 
                 });
 
-                // --- GENERATE PODIUM (Top 3 Finishers) ---
-                const finishers = runners.filter(r => r.finish_time);
-                
-                if (finishers.length >= 1) {
-                    podiumSection.style.display = 'flex';
-                    podiumSection.innerHTML = ''; 
+                // Render Table & Podium (Default: ALL)
+                renderTable("ALL");
+            });
+        }
 
-                    const podiumOrder = [1, 0, 2]; // 2nd, 1st, 3rd
-                    podiumOrder.forEach(idx => {
-                        if (finishers[idx]) {
-                            const r = finishers[idx];
-                            const rank = idx + 1;
-                            const rankClass = `rank-${rank}`;
-                            const icon = rank === 1 ? '<i class="fas fa-crown"></i>' : rank;
-                            
-                            podiumSection.innerHTML += `
-                                <div class="podium-card ${rankClass}">
-                                    <div class="rank-badge">${icon}</div>
-                                    <img src="https://i.pravatar.cc/150?u=${r.id}" class="racer-avatar">
-                                    <div class="racer-name">${r.first_name}</div>
-                                    <div class="racer-bib">BIB: ${r.id.substring(0,6)}..</div>
-                                    <div style="flex-grow:1"></div>
-                                    <div class="racer-time">${r.finish_time}</div>
-                                    <span class="badge status-finished">Finished</span>
-                                </div>
-                            `;
-                        }
-                    });
+        // 5. RENDER TABLE FUNCTION (With Filter Support)
+        function renderTable(filterCat) {
+            const tableBody = document.getElementById('leaderboardTable');
+            const podiumSection = document.getElementById('podiumSection');
+            tableBody.innerHTML = "";
+            podiumSection.innerHTML = "";
+            podiumSection.style.display = 'none';
+
+            // Filter Runners
+            let filteredRunners = allRunnersData;
+            if (filterCat !== "ALL") {
+                filteredRunners = allRunnersData.filter(r => r.category === filterCat);
+            }
+
+            if(filteredRunners.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:40px;">No participants in this category.</td></tr>';
+                return;
+            }
+
+            // --- GENERATE PODIUM (Top 3 Finishers in filtered list) ---
+            const finishers = filteredRunners.filter(r => r.finish_time);
+            
+            if (finishers.length >= 1) {
+                podiumSection.style.display = 'flex';
+                
+                // Podium Order: 2nd, 1st, 3rd
+                const podiumOrder = [1, 0, 2]; 
+                
+                podiumOrder.forEach(idx => {
+                    if (finishers[idx]) {
+                        const r = finishers[idx];
+                        const rank = idx + 1;
+                        const rankClass = `rank-${rank}`;
+                        const icon = rank === 1 ? '<i class="fas fa-crown"></i>' : rank;
+                        
+                        podiumSection.innerHTML += `
+                            <div class="podium-card ${rankClass}">
+                                <div class="rank-badge">${icon}</div>
+                                <img src="https://i.pravatar.cc/150?u=${r.id}" class="racer-avatar">
+                                <div class="racer-name">${r.first_name}</div>
+                                <div class="racer-bib">BIB: ${r.id.substring(0,6)}..</div>
+                                <div style="flex-grow:1"></div>
+                                <div class="racer-time">${r.finish_time}</div>
+                                <span class="badge status-finished">Finished</span>
+                            </div>
+                        `;
+                    }
+                });
+            }
+
+            // --- GENERATE TABLE ---
+            let rankCounter = 1;
+            
+            filteredRunners.forEach(r => {
+                let posDisplay = "-";
+                let posClass = "";
+                
+                if (r.finish_time) {
+                    posDisplay = rankCounter++;
+                    if (posDisplay === 1) posClass = "pos-1";
+                    else if (posDisplay === 2) posClass = "pos-2";
+                    else if (posDisplay === 3) posClass = "pos-3";
                 }
 
-                // --- GENERATE FULL TABLE ---
-                let rankCounter = 1;
-                
-                runners.forEach(r => {
-                    let posDisplay = "-";
-                    let posClass = "";
-                    
-                    if (r.finish_time) {
-                        posDisplay = rankCounter++;
-                        if (posDisplay === 1) posClass = "pos-1";
-                        else if (posDisplay === 2) posClass = "pos-2";
-                        else if (posDisplay === 3) posClass = "pos-3";
-                    }
+                let countryCode = (r.country || "my").toLowerCase(); 
+                const flagUrl = `https://flagcdn.com/24x18/${countryCode}.png`;
+                const iso3 = { 'my':'MYS', 'sg':'SGP', 'id':'IDN', 'th':'THA', 'bn':'BRN', 'vn':'VNM', 'ph':'PHL' };
+                const displayCountry = iso3[countryCode] || countryCode.toUpperCase();
 
-                    // LOGIC BENDERA DINAMIK
-                    let countryCode = (r.country || "my").toLowerCase(); 
-                    const flagUrl = `https://flagcdn.com/24x18/${countryCode}.png`;
-                    const iso3 = { 'my':'MYS', 'sg':'SGP', 'id':'IDN', 'th':'THA', 'bn':'BRN', 'vn':'VNM', 'ph':'PHL' };
-                    const displayCountry = iso3[countryCode] || countryCode.toUpperCase();
-
-                    const row = `
-                        <tr>
-                            <td class="col-pos ${posClass}">${posDisplay}</td>
-                            
-                            <td class="col-bib" title="${r.id}">${r.id.substring(0,6)}..</td>
-                            
-                            <td style="font-weight:600;">${r.first_name} ${r.last_name || ''}</td>
-                            
-                            <td><img src="${flagUrl}" class="country-flag"> ${displayCountry}</td>
-                            
-                            <td>${r.category}</td>
-                            
-                            <td class="col-time">${r.time_TA1 || '-'}</td>
-                            <td class="col-time">${r.time_TA2 || '-'}</td>
-                            <td class="col-time">${r.time_TA3 || '-'}</td>
-                            
-                            <td class="col-finish">${r.finish_time || '-'}</td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
+                const row = `
+                    <tr>
+                        <td class="col-pos ${posClass}">${posDisplay}</td>
+                        <td class="col-bib" title="${r.id}">${r.id.substring(0,6)}..</td>
+                        <td style="font-weight:600;">${r.first_name} ${r.last_name || ''}</td>
+                        <td><img src="${flagUrl}" class="country-flag"> ${displayCountry}</td>
+                        <td>${r.category}</td>
+                        <td class="col-time">${r.time_TA1 || '-'}</td>
+                        <td class="col-time">${r.time_TA2 || '-'}</td>
+                        <td class="col-time">${r.time_TA3 || '-'}</td>
+                        <td class="col-finish">${r.finish_time || '-'}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
             });
         }
     </script>
