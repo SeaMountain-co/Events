@@ -10,7 +10,7 @@
     
     <style>
         :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
-        * { box-sizing: border-box; } /* PENTING: Pastikan padding tak kacau saiz */
+        * { box-sizing: border-box; }
         
         body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding-bottom: 50px; }
         
@@ -30,25 +30,15 @@
         
         .form-group label { display: block; margin-bottom: 8px; font-weight: 700; color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* STANDARDIZED INPUTS (SUPAYA SAMA SAIZ) */
+        /* STANDARDIZED INPUTS */
         .form-control { 
-            width: 100%; 
-            height: 50px; /* Tetapkan tinggi tetap */
-            padding: 0 15px; 
-            background: #0a0b0e; 
-            border: 1px solid #444; 
-            color: #fff; 
-            border-radius: 8px; 
-            font-size: 0.95rem; 
-            font-family: 'Montserrat';
-            outline: none; 
-            transition: 0.3s; 
-            appearance: none; /* Buang style default browser */
+            width: 100%; height: 50px; padding: 0 15px; 
+            background: #0a0b0e; border: 1px solid #444; color: #fff; border-radius: 8px; 
+            font-size: 0.95rem; font-family: 'Montserrat'; outline: none; transition: 0.3s; 
+            appearance: none; 
         }
-        
         .form-control:focus { border-color: var(--brand-red); box-shadow: 0 0 0 3px rgba(255,0,0,0.1); background: #111; }
         
-        /* Custom Arrow untuk Select supaya nampak premium */
         select.form-control {
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
@@ -58,7 +48,7 @@
         }
 
         .form-row { display: flex; gap: 20px; width: 100%; } 
-        .form-row .form-group { flex: 1; } /* Pastikan dua kolom sama besar */
+        .form-row .form-group { flex: 1; }
 
         .section-label { color: var(--brand-red); font-weight: 800; margin-top: 30px; margin-bottom: 20px; text-transform: uppercase; border-top: 1px solid #333; padding-top: 25px; font-size: 1rem; letter-spacing: 1px; }
 
@@ -92,19 +82,15 @@
         .btn-pay { background: var(--brand-red); color: #fff; width: 100%; padding: 18px; border: none; border-radius: 50px; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 25px; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
         .btn-pay:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,0,0,0.6); }
 
-        /* MOBILE OPTIMIZATION */
         @media (max-width: 900px) { 
             .container { flex-direction: column; padding: 0 15px; } 
             .form-card { padding: 20px; }
-            .form-row { flex-direction: column; gap: 0; } /* Stack inputs on mobile */
+            .form-row { flex-direction: column; gap: 0; } 
             .form-group { margin-bottom: 15px; }
-            
-            /* Order Logic: Form First, Summary Last */
             .summary-section { position: relative; top: 0; margin-top: 30px; order: 2; }
             .form-section { order: 1; }
         }
 
-        /* FIX DATE PICKER */
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
     </style>
 </head>
@@ -197,12 +183,8 @@
                         <div class="form-group">
                             <label>Race Category</label>
                             <select id="category" class="form-control" required>
-                                <option value="" disabled selected>Select Category</option>
-                                <option value="5km">5KM Fun Run</option>
-                                <option value="10km">10KM Speed</option>
-                                <option value="21km">21KM Half Marathon</option>
-                                <option value="50km">50KM Ultra Trail</option>
-                            </select>
+                                <option value="" disabled selected>Loading Categories...</option>
+                                </select>
                         </div>
                         <div class="form-group">
                             <label>T-Shirt Size</label>
@@ -321,7 +303,7 @@
         }
     });
 
-    // 2. LOAD EVENT DATA
+    // 2. LOAD EVENT DATA (WITH CATEGORY FETCH)
     if(eventId) {
         get(ref(db, 'events/' + eventId)).then((snapshot) => {
             if(snapshot.exists()) {
@@ -336,6 +318,31 @@
                 finalAmount = originalPrice;
 
                 updatePriceUI();
+
+                // --- NEW: POPULATE CATEGORY DROPDOWN ---
+                const categorySelect = document.getElementById('category');
+                categorySelect.innerHTML = '<option value="" disabled selected>Select Category</option>'; // Clear existing
+
+                if (data.categories) {
+                    // Jika data.categories adalah string (contoh: "5km, 10km"), split jadi array
+                    // Jika ia array (contoh: ["5km", "10km"]), guna terus
+                    let categories = Array.isArray(data.categories) ? data.categories : data.categories.split(',');
+
+                    categories.forEach(cat => {
+                        const cleanCat = cat.trim();
+                        if(cleanCat) {
+                            const option = document.createElement('option');
+                            option.value = cleanCat;
+                            option.text = cleanCat;
+                            categorySelect.appendChild(option);
+                        }
+                    });
+                } else {
+                    // Fallback jika tiada kategori ditetapkan
+                    categorySelect.innerHTML += '<option value="General">General Entry</option>';
+                }
+                // ---------------------------------------
+
             } else {
                 alert("Event not found.");
                 window.location.href = "index.html";
@@ -346,7 +353,7 @@
         window.location.href = "index.html";
     }
 
-    // 3. VOUCHER LOGIC (UPDATED WITH EVENT CHECK)
+    // 3. VOUCHER LOGIC
     document.getElementById('btnApply').addEventListener('click', () => {
         const codeInput = document.getElementById('voucherCode');
         const code = codeInput.value.trim().toUpperCase();
@@ -372,7 +379,6 @@
                     return;
                 }
 
-                // Cek Limit
                 const used = voucher.used ? parseInt(voucher.used) : 0;
                 const limit = voucher.limit ? parseInt(voucher.limit) : 0;
 
@@ -442,7 +448,7 @@
         document.getElementById('finalTotal').innerText = "RM " + finalAmount.toFixed(2);
     }
 
-    // 4. PROCEED TO PAYMENT (WITH VOUCHER UPDATE LOGIC)
+    // 4. PROCEED TO PAYMENT
     document.getElementById('payBtn').addEventListener('click', () => {
         const form = document.getElementById('regForm');
         
@@ -480,21 +486,17 @@
             registration_time: new Date().toLocaleString()
         };
 
-        // --- UPDATE VOUCHER USAGE DI SINI (SEBELUM PAYMENT) ---
         if (currentVoucherCode && currentVoucherCode !== "NONE") {
             const voucherRef = ref(db, `vouchers/${currentVoucherCode}/used`);
             runTransaction(voucherRef, (currentUsed) => {
                 return (currentUsed || 0) + 1;
             }).then(() => {
-                console.log("Voucher usage updated!");
                 sessionStorage.setItem('tempRegistration', JSON.stringify(tempRegData));
                 window.location.href = "payment.html";
             }).catch((err) => {
-                console.error("Voucher update failed: ", err);
-                alert("Error processing voucher. Please try again.");
+                alert("Error processing voucher.");
             });
         } else {
-            // Kalau tak guna voucher, teruskan saja
             sessionStorage.setItem('tempRegistration', JSON.stringify(tempRegData));
             window.location.href = "payment.html";
         }
