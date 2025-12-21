@@ -14,61 +14,92 @@
 
         body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; padding: 20px; margin: 0; }
         
-        .container { max-width: 900px; margin: 0 auto; background: var(--card-bg); padding: 40px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        /* CONTAINER UTAMA */
+        .container { 
+            max-width: 900px; margin: 0 auto; background: var(--card-bg); 
+            padding: 40px; border-radius: 15px; border: 1px solid #333; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
         
         /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 40px; border-bottom: 2px solid #333; padding-bottom: 20px; 
+        }
         .logo { font-family: 'Russo One'; color: #fff; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
         .logo span { color: var(--brand-red); }
-        .back-btn { color: #888; text-decoration: none; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .back-btn { 
+            color: #888; text-decoration: none; font-weight: 600; font-size: 0.9rem; 
+            display: flex; align-items: center; gap: 8px; transition: 0.3s; 
+        }
         .back-btn:hover { color: #fff; transform: translateX(-5px); }
 
-        /* FORM SECTIONS */
-        .form-section { margin-bottom: 40px; border: 1px solid #333; padding: 25px; border-radius: 12px; background: rgba(0,0,0,0.2); }
-        .section-title { color: var(--brand-red); font-weight: 800; text-transform: uppercase; margin-bottom: 20px; display: block; font-size: 1.1rem; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        /* FORM SECTIONS (KOTAK KATEGORI) */
+        .form-section { 
+            margin-bottom: 40px; border: 1px solid #333; padding: 30px; 
+            border-radius: 12px; background: rgba(0,0,0,0.2); 
+        }
+        .section-title { 
+            color: var(--brand-red); font-weight: 800; text-transform: uppercase; 
+            margin-bottom: 25px; display: block; font-size: 1.1rem; letter-spacing: 1px; 
+            border-bottom: 1px solid #333; padding-bottom: 10px; 
+        }
 
         .form-group { margin-bottom: 25px; }
         
         /* LABELS */
-        .form-label { display: block; margin-bottom: 8px; font-size: 0.75rem; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .form-label { 
+            display: block; margin-bottom: 10px; font-size: 0.75rem; 
+            color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; 
+        }
         
-        /* INPUTS & SELECTS */
+        /* INPUTS & SELECTS (LEBIH BESAR & KEMAS) */
         .form-input, textarea, select { 
-            width: 100%; padding: 14px; background: var(--input-bg); border: 1px solid #444; 
+            width: 100%; padding: 15px; background: var(--input-bg); border: 1px solid #444; 
             border-radius: 8px; color: #fff; outline: none; font-family: 'Montserrat'; font-size: 0.95rem;
             transition: 0.3s;
         }
-        .form-input:focus, textarea:focus, select:focus { border-color: var(--brand-red); box-shadow: 0 0 0 3px rgba(255,0,0,0.1); background: #111; }
+        .form-input:focus, textarea:focus, select:focus { 
+            border-color: var(--brand-red); box-shadow: 0 0 0 3px rgba(255,0,0,0.1); background: #111; 
+        }
         
         /* Disabled Input */
         .form-input:disabled { background: #151515; color: #555; border-color: #222; cursor: not-allowed; }
         
-        /* GRID SYSTEM (ROW & COL) */
+        /* GRID SYSTEM (ROW & COL) - RESPONSIVE */
         .row { display: flex; gap: 25px; }
-        .col { flex: 1; min-width: 0; /* Fix flex issue */ }
+        .col { flex: 1; min-width: 0; }
 
         /* BUTTON */
         .btn-submit { 
-            width: 100%; padding: 18px; background: var(--brand-red); color: #fff; border: none; 
-            border-radius: 8px; font-weight: 800; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; 
-            transition: 0.3s; box-shadow: 0 5px 15px rgba(255,0,0,0.3); margin-top: 10px;
+            width: 100%; padding: 20px; background: var(--brand-red); color: #fff; border: none; 
+            border-radius: 50px; font-weight: 800; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; 
+            transition: 0.3s; box-shadow: 0 5px 15px rgba(255,0,0,0.3); margin-top: 10px; letter-spacing: 1px;
         }
         .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255,0,0,0.5); }
         
-        .img-preview { margin-top: 15px; max-width: 100%; height: auto; display: none; border-radius: 8px; border: 1px solid #444; }
+        .img-preview { 
+            margin-top: 15px; max-width: 100%; height: auto; display: none; 
+            border-radius: 8px; border: 1px solid #444; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
         
         /* LOADING OVERLAY */
-        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:none; justify-content:center; align-items:center; z-index:999; flex-direction: column; }
+        .loading-overlay { 
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background:rgba(0,0,0,0.9); display:none; justify-content:center; align-items:center; 
+            z-index:999; flex-direction: column; 
+        }
         .loading-text { font-family: 'Russo One'; margin-top: 15px; font-size: 1.2rem; color: #fff; letter-spacing: 2px; }
 
-        /* MOBILE RESPONSIVE */
+        /* MOBILE RESPONSIVE (MEDIA QUERY) */
         @media (max-width: 768px) {
             .container { padding: 20px; border: none; background: transparent; box-shadow: none; }
-            .form-section { padding: 20px; background: var(--card-bg); border: none; }
+            .form-section { padding: 20px; background: var(--card-bg); border: 1px solid #333; }
             .row { flex-direction: column; gap: 0; } /* Stack columns vertically */
             .col { margin-bottom: 20px; }
             .form-group { margin-bottom: 20px; }
-            .header { margin-bottom: 30px; }
+            .header { margin-bottom: 30px; flex-direction: column; gap: 15px; align-items: flex-start; }
+            .back-btn { width: 100%; padding: 10px; background: #222; justify-content: center; border-radius: 5px; }
         }
 
         /* Fix Date Picker Icon Color */
@@ -93,6 +124,7 @@
 
             <div class="form-section">
                 <span class="section-title"><i class="fas fa-info-circle"></i> Basic Information</span>
+                
                 <div class="row">
                     <div class="col">
                         <label class="form-label">Event Unique ID (No Spaces)</label>
@@ -123,7 +155,9 @@
                         <label class="form-label">Distances (Label Only)</label>
                         <input type="text" id="eventDistance" class="form-input" placeholder="e.g. 5KM, 10KM" required>
                     </div>
-                    <div class="col"></div> </div>
+                    <div class="col">
+                        </div>
+                </div>
 
                 <div class="form-group" style="margin-top: 10px;">
                     <label class="form-label">Full Event Title</label>
@@ -136,12 +170,15 @@
                 <div class="form-group">
                     <label class="form-label">Categories List (Separate by comma)</label>
                     <textarea id="categoriesInput" class="form-input" rows="3" placeholder="e.g. 5KM Fun Run, 10KM Speed, 21KM Half Marathon"></textarea>
-                    <small style="color:#666; font-size: 0.75rem; margin-top: 5px; display:block;">These options will appear in the registration form dropdown for users to select.</small>
+                    <small style="color:#666; font-size: 0.75rem; margin-top: 8px; display:block; line-height: 1.4;">
+                        <i class="fas fa-info-circle"></i> These options will appear in the registration form dropdown for users to select.
+                    </small>
                 </div>
             </div>
 
             <div class="form-section">
                 <span class="section-title"><i class="far fa-calendar-alt"></i> Date & Venue</span>
+                
                 <div class="form-group">
                     <label class="form-label">Registration Period</label>
                     <div class="row">
@@ -149,6 +186,7 @@
                         <div class="col"><input type="date" id="regEnd" class="form-input" required title="End Date"></div>
                     </div>
                 </div>
+
                 <div class="form-group">
                     <label class="form-label">Event Date (Race Day)</label>
                     <div class="row">
@@ -156,6 +194,7 @@
                         <div class="col"><input type="date" id="eventEnd" class="form-input" required title="End Date"></div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col">
                         <label class="form-label">Event Venue</label>
@@ -178,6 +217,7 @@
 
             <div class="form-section">
                 <span class="section-title"><i class="fas fa-image"></i> Event Visuals</span>
+                
                 <div class="row">
                     <div class="col">
                         <label class="form-label">Main Poster URL</label>
@@ -190,18 +230,28 @@
                         <img id="previewEnt" class="img-preview">
                     </div>
                 </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">E-Certificate Template URL (Landscape A4)</label>
+                    <input type="url" id="certTemplate" class="form-input" placeholder="https://... (Kosongkan nama & masa)" onchange="previewImg(this, 'previewCert')">
+                    <img id="previewCert" class="img-preview" style="border: 2px dashed #444;">
+                    <small style="color:#666; font-size: 0.75rem; margin-top: 5px; display:block;">Gunakan gambar saiz A4 Landscape (Melintang). Pastikan ruang tengah kosong untuk nama.</small>
+                </div>
             </div>
 
             <div class="form-section">
                 <span class="section-title"><i class="fas fa-align-left"></i> Description & Policies</span>
+                
                 <div class="form-group">
                     <label class="form-label">Event Description</label>
                     <textarea id="eventDesc" rows="4" class="form-input"></textarea>
                 </div>
+                
                 <div class="form-group">
                     <label class="form-label">Entitlements List</label>
                     <textarea id="entitlementInput" class="form-input" rows="3" placeholder="e.g. Medal, T-Shirt, Bib, Goodies Bag..."></textarea>
                 </div>
+                
                 <div class="row">
                     <div class="col">
                         <label class="form-label">Terms & Conditions</label>
@@ -254,7 +304,7 @@
         }
     });
 
-    // 2. EDIT MODE
+    // 2. EDIT MODE (LOAD DATA)
     function enterEditMode(id) {
         document.getElementById('loading').style.display = 'flex';
         document.getElementById('pageTitle').innerHTML = `EDIT <span>${id.toUpperCase()}</span>`;
@@ -269,6 +319,7 @@
             if(snapshot.exists()) {
                 const data = snapshot.val();
                 
+                // BASIC INFO
                 document.getElementById('eventTitle').value = data.title || "";
                 document.getElementById('eventPrice').value = data.price || "";
                 document.getElementById('eventVenue').value = data.venue || "";
@@ -280,13 +331,16 @@
                 if(document.getElementById('faqInput')) document.getElementById('faqInput').value = data.faq || "";
                 if(document.getElementById('tncInput')) document.getElementById('tncInput').value = data.tnc || "";
                 
-                // CATEGORIES
-                if(data.categories && Array.isArray(data.categories)) {
-                    document.getElementById('categoriesInput').value = data.categories.join(', ');
-                } else if(data.categories) {
-                    document.getElementById('categoriesInput').value = data.categories; 
+                // CATEGORIES (FIXED)
+                if(document.getElementById('categoriesInput')) {
+                    if(data.categories && Array.isArray(data.categories)) {
+                        document.getElementById('categoriesInput').value = data.categories.join(', ');
+                    } else if(data.categories) {
+                        document.getElementById('categoriesInput').value = data.categories; 
+                    }
                 }
 
+                // DROPDOWNS & NUMBERS
                 document.getElementById('eventCategory').value = data.category || "upcoming";
                 document.getElementById('eventQuota').value = data.quota || "";
                 document.getElementById('eventDistance').value = data.distance || "";
@@ -308,6 +362,12 @@
                     document.getElementById('entitlementPoster').value = data.entitlement_image;
                      previewImg(document.getElementById('entitlementPoster'), 'previewEnt');
                 }
+                
+                // CERT TEMPLATE
+                if(data.cert_template) {
+                    document.getElementById('certTemplate').value = data.cert_template;
+                    previewImg(document.getElementById('certTemplate'), 'previewCert');
+                }
 
             } else {
                 alert("Event ID not found!");
@@ -322,7 +382,7 @@
         else { img.style.display = "none"; }
     }
 
-    // 4. SUBMIT
+    // 4. SUBMIT FORM
     document.getElementById('eventForm').addEventListener('submit', (e) => {
         e.preventDefault();
 
@@ -348,9 +408,18 @@
         let faqText = document.getElementById('faqInput') ? document.getElementById('faqInput').value : "";
         let tncText = document.getElementById('tncInput') ? document.getElementById('tncInput').value : "";
 
-        // CATEGORIES
-        const catInput = document.getElementById('categoriesInput').value;
-        const categoriesArray = catInput.split(',').map(s => s.trim()).filter(s => s !== "");
+        // CATEGORIES (FIXED)
+        let categoriesArray = [];
+        if(document.getElementById('categoriesInput')) {
+            const catInput = document.getElementById('categoriesInput').value;
+            categoriesArray = catInput.split(',').map(s => s.trim()).filter(s => s !== "");
+        }
+
+        // CERT TEMPLATE (FIXED)
+        let certTemplateUrl = "";
+        if(document.getElementById('certTemplate')) {
+            certTemplateUrl = document.getElementById('certTemplate').value;
+        }
 
         const eventData = {
             title: document.getElementById('eventTitle').value,
@@ -366,6 +435,7 @@
 
             image_url: document.getElementById('mainPoster').value,
             entitlement_image: document.getElementById('entitlementPoster').value,
+            cert_template: certTemplateUrl, // Save Template URL
             kit_date: document.getElementById('kitDate').value,
             
             category: document.getElementById('eventCategory').value,
