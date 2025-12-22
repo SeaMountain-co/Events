@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFID Assignment - Timing System</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <style>
+        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding: 20px; }
+        
+        .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
+        
+        /* HEADER */
+        .header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+        .logo { font-family: 'Russo One'; font-size: 1.5rem; color: #fff; text-transform: uppercase; }
+        .logo span { color: var(--brand-red); }
+        .back-btn { color: #888; text-decoration: none; font-weight: 600; }
+
+        /* LEFT: SCANNER BOX */
+        .scan-card { background: var(--card-bg); padding: 40px 20px; border-radius: 15px; border: 2px solid var(--brand-red); text-align: center; box-shadow: 0 0 20px rgba(255, 0, 0, 0.2); }
+        .scan-icon { font-size: 4rem; color: var(--brand-red); margin-bottom: 20px; animation: pulse 2s infinite; }
+        .scan-status { font-family: 'Russo One'; font-size: 1.2rem; margin-bottom: 10px; }
+        .scan-input { 
+            width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: var(--brand-red); 
+            font-size: 1.5rem; text-align: center; border-radius: 8px; font-weight: bold; outline: none; letter-spacing: 2px;
+        }
+        .scan-input:focus { border-color: var(--brand-red); box-shadow: 0 0 15px rgba(255,0,0,0.3); }
+
+        /* RIGHT: FORM ASSIGNMENT */
+        .form-card { background: var(--card-bg); padding: 30px; border-radius: 15px; border: 1px solid #333; opacity: 0.5; pointer-events: none; transition: 0.3s; }
+        .form-card.active { opacity: 1; pointer-events: all; }
+
+        .form-group { margin-bottom: 20px; }
+        .label { display: block; margin-bottom: 8px; color: #888; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
+        .input-box { width: 100%; padding: 12px; background: #000; border: 1px solid #444; color: #fff; border-radius: 6px; font-family: 'Montserrat'; font-size: 1rem; }
+        
+        /* Select2 Dark Mode Customization */
+        .select2-container--default .select2-selection--single { background-color: #000; border: 1px solid #444; height: 45px; border-radius: 6px; }
+        .select2-container--default .select2-selection--single .select2-selection__rendered { color: #fff; line-height: 45px; padding-left: 12px; }
+        .select2-dropdown { background-color: #1a1c23; border: 1px solid #444; color: #fff; }
+        .select2-search__field { background-color: #000; color: #fff; }
+        .select2-results__option--highlighted[aria-selected] { background-color: var(--brand-red); }
+
+        .btn-save { width: 100%; padding: 15px; background: #28a745; border: none; color: #fff; font-weight: bold; border-radius: 8px; font-size: 1rem; cursor: pointer; margin-top: 10px; }
+        .btn-save:hover { background: #218838; }
+
+        .info-tag { display: inline-block; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; }
+        .tag-new { background: #3498db; color: #fff; }
+        .tag-exist { background: #f1c40f; color: #000; }
+
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+
+        @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">TIMING <span>PANEL</span></div>
+        <a href="admin-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Admin</a>
+    </div>
+
+    <div style="max-width: 1000px; margin: 0 auto 30px;">
+        <select id="eventSelector" class="input-box" style="font-size: 1.2rem; font-weight: bold;">
+            <option value="" disabled selected>-- Select Event First --</option>
+            <option value="loading">Loading Events...</option>
+        </select>
+    </div>
+
+    <div class="container">
+        
+        <div class="scan-card">
+            <i class="fas fa-wifi scan-icon"></i>
+            <div class="scan-status" id="scanStatus">READY TO SCAN</div>
+            <p style="color:#888; font-size:0.9rem; margin-bottom: 20px;">Tap card on reader. Do not click outside.</p>
+            <input type="text" id="rfidInput" class="scan-input" placeholder="TAP CARD HERE" autocomplete="off" autofocus>
+            <button onclick="document.getElementById('rfidInput').focus()" style="margin-top:10px; background:none; border:1px solid #555; color:#555; padding:5px 10px; border-radius:4px; cursor:pointer;">Re-focus Input</button>
+        </div>
+
+        <div id="assignForm" class="form-card">
+            <div id="cardTypeTag" class="info-tag tag-new" style="display:none;">NEW CARD DETECTED</div>
+            
+            <div class="form-group">
+                <label class="label">Card UID</label>
+                <input type="text" id="displayUID" class="input-box" readonly style="background:#111; color:#888;">
+            </div>
+
+            <div class="form-group">
+                <label class="label">Select Participant</label>
+                <select id="participantSelect" style="width: 100%;">
+                    <option></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="label">Assign BIB Number</label>
+                <input type="text" id="bibInput" class="input-box" placeholder="e.g. A1001">
+            </div>
+
+            <div class="form-group">
+                <label class="label">Category</label>
+                <input type="text" id="catDisplay" class="input-box" readonly style="background:#111; color:#aaa;">
+            </div>
+
+            <button id="btnSave" class="btn-save"><i class="fas fa-link"></i> LINK CARD & SAVE</button>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+            authDomain: "sea-mountain.firebaseapp.com",
+            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sea-mountain",
+            storageBucket: "sea-mountain.firebasestorage.app",
+            messagingSenderId: "812228825024",
+            appId: "1:812228825024:web:717049c1a64b39c8a60225"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let participantsData = []; 
+        let rfidMap = {}; 
+
+        // 1. INIT SELECT2
+        $(document).ready(function() {
+            $('#participantSelect').select2({
+                placeholder: "Search name, email, or IC...",
+                allowClear: true
+            });
+
+            $('#participantSelect').on('select2:select', function (e) {
+                const userId = e.params.data.id;
+                const user = participantsData.find(p => p.id === userId);
+                if(user) {
+                    document.getElementById('catDisplay').value = user.category || "-";
+                    if(user.bib) document.getElementById('bibInput').value = user.bib;
+                }
+            });
+        });
+
+        // 2. LOAD EVENTS
+        const eventSelect = document.getElementById('eventSelector');
+        onValue(ref(db, 'events'), (snapshot) => {
+            eventSelect.innerHTML = '<option value="" disabled selected>-- Select Event First --</option>';
+            if(snapshot.exists()){
+                Object.entries(snapshot.val()).forEach(([key, ev]) => {
+                    eventSelect.innerHTML += `<option value="${key}">${ev.title}</option>`;
+                });
+            }
+        });
+
+        // 3. LOAD PARTICIPANTS
+        eventSelect.addEventListener('change', function() {
+            const eventId = this.value;
+            loadParticipants(eventId);
+            document.getElementById('rfidInput').focus();
+        });
+
+        function loadParticipants(eventId) {
+            onValue(ref(db, `registrations/${eventId}`), (snapshot) => {
+                const data = snapshot.val();
+                participantsData = [];
+                rfidMap = {};
+                
+                $('#participantSelect').empty().trigger("change");
+
+                if(data) {
+                    Object.entries(data).forEach(([key, p]) => {
+                        participantsData.push({ id: key, ...p });
+                        
+                        if(p.rfid_tag) {
+                            rfidMap[p.rfid_tag] = { id: key, name: p.first_name + " " + p.last_name };
+                        }
+
+                        const label = `${p.first_name} ${p.last_name} (${p.category})`;
+                        const newOption = new Option(label, key, false, false);
+                        $('#participantSelect').append(newOption);
+                    });
+                }
+                $('#participantSelect').trigger('change');
+            });
+        }
+
+        // 4. RFID SCAN LOGIC (BUG FIXED)
+        const rfidInput = document.getElementById('rfidInput');
+        
+        rfidInput.addEventListener('change', function() {
+            handleScan(this.value.trim());
+        });
+
+        // NOTA: Saya dah BUANG event listener 'blur' di sini.
+        // Sekarang bila tuan klik kotak BIB, scanner takkan kacau fokus.
+
+        function handleScan(code) {
+            if(!code) return;
+            if(eventSelect.value === "") { alert("Please select an event first!"); rfidInput.value = ""; return; }
+
+            const form = document.getElementById('assignForm');
+            const uidField = document.getElementById('displayUID');
+            const statusTag = document.getElementById('cardTypeTag');
+            
+            document.querySelector('.scan-icon').style.color = '#00ff00';
+            setTimeout(() => document.querySelector('.scan-icon').style.color = '#ff0000', 500);
+
+            // Activate Form
+            form.classList.add('active');
+            uidField.value = code;
+
+            // CHECK EXISTING
+            if (rfidMap[code]) {
+                const existingUser = rfidMap[code];
+                statusTag.innerText = "EXISTING CARD DETECTED";
+                statusTag.className = "info-tag tag-exist";
+                statusTag.style.display = "inline-block";
+                
+                $('#participantSelect').val(existingUser.id).trigger('change');
+                alert(`Card registered to: ${existingUser.name}`); // Optional alert
+            } else {
+                statusTag.innerText = "NEW CARD DETECTED";
+                statusTag.className = "info-tag tag-new";
+                statusTag.style.display = "inline-block";
+                
+                $('#participantSelect').val(null).trigger('change');
+                document.getElementById('bibInput').value = "";
+                document.getElementById('catDisplay').value = "";
+            }
+
+            // Clear input tapi JANGAN paksa fokus terus, biar user isi form
+            rfidInput.value = "";
+        }
+
+        // 5. SAVE DATA
+        document.getElementById('btnSave').addEventListener('click', () => {
+            const eventId = eventSelect.value;
+            const rfid = document.getElementById('displayUID').value;
+            const userId = $('#participantSelect').val();
+            const bib = document.getElementById('bibInput').value;
+
+            if(!eventId || !rfid || !userId || !bib) {
+                alert("Please fill in all fields (User & BIB).");
+                return;
+            }
+
+            const updates = {};
+            updates[`registrations/${eventId}/${userId}/rfid_tag`] = rfid;
+            updates[`registrations/${eventId}/${userId}/bib`] = bib;
+
+            update(ref(db), updates).then(() => {
+                alert("SUCCESS! Card Assigned.");
+                resetForm(); // Panggil fungsi reset
+            }).catch((err) => {
+                alert("Error: " + err.message);
+            });
+        });
+
+        // Helper: Reset Form & Sedia Scan Seterusnya
+        function resetForm() {
+            document.getElementById('assignForm').classList.remove('active');
+            document.getElementById('displayUID').value = "";
+            document.getElementById('cardTypeTag').style.display = "none";
+            $('#participantSelect').val(null).trigger('change');
+            document.getElementById('bibInput').value = "";
+            
+            // FOKUS BALIK KE SCANNER HANYA BILA DAH SIAP SAVE
+            document.getElementById('rfidInput').focus(); 
+        }
+
+        // Tambahan: Shortcut key 'ESC' untuk cancel
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                resetForm();
+            }
+        });
+
+    </script>
+</body>
+</html>
