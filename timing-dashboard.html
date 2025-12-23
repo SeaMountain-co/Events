@@ -9,28 +9,74 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg: #0f1014; --card: #1a1c23; --accent: #00d2ff; --text: #fff; --success: #2ecc71; --error: #e74c3c; --pending: #f39c12; }
+        :root { 
+            --bg: #0f1014; --card: #1a1c23; --accent: #00d2ff; --text: #fff; 
+            --success: #2ecc71; --error: #e74c3c; --pending: #f39c12; 
+            --sidebar-w: 260px;
+        }
         * { box-sizing: border-box; }
         
-        body { background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; min-height: 100vh; }
+        body { background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; min-height: 100vh; display: flex; }
 
-        /* --- HEADER --- */
-        .header { padding: 15px 30px; background: rgba(0,0,0,0.8); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
-        .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -1px; }
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-w); background: #000; border-right: 1px solid #333;
+            display: flex; flex-direction: column; height: 100vh; position: fixed; left: 0; top: 0; z-index: 100;
+            padding: 20px;
+        }
+        .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -1px; margin-bottom: 20px; text-align: center; }
         .logo span { color: var(--accent); }
-        .live-clock { font-family: monospace; color: #aaa; font-size: 1rem; border: 1px solid #333; padding: 5px 15px; border-radius: 5px; }
 
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        .user-panel { 
+            display: flex; flex-direction: column; gap: 10px; align-items: center; 
+            margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #333;
+        }
+        .timing-badge { 
+            display: flex; align-items: center; gap: 8px; background: #111; 
+            padding: 8px 12px; border-radius: 6px; border: 1px solid #333; 
+            font-size: 0.8rem; color: #ccc; width: 100%; justify-content: center;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .btn-logout { 
+            background: transparent; border: 1px solid #e74c3c; color: #e74c3c; 
+            padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; 
+            cursor: pointer; width: 100%; transition: 0.2s;
+        }
+        .btn-logout:hover { background: #e74c3c; color: #fff; }
+        
+        .clock-box {
+            background: #111; border: 1px solid #333; padding: 15px; border-radius: 8px;
+            text-align: center; margin-bottom: 30px;
+        }
+        .clock-label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .live-clock { font-family: monospace; color: var(--accent); font-size: 1.5rem; font-weight: bold; }
+
+        .nav-group { display: flex; flex-direction: column; gap: 10px; }
+        .btn-side {
+            background: transparent; border: 1px solid transparent; color: #aaa; padding: 12px 15px;
+            border-radius: 8px; text-decoration: none; display: flex; align-items: center; gap: 10px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: 0.3s;
+        }
+        .btn-side:hover { background: #1a1c23; color: #fff; border-color: #333; }
+        .btn-side.active { background: var(--accent); color: #000; }
+        .btn-side i { width: 20px; text-align: center; }
+
+        /* --- MAIN CONTENT --- */
+        .main-wrapper { 
+            margin-left: var(--sidebar-w); width: calc(100% - var(--sidebar-w)); 
+            padding: 20px; min-height: 100vh; overflow-x: hidden;
+        }
+
         .screen { display: none; animation: fadeIn 0.3s ease; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
 
         /* --- HOME SCREEN --- */
-        .home-wrapper { max-width: 1200px; margin: 20px auto; text-align: center; }
+        .home-wrapper { max-width: 1200px; margin: 0 auto; text-align: center; }
         
-        /* Event & Role Selection Area */
-        .setup-area { background: var(--card); padding: 30px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
-        .event-select { width: 100%; max-width: 600px; padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 1rem; margin-bottom: 30px; }
+        .setup-area { background: var(--card); padding: 40px; border-radius: 15px; border: 1px solid #333; margin-bottom: 30px; }
+        .event-select { width: 100%; max-width: 600px; padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 1rem; margin-bottom: 30px; outline: none; }
+        .event-select:focus { border-color: var(--accent); }
         
         .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 800px; margin: 0 auto; }
         .role-card { background: #000; padding: 30px 20px; border-radius: 12px; cursor: pointer; border: 2px solid #333; transition: 0.3s; }
@@ -39,7 +85,7 @@
         .role-repc:hover { border-color: #f39c12; } .role-repc:hover i { color: #f39c12; }
         .role-race:hover { border-color: var(--accent); } .role-race:hover i { color: var(--accent); }
 
-        /* --- OVERALL LEADERBOARD TABLE --- */
+        /* --- LEADERBOARD --- */
         .leaderboard-section { background: var(--card); border-radius: 15px; border: 1px solid #333; overflow: hidden; margin-top: 30px; }
         .leaderboard-header { padding: 15px; background: #111; border-bottom: 1px solid #333; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .lb-title { color: var(--accent); text-transform: uppercase; font-size: 1.1rem; letter-spacing: 1px; }
@@ -59,12 +105,11 @@
         .finish-cell { font-family: monospace; font-weight: bold; color: var(--success); font-size: 1rem; }
         .country-flag { vertical-align: middle; margin-right: 5px; width: 20px; }
 
-        /* --- DASHBOARD GRID (SCANNER) --- */
+        /* --- SCANNER --- */
         .scanner-layout { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; align-items: start; }
-        .left-panel { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; position: sticky; top: 90px; }
+        .left-panel { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; position: sticky; top: 20px; }
         .top-controls { display: flex; gap: 10px; margin-bottom: 20px; }
-        .btn-home { background: #333; border: none; color: #fff; width: 45px; height: 45px; border-radius: 8px; cursor: pointer; }
-        .mode-badge { flex:1; background:#000; border:1px solid #333; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--accent); letter-spacing: 1px; }
+        .mode-badge { flex:1; background:#000; border:1px solid #333; border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:bold; color:var(--accent); letter-spacing: 1px; padding: 10px; }
 
         .scan-status { background: #000; padding: 30px; border-radius: 12px; text-align: center; border: 2px solid #333; margin-bottom: 20px; transition: 0.2s; }
         .scan-status.success { border-color: var(--success); background: rgba(46, 204, 113, 0.05); }
@@ -74,15 +119,15 @@
         .scan-bib { font-family: monospace; color: var(--accent); font-size: 1.4rem; cursor: pointer; text-decoration: underline; background: #222; padding: 5px 15px; border-radius: 5px; display: inline-block; }
         .scan-time { margin-top: 15px; color: #666; font-size: 0.9rem; }
 
-        .manual-input { width: 100%; padding: 15px; background: #111; border: 1px solid #444; color: #fff; text-align: center; font-size: 1.1rem; border-radius: 8px; margin-bottom: 20px; }
-        .manual-input:focus { border-color: var(--accent); outline: none; }
+        .manual-input { width: 100%; padding: 15px; background: #111; border: 1px solid #444; color: #fff; text-align: center; font-size: 1.1rem; border-radius: 8px; margin-bottom: 20px; outline: none; }
+        .manual-input:focus { border-color: var(--accent); }
 
         .stats-row { display: flex; gap: 10px; }
         .stat-box { flex: 1; background: #111; padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #333; }
         .stat-num { font-size: 1.5rem; font-weight: 800; }
         .stat-label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
 
-        /* RIGHT PANEL: TABLES */
+        /* RIGHT PANEL */
         .right-panel { display: flex; flex-direction: column; gap: 20px; }
         .table-card { background: var(--card); border-radius: 15px; border: 1px solid #333; overflow: hidden; }
         .table-header { padding: 15px; background: #111; border-bottom: 1px solid #333; font-weight: bold; color: #888; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; font-size: 0.85rem; }
@@ -95,9 +140,16 @@
         .btn-toggle-mobile { display: none; }
         #rfidInput { position: fixed; top: -1000px; opacity: 0; }
 
-        @media (max-width: 768px) {
-            .header { padding: 15px; }
-            .container { padding: 10px; }
+        @media (max-width: 1000px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: sticky; top: 0; flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 20px; }
+            .logo { margin-bottom: 0; font-size: 1rem; }
+            .user-panel { display: none; } 
+            .clock-box { display: none; } 
+            .nav-group { display: flex; flex-direction: row; }
+            .btn-side span { display: none; } 
+            
+            .main-wrapper { margin-left: 0; width: 100%; padding: 10px; }
             .role-grid { grid-template-columns: 1fr; }
             .scanner-layout { grid-template-columns: 1fr; gap: 10px; }
             .left-panel { position: static; padding: 15px; }
@@ -105,7 +157,7 @@
             .btn-toggle-mobile { display: block; width: 100%; padding: 15px; background: #333; color: #fff; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer; }
             .right-panel { display: none; } 
             .right-panel.show { display: block; }
-            .leaderboard-section { display: none; } /* Hide big table on mobile home to save space */
+            .leaderboard-section { display: none; }
         }
     </style>
 </head>
@@ -113,18 +165,37 @@
 
     <input type="text" id="rfidInput" autofocus autocomplete="off">
 
-    <div class="header">
+    <nav class="sidebar">
         <div class="logo">SEA <span>TIMING</span></div>
-        <div class="live-clock" id="clock">00:00:00</div>
-    </div>
+        
+        <div class="user-panel">
+            <div class="timing-badge" id="timingDisplay">
+                <i class="fas fa-spinner fa-spin"></i> Checking...
+            </div>
+            <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
 
-    <div class="container">
+        <div class="clock-box">
+            <div class="clock-label">Live System Time</div>
+            <div class="live-clock" id="clock">00:00:00</div>
+        </div>
+
+        <div class="nav-group">
+            <button onclick="goHome()" class="btn-side" title="Home"><i class="fas fa-home"></i> <span>Home / Reset</span></button>
+            <a href="timing-rfid.html" class="btn-side" title="RFID Manager"><i class="fa-regular fa-id-card"></i> <span>RFID Manager</span></a>
+            <a href="admin-login.html" class="btn-side" title="Back to Admin"><i class="fas fa-arrow-left"></i> <span>Admin Panel</span></a>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
 
         <div id="screen-home" class="screen active">
             <div class="home-wrapper">
                 
                 <div class="setup-area">
-                    <h2 style="margin-bottom:20px; text-transform:uppercase;">Select Event & Role</h2>
+                    <h2 style="margin-bottom:10px; text-transform:uppercase;">Select Event & Role</h2>
+                    <p style="color:#888; margin-bottom:20px; font-size:0.9rem;">Choose the event and your station to start scanning.</p>
+                    
                     <select id="globalEventSelect" class="event-select"><option value="">-- Loading Events --</option></select>
                     
                     <div class="role-grid">
@@ -135,7 +206,6 @@
                             <i class="fas fa-flag-checkered"></i><h3>RACE MARSHAL</h3><p style="color:#888; font-size:0.8rem;">Race Day Timing</p>
                         </div>
                     </div>
-                    <div style="margin-top:20px;"><a href="admin-dashboard.html" style="color:#666; text-decoration:none; font-size:0.8rem;"><i class="fas fa-arrow-left"></i> Back to Admin Dashboard</a></div>
                 </div>
 
                 <div class="leaderboard-section" id="overallLeaderboard">
@@ -170,8 +240,8 @@
 
         <div id="screen-cp-select" class="screen">
             <div class="home-wrapper">
-                <button class="btn-home" onclick="goHome()" style="margin-bottom:20px;"><i class="fas fa-arrow-left"></i></button>
-                <h2>SELECT CHECKPOINT</h2>
+                <button class="btn-side" onclick="goHome()" style="margin-bottom:20px; width:fit-content; background:#333;"><i class="fas fa-arrow-left"></i> Back</button>
+                <h2 style="margin-bottom:30px;">SELECT CHECKPOINT</h2>
                 <div class="role-grid">
                     <div class="role-card" onclick="startScanner('TA1')"><h3>TA1</h3></div>
                     <div class="role-card" onclick="startScanner('TA2')"><h3>TA2</h3></div>
@@ -186,7 +256,6 @@
                 
                 <div class="left-panel">
                     <div class="top-controls">
-                        <button class="btn-home" onclick="goHome()"><i class="fas fa-home"></i></button>
                         <div class="mode-badge" id="displayMode">LOADING...</div>
                     </div>
                     <div id="scanStatusCard" class="scan-status">
@@ -240,6 +309,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
@@ -252,7 +322,11 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getDatabase(app);
+
+    // --- SENARAI USER YANG DIBENARKAN ---
+    const ALLOWED_TIMING_USERS = ["admin@sm.com", "crew@sm.com"];
 
     let currentEventId = "";
     let activeMode = "";
@@ -268,6 +342,23 @@
         navigator.clipboard.writeText(text).then(() => alert("ID Copied: " + text));
     }
 
+    // --- AUTHENTICATION ---
+    onAuthStateChanged(auth, (user) => {
+        if (user && ALLOWED_TIMING_USERS.includes(user.email)) {
+            const icon = user.email.includes("admin") ? "user-shield" : "user-clock";
+            document.getElementById('timingDisplay').innerHTML = `<i class="fas fa-${icon}"></i> ${user.email}`;
+        } else {
+            alert("ACCESS DENIED: Unauthorized Account");
+            window.location.href = "timing-login.html"; 
+        }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        if(confirm("Log out form Timing System?")) {
+            signOut(auth).then(() => { window.location.href = "timing-login.html"; });
+        }
+    });
+
     // --- NAVIGATION ---
     window.selectRole = function(role) {
         currentEventId = document.getElementById('globalEventSelect').value;
@@ -280,11 +371,14 @@
         activeMode = mode;
         document.getElementById('displayMode').innerText = (mode === 'REPC') ? "REPC COUNTER" : mode + " CHECKPOINT";
         showScreen('screen-scanner');
-        renderScannerUI(); // Render scanner specific tables
+        renderScannerUI(); 
     }
 
     window.goHome = function() {
-        if(confirm("Exit session?")) { activeMode = ""; showScreen('screen-home'); renderLeaderboard(); }
+        if(activeMode && !confirm("Exit session?")) return;
+        activeMode = ""; 
+        showScreen('screen-home'); 
+        renderLeaderboard();
     }
 
     window.toggleTableMobile = function() {
@@ -299,14 +393,12 @@
     // --- LOAD EVENTS & DATA ---
     const eventSelect = document.getElementById('globalEventSelect');
     
-    // Load Events List
     onValue(ref(db, 'events'), (snap) => {
         eventSelect.innerHTML = '<option value="">-- Select Event First --</option>';
         const data = snap.val();
         if(data) Object.keys(data).forEach(k => eventSelect.innerHTML += `<option value="${k}">${data[k].title}</option>`);
     });
 
-    // Event Selection Changed -> Load Data & Render Leaderboard
     eventSelect.addEventListener('change', (e) => {
         currentEventId = e.target.value;
         if(currentEventId) {
@@ -324,16 +416,12 @@
             allParticipants = [];
             if(data) Object.keys(data).forEach(k => allParticipants.push({id: k, ...data[k]}));
             
-            // If on home screen, update leaderboard
             if(!activeMode) renderLeaderboard();
-            // If on scanner screen, update scanner tables
             else renderScannerUI();
         });
     }
 
     // --- RENDER FUNCTIONS ---
-
-    // 1. MAIN LEADERBOARD (HOME SCREEN)
     function renderLeaderboard() {
         const tbody = document.getElementById('leaderboardBody');
         tbody.innerHTML = "";
@@ -343,7 +431,6 @@
             return;
         }
 
-        // Sort: Finisher atas, ikut masa paling cepat. Yang belum habis duk bawah.
         const sorted = [...allParticipants].sort((a, b) => {
             if (a.finish_time && b.finish_time) return a.finish_time.localeCompare(b.finish_time);
             if (a.finish_time) return -1;
@@ -364,7 +451,6 @@
                 posHtml = `<span class="pos-badge ${colorClass}">${rank++}</span>`;
             }
 
-            // Flag Logic (Default MYS)
             const flagUrl = "https://flagcdn.com/24x18/my.png"; 
             const countryCode = "MYS";
 
@@ -385,7 +471,6 @@
         });
     }
 
-    // 2. SCANNER UI (DI DALAM MODE SCAN)
     function renderScannerUI() {
         const total = allParticipants.length;
         let scannedCount = 0;
@@ -415,7 +500,7 @@
         });
 
         scannedCount = scannedList.length;
-        scannedList.reverse(); // Latest scan on top
+        scannedList.reverse();
 
         scannedList.forEach(p => {
             tbodyScanned.innerHTML += `
