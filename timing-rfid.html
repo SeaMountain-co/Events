@@ -144,6 +144,11 @@
                     <input type="text" id="catDisplay" class="input-box input-readonly" readonly>
                 </div>
 
+                <div class="form-group" style="display:none;" id="eventDisplayGroup">
+                    <label class="label">Event ID</label>
+                    <input type="text" id="eventDisplay" class="input-box input-readonly" readonly>
+                </div>
+
                 <button id="btnSave" class="btn-save">LINK CARD & SAVE</button>
                 <div style="text-align:center;">
                     <button onclick="resetForm()" class="btn-cancel">Cancel / Reset (ESC)</button>
@@ -154,12 +159,13 @@
         <div class="table-section">
             <div class="table-header">
                 <h3 style="margin:0;">Manage Participants List</h3>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search by name, BIB or Card ID...">
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by name, BIB, Event or Card ID...">
             </div>
             <div style="overflow-x:auto;">
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th style="color:var(--accent);">EVENT</th>
                             <th>BIB</th>
                             <th>Name</th>
                             <th>Category</th>
@@ -169,7 +175,7 @@
                         </tr>
                     </thead>
                     <tbody id="participantTableBody">
-                        <tr><td colspan="6" style="text-align:center; padding:30px; color:#666;">Select an event to load list.</td></tr>
+                        <tr><td colspan="7" style="text-align:center; padding:30px; color:#666;">Select an event to load list.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -179,7 +185,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
@@ -206,15 +212,20 @@
                 const user = participantsData.find(p => p.id === userId);
                 if(user) {
                     document.getElementById('catDisplay').value = user.category || "-";
+                    // Papar Event ID jika user pilih "ALL EVENTS"
+                    document.getElementById('eventDisplay').value = user.eventId || "-";
                     if(user.bib) document.getElementById('bibInput').value = user.bib;
                 }
             });
         });
 
-        // 2. LOAD EVENTS
+        // 2. LOAD EVENTS (Tambah Option 'ALL')
         const eventSelect = document.getElementById('eventSelector');
         onValue(ref(db, 'events'), (snapshot) => {
             eventSelect.innerHTML = '<option value="" disabled selected>-- Select Event First --</option>';
+            // Tambah Pilihan ALL EVENTS
+            eventSelect.innerHTML += '<option value="all" style="font-weight:bold; color:#00d2ff;">ALL EVENTS (VIEW & MANAGE)</option>';
+            
             if(snapshot.exists()){
                 Object.entries(snapshot.val()).forEach(([key, ev]) => {
                     eventSelect.innerHTML += `<option value="${key}">${ev.title}</option>`;
@@ -222,14 +233,23 @@
             }
         });
 
-        // 3. LOAD PARTICIPANTS
+        // 3. LOAD PARTICIPANTS (Logik 'All' ditambah)
         eventSelect.addEventListener('change', function() {
             loadParticipants(this.value);
             document.getElementById('rfidInput').focus();
         });
 
         function loadParticipants(eventId) {
-            onValue(ref(db, `registrations/${eventId}`), (snapshot) => {
+            let dbRef;
+            
+            // Kalau pilih ALL, ambil root 'registrations'
+            if(eventId === 'all') {
+                dbRef = ref(db, 'registrations');
+            } else {
+                dbRef = ref(db, `registrations/${eventId}`);
+            }
+
+            onValue(dbRef, (snapshot) => {
                 const data = snapshot.val();
                 participantsData = [];
                 rfidMap = {};
@@ -237,31 +257,51 @@
                 $('#participantSelect').empty().trigger("change");
 
                 if(data) {
-                    Object.entries(data).forEach(([key, p]) => {
-                        participantsData.push({ id: key, ...p });
-                        
-                        if(p.rfid_tag) {
-                            rfidMap[p.rfid_tag] = { id: key, name: p.first_name + " " + p.last_name };
-                        }
-
-                        const label = `${p.first_name} ${p.last_name} (${p.category})`;
-                        const newOption = new Option(label, key, false, false);
-                        $('#participantSelect').append(newOption);
-                    });
+                    // Jika ALL EVENTS, structure data: { eventA: {users...}, eventB: {users...} }
+                    if(eventId === 'all') {
+                        Object.entries(data).forEach(([evId, users]) => {
+                            Object.entries(users).forEach(([userId, p]) => {
+                                processUserData(userId, p, evId);
+                            });
+                        });
+                    } 
+                    // Jika SINGLE EVENT, structure data: { user1: ..., user2: ... }
+                    else {
+                        Object.entries(data).forEach(([userId, p]) => {
+                            processUserData(userId, p, eventId);
+                        });
+                    }
                 }
                 
                 $('#participantSelect').trigger('change');
-                renderTable(participantsData); // Render Table Bawah
+                renderTable(participantsData);
             });
         }
 
-        // 4. RENDER TABLE & SEARCH
+        // Helper untuk proses data (supaya tak ulang kod)
+        function processUserData(userId, p, evId) {
+            // Tambah eventId ke dalam object user untuk rujukan
+            const userObj = { id: userId, eventId: evId, ...p };
+            participantsData.push(userObj);
+            
+            // Map RFID (Global Check)
+            if(p.rfid_tag) {
+                rfidMap[p.rfid_tag] = { id: userId, name: p.first_name + " " + p.last_name, eventId: evId };
+            }
+
+            // Dropdown Label (Ada Nama Event kalau pilih ALL)
+            const label = `${p.first_name} ${p.last_name} [${evId.toUpperCase()}] - ${p.category}`;
+            const newOption = new Option(label, userId, false, false);
+            $('#participantSelect').append(newOption);
+        }
+
+        // 4. RENDER TABLE & SEARCH (Tambah Column Event)
         function renderTable(data) {
             const tbody = document.getElementById('participantTableBody');
             tbody.innerHTML = "";
 
             if(data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No participants found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No participants found.</td></tr>';
                 return;
             }
 
@@ -272,12 +312,13 @@
                     : `<span class="status-none">NO CARD</span>`;
                 
                 const actionHtml = isLinked 
-                    ? `<button class="btn-unlink" onclick="unlinkCard('${p.id}')"><i class="fas fa-unlink"></i> Unlink</button>` 
+                    ? `<button class="btn-unlink" onclick="unlinkCard('${p.id}', '${p.eventId}')"><i class="fas fa-unlink"></i> Unlink</button>` 
                     : `<span style="color:#666;">-</span>`;
 
                 const row = `
                     <tr>
-                        <td style="color:var(--accent); font-weight:bold;">${p.bib || '-'}</td>
+                        <td style="color:var(--accent); font-weight:bold; text-transform:uppercase;">${p.eventId}</td>
+                        <td style="font-weight:bold;">${p.bib || '-'}</td>
                         <td>${p.first_name} ${p.last_name || ''}</td>
                         <td>${p.category}</td>
                         <td>${statusHtml}</td>
@@ -294,17 +335,17 @@
             const filtered = participantsData.filter(p => 
                 (p.first_name + " " + p.last_name).toLowerCase().includes(term) ||
                 (p.bib || "").toLowerCase().includes(term) ||
+                (p.eventId || "").toLowerCase().includes(term) || // Boleh search by Event ID
                 (p.rfid_tag || "").toLowerCase().includes(term)
             );
             renderTable(filtered);
         });
 
-        // 5. UNLINK FUNCTION
-        window.unlinkCard = function(userId) {
-            const eventId = eventSelect.value;
+        // 5. UNLINK FUNCTION (Kena pass eventId sebab mungkin 'All Events' dipilih)
+        window.unlinkCard = function(userId, userEventId) {
             if(confirm("Are you sure you want to unlink (remove) the card from this user?")) {
                 const updates = {};
-                updates[`registrations/${eventId}/${userId}/rfid_tag`] = null; // Delete field
+                updates[`registrations/${userEventId}/${userId}/rfid_tag`] = null; 
                 
                 update(ref(db), updates).then(() => {
                     alert("Card Unlinked Successfully!");
@@ -347,25 +388,37 @@
                 $('#participantSelect').val(null).trigger('change');
                 document.getElementById('bibInput').value = "";
                 document.getElementById('catDisplay').value = "";
+                document.getElementById('eventDisplay').value = "";
             }
             rfidInput.value = "";
         }
 
-        // 7. SAVE DATA
+        // 7. SAVE DATA (Updated Logic for All Events)
         document.getElementById('btnSave').addEventListener('click', () => {
-            const eventId = eventSelect.value;
+            const dropdownValue = eventSelect.value;
             const rfid = document.getElementById('displayUID').value;
             const userId = $('#participantSelect').val();
             const bib = document.getElementById('bibInput').value;
 
-            if(!eventId || !rfid || !userId || !bib) {
+            if(!userId || !rfid || !bib) {
                 alert("Please fill in all fields (User & BIB).");
                 return;
             }
 
+            // Cari user dalam data array untuk dapatkan Event ID sebenar
+            const selectedUser = participantsData.find(p => p.id === userId);
+            
+            // Jika dropdown "ALL", guna eventId dari user. Jika specific, guna dropdown value.
+            const targetEventId = selectedUser ? selectedUser.eventId : dropdownValue;
+
+            if(!targetEventId || targetEventId === 'all') {
+                alert("Error: Cannot determine Event ID for this user.");
+                return;
+            }
+
             const updates = {};
-            updates[`registrations/${eventId}/${userId}/rfid_tag`] = rfid;
-            updates[`registrations/${eventId}/${userId}/bib`] = bib;
+            updates[`registrations/${targetEventId}/${userId}/rfid_tag`] = rfid;
+            updates[`registrations/${targetEventId}/${userId}/bib`] = bib;
 
             update(ref(db), updates).then(() => {
                 alert("SUCCESS! Card Assigned.");
@@ -382,6 +435,7 @@
             document.getElementById('cardTypeTag').style.display = "none";
             $('#participantSelect').val(null).trigger('change');
             document.getElementById('bibInput').value = "";
+            document.getElementById('eventDisplay').value = "";
             document.getElementById('rfidInput').focus(); 
         }
 
