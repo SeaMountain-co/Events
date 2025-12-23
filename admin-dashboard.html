@@ -235,7 +235,6 @@
         const db = getDatabase(app);
         const ALLOWED_ADMIN = "admin@sm.com"; 
 
-        // SIDEBAR TOGGLE
         window.toggleMenu = function() {
             document.getElementById('sidebar').classList.toggle('active');
             document.querySelector('.overlay').classList.toggle('active');
@@ -259,6 +258,7 @@
             }
         });
 
+        // --- 1. LOAD DATA WITH STRICT FILTER ---
         function loadData() {
             const dbRef = ref(db, 'registrations');
             
@@ -269,23 +269,31 @@
                 
                 document.getElementById('loadingMsg').style.display = 'none';
                 tableBody.innerHTML = ""; 
-                
-                // RESET ARRAY (PENTING!)
                 allRegistrations = []; 
                 let stats = { total: 0, paid: 0, pending: 0 };
                 let eventList = new Set(); 
 
                 if (data) {
                     Object.keys(data).forEach(eventId => {
-                        eventList.add(eventId); 
                         const eventData = data[eventId];
                         
+                        // PASTIKAN eventData adalah object, bukan string (untuk elak key tersesat)
                         if(eventData && typeof eventData === 'object') {
+                            eventList.add(eventId); 
+                            
                             Object.keys(eventData).forEach(userId => {
                                 const runner = eventData[userId];
                                 
-                                // PENAPIS KETAT: Elak data hantu/undefined
-                                if (runner && runner.first_name) {
+                                // --- PENAPIS KETAT (ANTI-UNDEFINED) ---
+                                // 1. Mesti object
+                                // 2. Mesti ada 'first_name' yang sah (bukan undefined/null)
+                                // 3. Key userId tidak boleh string "undefined"
+                                if (runner && 
+                                    typeof runner === 'object' && 
+                                    runner.first_name && 
+                                    userId !== 'undefined' &&
+                                    userId !== 'null') {
+                                    
                                     allRegistrations.push({ eventId: eventId, userId: userId, ...runner });
                                     
                                     stats.total++;
@@ -342,26 +350,22 @@
             }
 
             dataArray.forEach(row => {
-                const currentStatus = (row.status || "").toLowerCase();
-                const isPaid = currentStatus === 'paid';
+                const isPaid = (row.status && row.status.toLowerCase() === 'paid');
                 const statusClass = isPaid ? "paid" : "pending";
                 
-                // --- MANUAL CHECK LOGIC ---
                 let actionBtn = "";
                 if(isPaid) {
-                    // Kalau dah Paid, tunjuk butang REVOKE (Oren) untuk undo
-                    actionBtn = `<button class="btn-action btn-revoke" title="Revoke (Set Pending)" onclick="togglePaymentStatus('${row.eventId}', '${row.userId}', 'Pending Payment')"><i class="fas fa-undo"></i></button>`;
+                    actionBtn = `<button class="btn-action btn-revoke" title="Revoke Payment" onclick="togglePaymentStatus('${row.eventId}', '${row.userId}', 'Pending Payment')"><i class="fas fa-undo"></i></button>`;
                 } else {
-                    // Kalau belum Paid, tunjuk butang APPROVE (Hijau)
-                    actionBtn = `<button class="btn-action btn-approve" title="Approve (Set Paid)" onclick="togglePaymentStatus('${row.eventId}', '${row.userId}', 'Paid')"><i class="fas fa-check"></i></button>`;
+                    actionBtn = `<button class="btn-action btn-approve" title="Mark as Paid" onclick="togglePaymentStatus('${row.eventId}', '${row.userId}', 'Paid')"><i class="fas fa-check"></i></button>`;
                 }
 
                 const htmlRow = `
                     <tr>
                         <td style="color:var(--brand-red); font-weight:bold;">${row.eventId.toUpperCase()}</td>
-                        <td>${row.first_name} ${row.last_name}</td>
-                        <td>${row.email}<br><small style="color:#888;">${row.phone}</small></td>
-                        <td>${row.category} <span style="color:#aaa; font-size:0.8rem;">(${row.tshirt_size})</span></td>
+                        <td>${row.first_name} ${row.last_name || ''}</td>
+                        <td>${row.email || '-'}<br><small style="color:#888;">${row.phone || '-'}</small></td>
+                        <td>${row.category || '-'} <span style="color:#aaa; font-size:0.8rem;">(${row.tshirt_size || '-'})</span></td>
                         <td><span class="badge ${statusClass}">${row.status || 'Pending Payment'}</span></td>
                         <td style="white-space:nowrap;">
                             ${actionBtn}
@@ -408,7 +412,14 @@
             }
         }
 
+        // --- 2. DELETE FUNCTION WITH SAFEGUARDS ---
         window.deleteRunner = function(eventId, userId) {
+            // Elak delete jika ID rosak
+            if(!eventId || !userId || userId === 'undefined') {
+                alert("Cannot delete: Invalid ID. Try refreshing.");
+                return;
+            }
+
             if(confirm("Delete this runner permanently?")) { 
                 remove(ref(db, `registrations/${eventId}/${userId}`))
                 .then(() => alert("User Deleted Successfully"))
@@ -416,12 +427,17 @@
             }
         }
         
-        // --- SATU FUNGSI UNTUK TUKAR STATUS (PAID <-> PENDING) ---
+        // --- 3. TOGGLE STATUS FUNCTION ---
         window.togglePaymentStatus = function(eventId, userId, newStatus) {
+            // Elak update jika ID rosak
+            if(!eventId || !userId || userId === 'undefined') {
+                alert("Cannot update: Invalid ID. Try refreshing.");
+                return;
+            }
+
             if(confirm(`Confirm change status to '${newStatus}'?`)) { 
                 update(ref(db, `registrations/${eventId}/${userId}`), { status: newStatus })
                 .then(() => {
-                    // Tak perlu reload, onValue akan auto update.
                     alert("Success! Status updated to " + newStatus);
                 })
                 .catch((err) => {
