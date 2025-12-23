@@ -6,98 +6,112 @@
     <title>RFID Assignment - Timing System</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
     
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
-        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
-        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding: 20px; }
+        /* --- TEMA DASHBOARD (SAMA MACAM TIMING DASHBOARD) --- */
+        :root { --bg: #0f1014; --card: #1a1c23; --accent: #00d2ff; --text: #fff; --success: #2ecc71; --error: #e74c3c; --pending: #f39c12; }
+        * { box-sizing: border-box; }
         
-        .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
-        
+        body { background: var(--bg); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; min-height: 100vh; }
+
         /* HEADER */
-        .header { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 20px; }
-        .logo { font-family: 'Russo One'; font-size: 1.5rem; color: #fff; text-transform: uppercase; }
-        .logo span { color: var(--brand-red); }
-        .back-btn { color: #888; text-decoration: none; font-weight: 600; }
+        .header { padding: 15px 30px; background: rgba(0,0,0,0.8); border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+        .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -1px; }
+        .logo span { color: var(--accent); }
+        .back-btn { color: #aaa; text-decoration: none; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .back-btn:hover { color: #fff; }
 
-        /* LEFT: SCANNER BOX */
-        .scan-card { background: var(--card-bg); padding: 40px 20px; border-radius: 15px; border: 2px solid var(--brand-red); text-align: center; box-shadow: 0 0 20px rgba(255, 0, 0, 0.2); }
-        .scan-icon { font-size: 4rem; color: var(--brand-red); margin-bottom: 20px; animation: pulse 2s infinite; }
-        .scan-status { font-family: 'Russo One'; font-size: 1.2rem; margin-bottom: 10px; }
+        /* CONTAINER */
+        .container { max-width: 1200px; margin: 30px auto; padding: 20px; display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
+
+        /* EVENT SELECTOR (ATAS) */
+        .top-bar { grid-column: 1 / -1; margin-bottom: 20px; }
+        .event-select { width: 100%; max-width: 500px; padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 1rem; outline: none; transition: 0.3s; }
+        .event-select:focus { border-color: var(--accent); }
+
+        /* LEFT PANEL: SCANNER */
+        .scan-card { background: var(--card); padding: 40px; border-radius: 15px; border: 1px solid #333; text-align: center; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .scan-icon { font-size: 5rem; color: var(--accent); margin-bottom: 30px; animation: pulse 2s infinite; }
+        .scan-status { font-family: 'Russo One'; font-size: 1.5rem; margin-bottom: 15px; color: #fff; }
         .scan-input { 
-            width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: var(--brand-red); 
-            font-size: 1.5rem; text-align: center; border-radius: 8px; font-weight: bold; outline: none; letter-spacing: 2px;
+            width: 100%; padding: 20px; background: #000; border: 2px solid #444; color: var(--accent); 
+            font-size: 1.2rem; text-align: center; border-radius: 10px; font-weight: bold; outline: none; letter-spacing: 2px;
+            text-transform: uppercase; margin-bottom: 15px; transition: 0.3s;
         }
-        .scan-input:focus { border-color: var(--brand-red); box-shadow: 0 0 15px rgba(255,0,0,0.3); }
+        .scan-input:focus { border-color: var(--accent); box-shadow: 0 0 20px rgba(0, 210, 255, 0.2); }
+        .scan-hint { color: #666; font-size: 0.85rem; }
 
-        /* RIGHT: FORM ASSIGNMENT */
-        .form-card { background: var(--card-bg); padding: 30px; border-radius: 15px; border: 1px solid #333; opacity: 0.5; pointer-events: none; transition: 0.3s; }
-        .form-card.active { opacity: 1; pointer-events: all; }
+        /* RIGHT PANEL: FORM */
+        .form-card { background: var(--card); padding: 40px; border-radius: 15px; border: 1px solid #333; opacity: 0.3; pointer-events: none; transition: 0.3s; position: relative; }
+        .form-card.active { opacity: 1; pointer-events: all; border-color: var(--accent); }
 
-        .form-group { margin-bottom: 20px; }
-        .label { display: block; margin-bottom: 8px; color: #888; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; }
-        .input-box { width: 100%; padding: 12px; background: #000; border: 1px solid #444; color: #fff; border-radius: 6px; font-family: 'Montserrat'; font-size: 1rem; }
+        .tag-badge { position: absolute; top: 20px; right: 20px; font-size: 0.75rem; font-weight: bold; padding: 5px 10px; border-radius: 4px; display: none; text-transform: uppercase; }
+        .tag-new { background: var(--success); color: #000; }
+        .tag-exist { background: var(--pending); color: #000; }
+
+        .form-group { margin-bottom: 25px; }
+        .label { display: block; margin-bottom: 10px; color: #888; font-weight: bold; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* Select2 Dark Mode Customization */
-        .select2-container--default .select2-selection--single { background-color: #000; border: 1px solid #444; height: 45px; border-radius: 6px; }
-        .select2-container--default .select2-selection--single .select2-selection__rendered { color: #fff; line-height: 45px; padding-left: 12px; }
+        .input-box { width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 8px; font-family: 'Montserrat'; font-size: 1rem; outline: none; transition: 0.3s; }
+        .input-box:focus { border-color: var(--accent); }
+        .input-readonly { background: #151515; color: #666; border-color: #222; cursor: default; }
+
+        .btn-save { width: 100%; padding: 18px; background: var(--success); border: none; color: #000; font-weight: 800; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-save:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(46, 204, 113, 0.2); }
+        .btn-cancel { background: transparent; border: none; color: #666; margin-top: 15px; cursor: pointer; text-decoration: underline; font-size: 0.9rem; }
+
+        /* SELECT2 DARK THEME OVERRIDE */
+        .select2-container--default .select2-selection--single { background-color: #000; border: 1px solid #444; height: 50px; border-radius: 8px; }
+        .select2-container--default .select2-selection--single .select2-selection__rendered { color: #fff; line-height: 50px; padding-left: 15px; }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 48px; }
         .select2-dropdown { background-color: #1a1c23; border: 1px solid #444; color: #fff; }
-        .select2-search__field { background-color: #000; color: #fff; }
-        .select2-results__option--highlighted[aria-selected] { background-color: var(--brand-red); }
+        .select2-search__field { background-color: #000 !important; color: #fff !important; border: 1px solid #444 !important; }
+        .select2-results__option--highlighted[aria-selected] { background-color: var(--accent); color: #000; }
+        .select2-results__option[aria-selected=true] { background-color: #333; }
 
-        .btn-save { width: 100%; padding: 15px; background: #28a745; border: none; color: #fff; font-weight: bold; border-radius: 8px; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-        .btn-save:hover { background: #218838; }
-
-        .info-tag { display: inline-block; padding: 5px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-bottom: 15px; }
-        .tag-new { background: #3498db; color: #fff; }
-        .tag-exist { background: #f1c40f; color: #000; }
-
-        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
-
-        @media (max-width: 800px) { .container { grid-template-columns: 1fr; } }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
+        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .scan-card { padding: 30px; margin-bottom: 20px; } }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="logo">TIMING <span>PANEL</span></div>
-        <a href="admin-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Admin</a>
-    </div>
-
-    <div style="max-width: 1000px; margin: 0 auto 30px;">
-        <select id="eventSelector" class="input-box" style="font-size: 1.2rem; font-weight: bold;">
-            <option value="" disabled selected>-- Select Event First --</option>
-            <option value="loading">Loading Events...</option>
-        </select>
+        <div class="logo">SEA <span>TIMING</span></div>
+        <a href="admin-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
     </div>
 
     <div class="container">
         
+        <div class="top-bar">
+            <select id="eventSelector" class="event-select">
+                <option value="" disabled selected>-- Select Event First --</option>
+                <option value="loading">Loading Events...</option>
+            </select>
+        </div>
+
         <div class="scan-card">
             <i class="fas fa-wifi scan-icon"></i>
-            <div class="scan-status" id="scanStatus">READY TO SCAN</div>
-            <p style="color:#888; font-size:0.9rem; margin-bottom: 20px;">Tap card on reader. Do not click outside.</p>
-            <input type="text" id="rfidInput" class="scan-input" placeholder="TAP CARD HERE" autocomplete="off" autofocus>
-            <button onclick="document.getElementById('rfidInput').focus()" style="margin-top:10px; background:none; border:1px solid #555; color:#555; padding:5px 10px; border-radius:4px; cursor:pointer;">Re-focus Input</button>
+            <div class="scan-status">READY TO SCAN</div>
+            <input type="text" id="rfidInput" class="scan-input" placeholder="Click & Tap Card" autocomplete="off" autofocus>
+            <p class="scan-hint">Ensure cursor is blinking inside the box before scanning.</p>
         </div>
 
         <div id="assignForm" class="form-card">
-            <div id="cardTypeTag" class="info-tag tag-new" style="display:none;">NEW CARD DETECTED</div>
+            <div id="cardTypeTag" class="tag-badge">NEW CARD</div>
             
             <div class="form-group">
                 <label class="label">Card UID</label>
-                <input type="text" id="displayUID" class="input-box" readonly style="background:#111; color:#888;">
+                <input type="text" id="displayUID" class="input-box input-readonly" readonly>
             </div>
 
             <div class="form-group">
                 <label class="label">Select Participant</label>
-                <select id="participantSelect" style="width: 100%;">
-                    <option></option>
-                </select>
+                <select id="participantSelect" style="width: 100%;"><option></option></select>
             </div>
 
             <div class="form-group">
@@ -107,17 +121,20 @@
 
             <div class="form-group">
                 <label class="label">Category</label>
-                <input type="text" id="catDisplay" class="input-box" readonly style="background:#111; color:#aaa;">
+                <input type="text" id="catDisplay" class="input-box input-readonly" readonly>
             </div>
 
-            <button id="btnSave" class="btn-save"><i class="fas fa-link"></i> LINK CARD & SAVE</button>
+            <button id="btnSave" class="btn-save">LINK CARD & SAVE</button>
+            <div style="text-align:center;">
+                <button onclick="resetForm()" class="btn-cancel">Cancel / Reset (ESC)</button>
+            </div>
         </div>
 
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
@@ -195,15 +212,13 @@
             });
         }
 
-        // 4. RFID SCAN LOGIC (BUG FIXED)
+        // 4. RFID SCAN LOGIC
         const rfidInput = document.getElementById('rfidInput');
+        const scanIcon = document.querySelector('.scan-icon');
         
         rfidInput.addEventListener('change', function() {
             handleScan(this.value.trim());
         });
-
-        // NOTA: Saya dah BUANG event listener 'blur' di sini.
-        // Sekarang bila tuan klik kotak BIB, scanner takkan kacau fokus.
 
         function handleScan(code) {
             if(!code) return;
@@ -213,33 +228,31 @@
             const uidField = document.getElementById('displayUID');
             const statusTag = document.getElementById('cardTypeTag');
             
-            document.querySelector('.scan-icon').style.color = '#00ff00';
-            setTimeout(() => document.querySelector('.scan-icon').style.color = '#ff0000', 500);
+            // Visual Feedback
+            scanIcon.style.color = '#2ecc71'; // Green
+            setTimeout(() => scanIcon.style.color = '#00d2ff', 500); // Back to blue
 
             // Activate Form
             form.classList.add('active');
             uidField.value = code;
 
-            // CHECK EXISTING
             if (rfidMap[code]) {
                 const existingUser = rfidMap[code];
-                statusTag.innerText = "EXISTING CARD DETECTED";
-                statusTag.className = "info-tag tag-exist";
-                statusTag.style.display = "inline-block";
+                statusTag.innerText = "EXISTING CARD";
+                statusTag.className = "tag-badge tag-exist";
+                statusTag.style.display = "block";
                 
                 $('#participantSelect').val(existingUser.id).trigger('change');
-                alert(`Card registered to: ${existingUser.name}`); // Optional alert
             } else {
-                statusTag.innerText = "NEW CARD DETECTED";
-                statusTag.className = "info-tag tag-new";
-                statusTag.style.display = "inline-block";
+                statusTag.innerText = "NEW CARD";
+                statusTag.className = "tag-badge tag-new";
+                statusTag.style.display = "block";
                 
                 $('#participantSelect').val(null).trigger('change');
                 document.getElementById('bibInput').value = "";
                 document.getElementById('catDisplay').value = "";
             }
 
-            // Clear input tapi JANGAN paksa fokus terus, biar user isi form
             rfidInput.value = "";
         }
 
@@ -261,25 +274,22 @@
 
             update(ref(db), updates).then(() => {
                 alert("SUCCESS! Card Assigned.");
-                resetForm(); // Panggil fungsi reset
+                resetForm();
             }).catch((err) => {
                 alert("Error: " + err.message);
             });
         });
 
-        // Helper: Reset Form & Sedia Scan Seterusnya
-        function resetForm() {
+        // Helper: Reset Form
+        window.resetForm = function() {
             document.getElementById('assignForm').classList.remove('active');
             document.getElementById('displayUID').value = "";
             document.getElementById('cardTypeTag').style.display = "none";
             $('#participantSelect').val(null).trigger('change');
             document.getElementById('bibInput').value = "";
-            
-            // FOKUS BALIK KE SCANNER HANYA BILA DAH SIAP SAVE
             document.getElementById('rfidInput').focus(); 
         }
 
-        // Tambahan: Shortcut key 'ESC' untuk cancel
         document.addEventListener('keydown', function(event) {
             if (event.key === "Escape") {
                 resetForm();
