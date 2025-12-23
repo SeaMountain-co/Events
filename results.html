@@ -66,12 +66,7 @@
         }
         .search-btn:hover { background: #cc0000; }
 
-        /* --- FIX DROPDOWN OPTIONS (PENTING) --- */
-        select option {
-            background-color: #000;
-            color: #fff;
-            padding: 10px;
-        }
+        select option { background-color: #000; color: #fff; padding: 10px; }
 
         /* RESULTS CONTENT */
         .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; flex: 1; }
@@ -116,10 +111,9 @@
         }
         .btn-ecert:hover { background: var(--brand-red); border-color: var(--brand-red); }
 
-        /* LOADING */
         .loading-msg { text-align: center; padding: 50px; color: #666; font-style: italic; }
 
-        /* --- SECURITY MODAL (POPUP) --- */
+        /* SECURITY MODAL */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.85); z-index: 2000;
@@ -335,7 +329,7 @@
             });
         }
 
-        // 5. RENDER RESULTS
+        // 5. RENDER RESULTS (Updated with BIB Check)
         function renderResults(filterCat, searchTerm) {
             const listContainer = document.getElementById('resultsList');
             listContainer.innerHTML = "";
@@ -344,7 +338,8 @@
             let filtered = allResultsData.filter(r => {
                 const matchCat = filterCat === "ALL" || r.category === filterCat;
                 const matchSearch = (r.first_name + " " + r.last_name).toLowerCase().includes(term) || 
-                                    (r.id || "").toLowerCase().includes(term); 
+                                    (r.id || "").toLowerCase().includes(term) ||
+                                    (r.bib || "").toLowerCase().includes(term); // Boleh search by BIB jugak
                 return matchCat && matchSearch;
             });
 
@@ -359,8 +354,10 @@
                 const rank = index + 1; 
                 const isTop3 = rank <= 3 ? "top-3" : "";
                 
-                // Button ada 'data-id' untuk rujukan
                 const btnHtml = `<button class="btn-ecert" data-id="${r.id}"><i class="fas fa-lock"></i> E-CERT</button>`;
+
+                // LOGIC BIB: Kalau ada 'bib', guna 'bib'. Kalau tak ada, guna ID pendek.
+                const displayBib = r.bib || r.id.substring(0,6).toUpperCase();
 
                 const card = `
                     <div class="result-card ${isTop3}">
@@ -372,7 +369,7 @@
                             <div class="racer-name">${r.first_name} ${r.last_name || ''}</div>
                             <div class="racer-meta">
                                 <div class="meta-item"><i class="fas fa-running"></i> ${r.category}</div>
-                                <div class="meta-item"><i class="fas fa-id-card"></i> BIB: ${r.id.substring(0,6)}</div>
+                                <div class="meta-item"><i class="fas fa-id-card"></i> BIB: ${displayBib}</div>
                                 <div class="meta-item"><i class="fas fa-globe"></i> ${r.country ? r.country.toUpperCase() : 'MYS'}</div>
                             </div>
                         </div>
@@ -385,7 +382,7 @@
                 listContainer.innerHTML += card;
             });
 
-            // Bind click event kepada semua button E-Cert
+            // Bind click event
             document.querySelectorAll('.btn-ecert').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const runnerId = e.target.closest('button').dataset.id;
@@ -394,12 +391,10 @@
             });
         }
 
-        // --- SECURITY LOGIC (VERIFICATION) ---
+        // --- SECURITY LOGIC ---
         
         window.openVerifyModal = (runnerId) => {
-            // Cari data runner dalam array
             currentRunnerData = allResultsData.find(r => r.id === runnerId);
-            
             if(currentRunnerData) {
                 document.getElementById('verifyInput').value = "";
                 document.getElementById('verifyError').style.display = "none";
@@ -417,15 +412,12 @@
             if(!currentRunnerData) return;
 
             const input = document.getElementById('verifyInput').value.trim();
-            const realIC = currentRunnerData.ic || ""; // IC dari database
-            const last4 = realIC.slice(-4); // Ambil 4 digit terakhir
+            const realIC = currentRunnerData.ic || ""; 
+            const last4 = realIC.slice(-4); 
 
             if(input === last4 && input.length === 4) {
-                // SUCCESS
-                // document.getElementById('verifyModal').style.display = "none"; // Jangan tutup modal dulu, tunjuk progress
                 generatePDF(currentRunnerData);
             } else {
-                // FAIL
                 document.getElementById('verifyError').style.display = "block";
             }
         };
@@ -446,30 +438,16 @@
 
             try {
                 const { jsPDF } = window.jspdf;
-                
-                // Setup PDF: Landscape A4 (297mm x 210mm) -> approx 842px x 595px
-                const doc = new jsPDF({
-                    orientation: 'landscape',
-                    unit: 'px',
-                    format: [842, 595] 
-                });
+                const doc = new jsPDF({ orientation: 'landscape', unit: 'px', format: [842, 595] });
 
-                // A. Load Gambar Template (Convert URL ke Base64 supaya tak error CORS)
                 const imgData = await getBase64ImageFromUrl(currentEventTemplate);
-                
-                // B. Letak Gambar Penuh Satu Page
                 doc.addImage(imgData, 'JPEG', 0, 0, 842, 595);
 
-                // C. Setup Font & Warna Teks
-                doc.setTextColor(0, 0, 0); // Warna Hitam (Tukar 255,255,255 kalau background gelap)
-                
-                // D. Tulis NAMA PESERTA (Tengah-tengah)
+                doc.setTextColor(0, 0, 0); 
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(40);
-                // Koordinat X=421 (Tengah), Y=280 (Agak tengah menegak) - Boleh adjust Y ikut template
                 doc.text(runner.first_name.toUpperCase() + " " + (runner.last_name || "").toUpperCase(), 421, 280, { align: "center" });
 
-                // E. Tulis DETAIL LAIN (Masa & Kategori)
                 doc.setFont("helvetica", "normal");
                 doc.setFontSize(20);
                 doc.text(`CATEGORY: ${runner.category}`, 421, 330, { align: "center" });
@@ -478,10 +456,8 @@
                 doc.setFontSize(30);
                 doc.text(`FINISH TIME: ${runner.finish_time}`, 421, 380, { align: "center" });
 
-                // F. Save PDF
                 doc.save(`SeaMountain_Cert_${runner.first_name}.pdf`);
                 
-                // Selesai
                 btn.innerText = "DOWNLOAD COMPLETE";
                 setTimeout(() => {
                     closeModal();
@@ -491,30 +467,23 @@
 
             } catch (error) {
                 console.error(error);
-                alert("Gagal generate PDF. Sila pastikan link gambar template valid (Direct Link) dan tiada isu CORS.");
+                alert("Gagal generate PDF.");
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
         }
 
-        // HELPER: Tukar URL Gambar ke Base64 (Penting untuk PDF)
         async function getBase64ImageFromUrl(imageUrl) {
             const res = await fetch(imageUrl);
             const blob = await res.blob();
-
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
-                reader.addEventListener("load", function () {
-                    resolve(reader.result);
-                }, false);
-                reader.onerror = () => {
-                    return reject(this);
-                };
+                reader.addEventListener("load", () => resolve(reader.result), false);
+                reader.onerror = () => reject(this);
                 reader.readAsDataURL(blob);
             });
         }
 
-        // Expose functions to window scope for onclick HTML
         window.closeModal = closeModal;
         window.verifyAndDownload = verifyAndDownload;
 
