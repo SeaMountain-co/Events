@@ -483,7 +483,9 @@
             
             amountPaid: finalAmount.toFixed(2),
             voucherUsed: currentVoucherCode || "NONE",
-            registration_time: new Date().toLocaleString()
+            registration_time: new Date().toLocaleString(),
+
+            status: "Pending Payment"  // Set status awal supaya Admin Dashboard tak pening
         };
 
         if (currentVoucherCode && currentVoucherCode !== "NONE") {
