@@ -5,37 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Access - Sea Mountain</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Montserrat', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .admin-box { width: 100%; max-width: 350px; padding: 40px; background: #111; border: 1px solid #333; border-radius: 10px; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 0, 0.2); }
-        h2 { font-family: 'Russo One'; color: #ff0000; margin-bottom: 30px; letter-spacing: 2px; }
-        input { width: 100%; padding: 15px; margin-bottom: 15px; background: #222; border: 1px solid #333; color: #fff; border-radius: 5px; outline: none; box-sizing: border-box; }
-        input:focus { border-color: #ff0000; }
-        .btn-admin { width: 100%; padding: 15px; background: #ff0000; color: #fff; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
-        .btn-admin:hover { background: #cc0000; }
-        .error-msg { color: red; font-size: 0.8rem; margin-top: 15px; display: none; }
+        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #111; --text-white: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text-white); 
+            display: flex; align-items: center; justify-content: center; 
+            height: 100vh; 
+            background-image: radial-gradient(circle at 50% 0%, rgba(255, 0, 0, 0.1) 0%, transparent 60%);
+        }
+
+        .login-card { 
+            width: 100%; max-width: 400px; padding: 40px; 
+            background: var(--card-bg); border: 1px solid #222; 
+            border-radius: 15px; text-align: center; 
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5); 
+            position: relative;
+        }
+        /* Glow Effect Bawah */
+        .login-card::after {
+            content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--brand-red), transparent);
+            box-shadow: 0 0 20px var(--brand-red);
+        }
+
+        /* HEADER */
+        .logo-title { font-family: 'Russo One'; font-size: 2rem; margin-bottom: 5px; color: #fff; text-transform: uppercase; }
+        .logo-title span { color: var(--brand-red); }
+        
+        .badge-role { 
+            background: rgba(255, 0, 0, 0.1); border: 1px solid var(--brand-red); 
+            color: var(--brand-red); padding: 5px 15px; border-radius: 20px; 
+            font-size: 0.75rem; font-weight: 800; text-transform: uppercase; 
+            display: inline-flex; align-items: center; gap: 8px; margin-bottom: 30px;
+        }
+
+        /* FORM */
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.8rem; font-weight: 700; color: #888; margin-bottom: 8px; }
+        
+        .form-input { 
+            width: 100%; padding: 15px; background: #080808; border: 1px solid #333; 
+            color: #fff; border-radius: 8px; outline: none; transition: 0.3s; 
+            font-size: 1rem;
+        }
+        .form-input:focus { border-color: var(--brand-red); background: #000; box-shadow: 0 0 10px rgba(255, 0, 0, 0.1); }
+
+        .btn-login { 
+            width: 100%; padding: 15px; background: var(--brand-red); color: #fff; 
+            border: none; border-radius: 8px; font-weight: 800; font-size: 1rem; 
+            cursor: pointer; text-transform: uppercase; transition: 0.3s; margin-top: 10px; 
+            box-shadow: 0 5px 15px rgba(255, 0, 0, 0.3);
+        }
+        .btn-login:hover { background: #cc0000; transform: translateY(-2px); }
+
+        .footer-text { font-size: 0.75rem; color: #444; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px; }
+        .error-msg { color: #ff4d4d; font-size: 0.85rem; margin-top: 15px; display: none; font-weight: 600; }
+        
+        .back-link { margin-top: 15px; display: block; color: #666; font-size: 0.8rem; text-decoration: none; transition: 0.3s; }
+        .back-link:hover { color: #fff; }
+
     </style>
 </head>
 <body>
 
-    <div class="admin-box">
-        <h2>ADMIN PANEL</h2>
+    <div class="login-card">
+        <div class="logo-title">SEA <span>MOUNTAIN</span></div>
+        <div class="badge-role"><i class="fas fa-shield-alt"></i> Official Admin Access</div>
+
         <form id="adminForm">
-            <input type="email" id="adminEmail" placeholder="Admin Email" required>
-            <input type="password" id="adminPass" placeholder="Password" required>
-            <button type="submit" class="btn-admin">Access Dashboard</button>
-            <a href="index.html" style="color:#333; text-decoration:none; font-size:0.8rem;">Main Page</a>
+            <div class="form-group">
+                <label class="form-label">Admin Email</label>
+                <input type="email" id="adminEmail" class="form-input" placeholder="admin@sm.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Access Code / Password</label>
+                <input type="password" id="adminPass" class="form-input" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-login">Unlock Dashboard</button>
         </form>
-        <div id="errorMsg" class="error-msg">Access Denied: Invalid Credentials.</div>
+
+        <div id="errorMsg" class="error-msg"><i class="fas fa-exclamation-circle"></i> Access Denied.</div>
+        
+        <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Homepage</a>
+        <div class="footer-text">Restricted Area &copy; 2025</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // --- PASTE CONFIG ANDA DI SINI ---
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
             authDomain: "sea-mountain.firebaseapp.com",
@@ -49,7 +116,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // EMAIL KHAS ADMIN (Untuk Double Security)
+        // EMAIL KHAS ADMIN
         const ADMIN_EMAIL_CHECK = "admin@sm.com"; 
 
         document.getElementById('adminForm').addEventListener('submit', (e) => {
@@ -57,31 +124,40 @@
             const email = document.getElementById('adminEmail').value;
             const pass = document.getElementById('adminPass').value;
             const errorMsg = document.getElementById('errorMsg');
+            const btn = document.querySelector('.btn-login');
 
-            // 1. Cuba Login guna Email/Password
+            // UI Loading State
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            btn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            // 1. Cuba Login
             signInWithEmailAndPassword(auth, email, pass)
                 .then((userCredential) => {
                     const user = userCredential.user;
                     
-                    // 2. Security Tambahan: Pastikan email betul-betul admin
+                    // 2. Security Check (Admin Only)
                     if(user.email === ADMIN_EMAIL_CHECK) {
-                        // Kalau betul admin, masuk dashboard
-                        sessionStorage.setItem("isAdmin", "true"); // Simpan 'kunci' admin
+                        sessionStorage.setItem("isAdmin", "true"); 
                         window.location.href = "admin-dashboard.html"; 
                     } else {
-                        // Kalau user biasa cuba login sini
-                        errorMsg.innerText = "You are not an Authorized Admin.";
-                        errorMsg.style.display = "block";
-                        auth.signOut(); // Tendang keluar
+                        throw new Error("Unauthorized");
                     }
                 })
                 .catch((error) => {
                     console.error(error);
-                    errorMsg.innerText = "Login Failed: Wrong email or password.";
+                    btn.innerHTML = 'Unlock Dashboard';
+                    btn.disabled = false;
+                    
+                    if(error.message === "Unauthorized") {
+                        errorMsg.innerText = "You are not an Authorized Admin.";
+                    } else {
+                        errorMsg.innerText = "Login Failed: Wrong email or password.";
+                    }
                     errorMsg.style.display = "block";
+                    auth.signOut();
                 });
         });
     </script>
 </body>
 </html>
-
