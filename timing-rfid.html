@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
-        /* --- TEMA DASHBOARD (SAMA MACAM TIMING DASHBOARD) --- */
+        /* --- TEMA DASHBOARD --- */
         :root { --bg: #0f1014; --card: #1a1c23; --accent: #00d2ff; --text: #fff; --success: #2ecc71; --error: #e74c3c; --pending: #f39c12; }
         * { box-sizing: border-box; }
         
@@ -27,10 +27,13 @@
         .back-btn:hover { color: #fff; }
 
         /* CONTAINER */
-        .container { max-width: 1200px; margin: 30px auto; padding: 20px; display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; }
+        .container { max-width: 1200px; margin: 30px auto; padding: 20px; }
+        
+        /* TOP SECTION (ASSIGNMENT) */
+        .assign-section { display: grid; grid-template-columns: 1fr 1.5fr; gap: 30px; margin-bottom: 50px; }
 
         /* EVENT SELECTOR (ATAS) */
-        .top-bar { grid-column: 1 / -1; margin-bottom: 20px; }
+        .top-bar { margin-bottom: 20px; }
         .event-select { width: 100%; max-width: 500px; padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 1rem; outline: none; transition: 0.3s; }
         .event-select:focus { border-color: var(--accent); }
 
@@ -65,6 +68,22 @@
         .btn-save:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(46, 204, 113, 0.2); }
         .btn-cancel { background: transparent; border: none; color: #666; margin-top: 15px; cursor: pointer; text-decoration: underline; font-size: 0.9rem; }
 
+        /* TABLE SECTION */
+        .table-section { background: var(--card); border-radius: 15px; border: 1px solid #333; padding: 20px; overflow: hidden; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .search-input { padding: 10px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; width: 300px; }
+        
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { text-align: left; padding: 15px; background: #111; color: #888; text-transform: uppercase; font-size: 0.8rem; border-bottom: 2px solid #333; }
+        .data-table td { padding: 15px; border-bottom: 1px solid #222; font-size: 0.9rem; }
+        .data-table tr:hover { background: #222; }
+
+        .status-linked { color: var(--success); font-weight: bold; font-size: 0.8rem; border: 1px solid var(--success); padding: 3px 8px; border-radius: 4px; display: inline-block; }
+        .status-none { color: #666; font-weight: bold; font-size: 0.8rem; border: 1px solid #444; padding: 3px 8px; border-radius: 4px; display: inline-block; }
+
+        .btn-unlink { background: #e74c3c; color: #fff; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; transition: 0.2s; }
+        .btn-unlink:hover { background: #c0392b; }
+
         /* SELECT2 DARK THEME OVERRIDE */
         .select2-container--default .select2-selection--single { background-color: #000; border: 1px solid #444; height: 50px; border-radius: 8px; }
         .select2-container--default .select2-selection--single .select2-selection__rendered { color: #fff; line-height: 50px; padding-left: 15px; }
@@ -75,7 +94,7 @@
         .select2-results__option[aria-selected=true] { background-color: #333; }
 
         @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .scan-card { padding: 30px; margin-bottom: 20px; } }
+        @media (max-width: 900px) { .assign-section { grid-template-columns: 1fr; } .scan-card { padding: 30px; margin-bottom: 20px; } }
     </style>
 </head>
 <body>
@@ -94,39 +113,65 @@
             </select>
         </div>
 
-        <div class="scan-card">
-            <i class="fas fa-wifi scan-icon"></i>
-            <div class="scan-status">READY TO SCAN</div>
-            <input type="text" id="rfidInput" class="scan-input" placeholder="Click & Tap Card" autocomplete="off" autofocus>
-            <p class="scan-hint">Ensure cursor is blinking inside the box before scanning.</p>
+        <div class="assign-section">
+            <div class="scan-card">
+                <i class="fas fa-wifi scan-icon"></i>
+                <div class="scan-status">READY TO SCAN</div>
+                <input type="text" id="rfidInput" class="scan-input" placeholder="Click & Tap Card" autocomplete="off" autofocus>
+                <p class="scan-hint">Ensure cursor is blinking inside the box before scanning.</p>
+            </div>
+
+            <div id="assignForm" class="form-card">
+                <div id="cardTypeTag" class="tag-badge">NEW CARD</div>
+                
+                <div class="form-group">
+                    <label class="label">Card UID</label>
+                    <input type="text" id="displayUID" class="input-box input-readonly" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Select Participant</label>
+                    <select id="participantSelect" style="width: 100%;"><option></option></select>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Assign BIB Number</label>
+                    <input type="text" id="bibInput" class="input-box" placeholder="e.g. A1001">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Category</label>
+                    <input type="text" id="catDisplay" class="input-box input-readonly" readonly>
+                </div>
+
+                <button id="btnSave" class="btn-save">LINK CARD & SAVE</button>
+                <div style="text-align:center;">
+                    <button onclick="resetForm()" class="btn-cancel">Cancel / Reset (ESC)</button>
+                </div>
+            </div>
         </div>
 
-        <div id="assignForm" class="form-card">
-            <div id="cardTypeTag" class="tag-badge">NEW CARD</div>
-            
-            <div class="form-group">
-                <label class="label">Card UID</label>
-                <input type="text" id="displayUID" class="input-box input-readonly" readonly>
+        <div class="table-section">
+            <div class="table-header">
+                <h3 style="margin:0;">Manage Participants List</h3>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by name, BIB or Card ID...">
             </div>
-
-            <div class="form-group">
-                <label class="label">Select Participant</label>
-                <select id="participantSelect" style="width: 100%;"><option></option></select>
-            </div>
-
-            <div class="form-group">
-                <label class="label">Assign BIB Number</label>
-                <input type="text" id="bibInput" class="input-box" placeholder="e.g. A1001">
-            </div>
-
-            <div class="form-group">
-                <label class="label">Category</label>
-                <input type="text" id="catDisplay" class="input-box input-readonly" readonly>
-            </div>
-
-            <button id="btnSave" class="btn-save">LINK CARD & SAVE</button>
-            <div style="text-align:center;">
-                <button onclick="resetForm()" class="btn-cancel">Cancel / Reset (ESC)</button>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>BIB</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Card Status</th>
+                            <th>Card ID</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="participantTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding:30px; color:#666;">Select an event to load list.</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -154,10 +199,7 @@
 
         // 1. INIT SELECT2
         $(document).ready(function() {
-            $('#participantSelect').select2({
-                placeholder: "Search name, email, or IC...",
-                allowClear: true
-            });
+            $('#participantSelect').select2({ placeholder: "Search name, email, or IC...", allowClear: true });
 
             $('#participantSelect').on('select2:select', function (e) {
                 const userId = e.params.data.id;
@@ -182,8 +224,7 @@
 
         // 3. LOAD PARTICIPANTS
         eventSelect.addEventListener('change', function() {
-            const eventId = this.value;
-            loadParticipants(eventId);
+            loadParticipants(this.value);
             document.getElementById('rfidInput').focus();
         });
 
@@ -208,11 +249,70 @@
                         $('#participantSelect').append(newOption);
                     });
                 }
+                
                 $('#participantSelect').trigger('change');
+                renderTable(participantsData); // Render Table Bawah
             });
         }
 
-        // 4. RFID SCAN LOGIC
+        // 4. RENDER TABLE & SEARCH
+        function renderTable(data) {
+            const tbody = document.getElementById('participantTableBody');
+            tbody.innerHTML = "";
+
+            if(data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No participants found.</td></tr>';
+                return;
+            }
+
+            data.forEach(p => {
+                const isLinked = !!p.rfid_tag;
+                const statusHtml = isLinked 
+                    ? `<span class="status-linked">LINKED</span>` 
+                    : `<span class="status-none">NO CARD</span>`;
+                
+                const actionHtml = isLinked 
+                    ? `<button class="btn-unlink" onclick="unlinkCard('${p.id}')"><i class="fas fa-unlink"></i> Unlink</button>` 
+                    : `<span style="color:#666;">-</span>`;
+
+                const row = `
+                    <tr>
+                        <td style="color:var(--accent); font-weight:bold;">${p.bib || '-'}</td>
+                        <td>${p.first_name} ${p.last_name || ''}</td>
+                        <td>${p.category}</td>
+                        <td>${statusHtml}</td>
+                        <td style="font-family:monospace; color:#888;">${p.rfid_tag || '-'}</td>
+                        <td>${actionHtml}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        document.getElementById('searchInput').addEventListener('keyup', function(e) {
+            const term = e.target.value.toLowerCase();
+            const filtered = participantsData.filter(p => 
+                (p.first_name + " " + p.last_name).toLowerCase().includes(term) ||
+                (p.bib || "").toLowerCase().includes(term) ||
+                (p.rfid_tag || "").toLowerCase().includes(term)
+            );
+            renderTable(filtered);
+        });
+
+        // 5. UNLINK FUNCTION
+        window.unlinkCard = function(userId) {
+            const eventId = eventSelect.value;
+            if(confirm("Are you sure you want to unlink (remove) the card from this user?")) {
+                const updates = {};
+                updates[`registrations/${eventId}/${userId}/rfid_tag`] = null; // Delete field
+                
+                update(ref(db), updates).then(() => {
+                    alert("Card Unlinked Successfully!");
+                }).catch(err => alert("Error: " + err.message));
+            }
+        }
+
+        // 6. RFID SCAN LOGIC
         const rfidInput = document.getElementById('rfidInput');
         const scanIcon = document.querySelector('.scan-icon');
         
@@ -228,11 +328,9 @@
             const uidField = document.getElementById('displayUID');
             const statusTag = document.getElementById('cardTypeTag');
             
-            // Visual Feedback
-            scanIcon.style.color = '#2ecc71'; // Green
-            setTimeout(() => scanIcon.style.color = '#00d2ff', 500); // Back to blue
+            scanIcon.style.color = '#2ecc71';
+            setTimeout(() => scanIcon.style.color = '#00d2ff', 500);
 
-            // Activate Form
             form.classList.add('active');
             uidField.value = code;
 
@@ -241,22 +339,19 @@
                 statusTag.innerText = "EXISTING CARD";
                 statusTag.className = "tag-badge tag-exist";
                 statusTag.style.display = "block";
-                
                 $('#participantSelect').val(existingUser.id).trigger('change');
             } else {
                 statusTag.innerText = "NEW CARD";
                 statusTag.className = "tag-badge tag-new";
                 statusTag.style.display = "block";
-                
                 $('#participantSelect').val(null).trigger('change');
                 document.getElementById('bibInput').value = "";
                 document.getElementById('catDisplay').value = "";
             }
-
             rfidInput.value = "";
         }
 
-        // 5. SAVE DATA
+        // 7. SAVE DATA
         document.getElementById('btnSave').addEventListener('click', () => {
             const eventId = eventSelect.value;
             const rfid = document.getElementById('displayUID').value;
@@ -291,9 +386,7 @@
         }
 
         document.addEventListener('keydown', function(event) {
-            if (event.key === "Escape") {
-                resetForm();
-            }
+            if (event.key === "Escape") { resetForm(); }
         });
 
     </script>
