@@ -9,21 +9,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,700;0,900;1,300;1,900&family=Russo+One&display=swap" rel="stylesheet">
     
     <style>
-        /* --- STYLE CSS SAMA SEPERTI YANG ANDA BERI --- */
-        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text-white: #ffffff; --text-gray: #b0b3b8; --footer-bg: #000000; }
+        /* --- ASAS & WARNA --- */
+        :root { --brand-red: #ff0000; --brand-orange: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text-white: #ffffff; --text-gray: #b0b3b8; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-white); background-image: radial-gradient(circle at 50% 10%, rgba(255, 0, 0, 0.05) 0%, transparent 40%); }
         a { text-decoration: none; color: inherit; transition: 0.3s; }
         
-        /* Header */
+        /* HEADER */
         header { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: rgba(15, 16, 20, 0.95); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; font-size: 1.5rem; color: #fff; text-transform: uppercase; text-decoration: none; letter-spacing: -1px; }
+        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; font-size: 1.5rem; color: #fff; text-transform: uppercase; letter-spacing: -1px; }
         .logo img { height: 40px; } .logo span { color: var(--brand-red); font-weight: 300; }
         .nav-links { display: flex; gap: 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
-        .login-btn { background: linear-gradient(45deg, var(--brand-red), #aa0000); padding: 10px 25px; border-radius: 30px; font-weight: 800; text-transform: uppercase; color: #fff; }
+        .login-btn { background: linear-gradient(45deg, var(--brand-orange), #ff7b00); padding: 10px 25px; border-radius: 30px; font-weight: 800; text-transform: uppercase; color: #fff; }
 
-        /* Content */
-        .main-container { max-width: 1200px; margin: 40px auto; padding: 0 5%; }
+        /* CONTENT */
+        .main-container { max-width: 1200px; margin: 40px auto; padding: 0 5%; min-height: 60vh; }
         .back-btn { display: inline-flex; align-items: center; gap: 10px; color: var(--text-gray); margin-bottom: 20px; font-weight: 600; }
         .event-detail-wrapper { background-color: var(--card-bg); border-radius: 15px; overflow: hidden; display: flex; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 50px; }
         .detail-image-col { flex: 1.2; min-height: 400px; }
@@ -39,7 +39,7 @@
         .action-btn { margin-top: auto; background: linear-gradient(45deg, var(--brand-red), #aa0000); color: #fff; border: 1px solid var(--brand-red); padding: 15px; border-radius: 30px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-align: center; width: 100%; }
         .action-btn:hover { background: var(--brand-red); transform: translateY(-2px); }
 
-        /* Countdown & Tabs */
+        /* COUNTDOWN & TABS */
         .countdown-section { text-align: center; margin-bottom: 60px; }
         .timer-container { display: flex; justify-content: center; gap: 30px; }
         .timer-block { display: flex; flex-direction: column; align-items: center; position: relative; }
@@ -56,22 +56,42 @@
         .tab-panel h3 { margin-bottom: 15px; color: var(--brand-red); text-transform: uppercase; } .tab-panel p { color: #ccc; line-height: 1.6; margin-bottom: 10px; }
         .contact-row { margin-bottom: 10px; font-size: 1rem; color: #ddd; } .contact-row span { color: var(--text-gray); display: inline-block; width: 160px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        /* =========================================
-           TAMBAHAN: FOOTER
-           ========================================= */
-        footer {
-            background-color: var(--footer-bg); padding: 60px 5% 20px;
-            border-top: 1px solid #222; margin-top: auto;
+
+        /* --- FOOTER BARU (UPDATED) --- */
+        .footer-wrapper {
+            background: linear-gradient(to bottom, #111, #0a0a0a); /* Gradien Gelap Smooth */
+            border-top: 1px solid #222;
+            padding-top: 60px;
+            margin-top: auto;
         }
-        .footer-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px; max-width: 1200px; margin: 0 auto 50px;
+
+        .footer-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 5% 40px; 
+            border-bottom: 1px solid #222;
         }
-        .footer-col h4 {
-            color: var(--brand-red); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;
-        }
-        .footer-col p { color: #888; font-size: 0.9rem; line-height: 1.6; }
+        .footer-col h4 { color: #fff; font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
+        .footer-col p { color: #666; font-size: 0.85rem; line-height: 1.6; }
         
+        .social-icons { display: flex; gap: 10px; margin-top: 15px; }
+        .social-icons a { 
+            width: 35px; height: 35px; background: #222; color: #aaa; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; transition: 0.3s; 
+        }
+        .social-icons a:hover { background: var(--brand-red); color: #fff; }
+
+        .footer-bottom { text-align: center; padding: 30px 5%; color: #444; font-size: 0.8rem; }
+        .footer-links { margin-bottom: 15px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .footer-links a { color: #666; font-weight: 600; text-decoration: none; transition: 0.3s; }
+        .footer-links a:hover { color: #fff; }
+        
+        .visitor-counter { 
+            margin-top: 15px; font-size: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 1px; 
+            font-weight: bold; display: inline-block; padding: 5px 15px; 
+            background: #050505; border: 1px solid #222; border-radius: 20px; 
+        }
+        .visitor-counter span { color: #888; font-family: 'Courier New', monospace; }
+
         .app-buttons { display: flex; gap: 10px; margin-top: 15px; }
         .app-btn {
             background: #222; color: #fff; padding: 10px 15px; border-radius: 5px; border: 1px solid #333;
@@ -80,19 +100,6 @@
         .app-btn:hover { border-color: #fff; background: #000; }
         .app-btn i { font-size: 1.5rem; }
 
-        .social-icons { display: flex; gap: 15px; }
-        .social-icons a {
-            width: 40px; height: 40px; background: #222; color: #fff;
-            display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: 0.3s;
-        }
-        .social-icons a:hover { background: var(--brand-red); transform: translateY(-3px); }
-
-        .footer-bottom {
-            text-align: center; border-top: 1px solid #222; padding-top: 20px; color: #555; font-size: 0.8rem;
-        }
-        .footer-links { margin-bottom: 10px; }
-        .footer-links a { color: #888; margin: 0 10px; font-weight: 600; }
-        .footer-links a:hover { color: #fff; }
         @media (max-width: 900px) { .nav-links { display: none; } .event-detail-wrapper, .info-tabs-wrapper { flex-direction: column; } .detail-image-col { height: 250px; } .timer-number { font-size: 2rem; } }
     </style>
 </head>
@@ -187,18 +194,19 @@
     
                 <div id="contact" class="tab-panel">
                     <div class="contact-row"><span>Organiser:</span> Sea Mountain Team</div>
-                    <div class="contact-row"><span>Email:</span> support@seamountain.com</div>
+                    <div class="contact-row"><span>Email:</span> info@seamountain.com</div>
                 </div>
             </div>
         </div>
 
-        <!-- Footer Section -->
-         <footer>
+    </div>
+
+    <div class="footer-wrapper">
         <div class="footer-grid">
             <div class="footer-col">
                 <h4>About</h4>
                 <p>THE SPORTS AND FITNESS ONLINE EVENT REGISTRATION SOLUTION.</p>
-                <p style="margin-top:10px; color:#fff;"><strong>info@seamountain.com</strong></p>
+                <p style="margin-top:10px; color:#aaa;"><strong>info@seamountain.com</strong></p>
             </div>
 
             <div class="footer-col">
@@ -232,19 +240,18 @@
 
         <div class="footer-bottom">
             <div class="footer-links">
-                <a href="#">Privacy Policy</a> | 
-                <a href="#">Refund Policy</a> | 
+                <a href="#">Privacy Policy</a>
+                <a href="#">Refund Policy</a>
                 <a href="#">Terms & Conditions</a>
+                <a href="admin-login.html" style="color:#444;">Admin</a>
             </div>
             <p>&copy; 2025 Sea Mountain.Co. All Rights Reserved.</p>
         </div>
-    </footer>
-    
+    </div>
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-    // PENTING: Tambah 'signOut' di sini
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     // --- CONFIG FIREBASE ANDA ---
@@ -267,43 +274,32 @@
     const eventId = urlParams.get('id');
 
     let isUserLoggedIn = false;
-    const loginBtn = document.querySelector('.login-btn'); // Ambil butang header (pastikan class di HTML ialah .login-btn) or .cta-btn di header
+    const loginBtn = document.querySelector('.login-btn'); 
 
-    // 2. LOGIC AUTH & HEADER UI (INI YANG SAYA TAMBAH)
+    // 2. LOGIC AUTH & HEADER UI
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // USER LOGIN: Set variable & Tukar Header jadi Hijau
             isUserLoggedIn = true;
-            console.log("Logged In as:", user.email);
-
             if(loginBtn) {
-                // Tukar teks jadi nama user
                 loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.displayName || 'User'}`;
                 loginBtn.href = "#"; 
-                // Tukar warna jadi hijau
                 loginBtn.style.background = "#28a745"; 
                 loginBtn.style.color = "#fff";
                 
-                // Tambah fungsi Logout bila tekan nama
                 loginBtn.onclick = function(e) {
                     e.preventDefault();
                     if(confirm("Log out dari akaun ini?")) {
-                        signOut(auth).then(() => {
-                            window.location.reload();
-                        });
+                        signOut(auth).then(() => { window.location.reload(); });
                     }
                 };
             }
         } else {
-            // GUEST: Reset Header jadi "LOG IN" Merah
             isUserLoggedIn = false;
-            console.log("Guest User");
-
             if(loginBtn) {
                 loginBtn.innerHTML = "LOG IN";
                 loginBtn.href = "login.html";
-                loginBtn.style.background = ""; // Guna warna asal CSS (Merah)
-                loginBtn.onclick = null; // Buang event listener logout
+                loginBtn.style.background = ""; 
+                loginBtn.onclick = null; 
             }
         }
     });
@@ -315,7 +311,7 @@
         onValue(eventRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                // Masukkan Data ke HTML (Basic Info)
+                // Masukkan Data ke HTML
                 document.getElementById('eventTitle').innerText = data.title;
                 document.getElementById('eventImage').src = data.image_url;
                 document.getElementById('regDuration').innerText = data.reg_duration || "-";
@@ -323,11 +319,8 @@
                 document.getElementById('eventDate').innerText = data.date || `${data.date_start} - ${data.date_end}`;
                 document.getElementById('kitDate').innerText = data.kit_date || "To be announced";
 
-                // --- 1. ENTITLEMENTS (TEXT & IMAGE) ---
                 const entText = document.getElementById('entitlementList');
-                if (entText) {
-                    entText.innerText = data.entitlements || "Event Tee, Finisher Medal, E-Certificate, Bib Number.";
-                }
+                if (entText) entText.innerText = data.entitlements || "Event Tee, Finisher Medal, E-Certificate, Bib Number.";
 
                 const entImg = document.getElementById('entitlementImg');
                 if (data.entitlement_image) {
@@ -337,21 +330,12 @@
                     entImg.style.display = "none";
                 }
 
-                // --- 2. TERMS & CONDITIONS ---
                 const tncElement = document.getElementById('tncList');
-                if(tncElement) {
-                    // Guna data.tnc kalau ada, kalau tak guna default
-                    tncElement.innerText = data.tnc || "Participants must be 18 years and above. Fees are non-refundable.";
-                }
+                if(tncElement) tncElement.innerText = data.tnc || "Participants must be 18 years and above. Fees are non-refundable.";
 
-                // --- 3. FAQ ---
                 const faqElement = document.getElementById('faqList'); 
-                if(faqElement) {
-                    // Guna data.faq kalau ada, kalau tak guna default
-                    faqElement.innerText = data.faq || "No FAQ available yet.";
-                }
+                if(faqElement) faqElement.innerText = data.faq || "No FAQ available yet.";
 
-                // --- LOGIC BUTANG REGISTER & COUNTDOWN ---
                 const registerBtn = document.getElementById('registerBtn'); 
                 if(data.price) {
                     registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
@@ -369,7 +353,6 @@
                     }
                 };
 
-                // Start Countdown (Jika ada)
                 if(data.countdown_date) startCountdown(data.countdown_date);
 
             } else {
@@ -414,5 +397,4 @@
 </script>
 
 </body>
-
 </html>
