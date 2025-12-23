@@ -21,31 +21,23 @@
             backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; 
             border-bottom: 1px solid rgba(255,255,255,0.1); 
         }
-        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; font-size: 1.2rem; color: #fff; text-transform: uppercase; letter-spacing: -1px; z-index: 1001; }
+        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; font-size: 1.2rem; color: #fff; text-transform: uppercase; letter-spacing: -1px; z-index: 1002; }
         .logo img { height: 35px; width: auto; }
         .logo span { color: var(--brand-orange); font-weight: 300; }
         
-        /* NAV LINKS (Desktop Default) */
         .nav-links { display: flex; gap: 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
         .nav-links a:hover { color: var(--brand-orange); }
         
-        /* AUTH GROUP */
-        .auth-group { display: flex; align-items: center; gap: 10px; z-index: 1001; }
+        .header-right { display: flex; align-items: center; gap: 15px; z-index: 1002; }
+        .auth-group { display: flex; align-items: center; gap: 10px; }
 
         .login-btn { background: linear-gradient(45deg, var(--brand-orange), #ff7b00); padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; color: #000; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3); white-space: nowrap; }
         .login-btn:hover { transform: translateY(-2px); }
 
-        .qr-btn { 
-            width: 35px; height: 35px; 
-            background: #222; border: 1px solid #444; 
-            border-radius: 50%; display: none;
-            align-items: center; justify-content: center; 
-            color: #fff; font-size: 1.1rem; cursor: pointer; transition: 0.3s;
-        }
+        .qr-btn { width: 35px; height: 35px; background: #222; border: 1px solid #444; border-radius: 50%; display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
         .qr-btn:hover { background: var(--brand-orange); border-color: var(--brand-orange); color: #222; }
 
-        /* HAMBURGER MENU (Mobile Only) */
-        .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; z-index: 1001; }
+        .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
 
         /* HERO SECTION */
         .hero { position: relative; min-height: 500px; display: flex; align-items: center; justify-content: center; padding: 40px 5%; overflow: hidden; margin-bottom: 40px; }
@@ -88,67 +80,109 @@
         .card-btn:hover { background: var(--brand-orange); color: #000; }
         .card-btn.disabled { background: #333 !important; color: #777 !important; border-color: #555 !important; cursor: not-allowed; pointer-events: none; }
 
-        /* CONTACT SECTION */
-        .contact-section { padding: 60px 5%; background: linear-gradient(to bottom, var(--bg-dark), #15161a); position: relative; }
-        .contact-container { max-width: 1200px; margin: 0 auto; display: flex; gap: 50px; flex-wrap: wrap; }
+        /* --- CONTACT & FOOTER SECTION (KEMASKINI) --- */
+        
+        /* 1. Gabungkan Contact & Footer supaya seamless */
+        .footer-wrapper {
+            background: linear-gradient(to bottom, #111, #0a0a0a); /* Gradien Gelap Smooth */
+            border-top: 1px solid #222;
+            margin-top: 50px;
+            padding-top: 60px;
+        }
+
+        .contact-container { 
+            max-width: 1200px; margin: 0 auto; display: flex; gap: 60px; flex-wrap: wrap; 
+            padding: 0 5% 60px; /* Padding bawah */
+        }
+        
         .contact-info { flex: 1; min-width: 300px; }
-        .contact-info h2 { font-family: 'Russo One'; font-size: 2rem; text-transform: uppercase; margin-bottom: 20px; line-height: 1.2; }
-        .contact-info p { color: #aaa; margin-bottom: 30px; line-height: 1.6; }
-        .contact-item { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; font-size: 1rem; font-weight: 600; }
+        .contact-info h2 { font-family: 'Russo One'; font-size: 2rem; text-transform: uppercase; margin-bottom: 20px; color: #fff; }
+        .contact-info p { color: #888; margin-bottom: 30px; line-height: 1.6; }
+        
+        .contact-item { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; font-size: 1rem; color: #ccc; }
         .contact-item i { color: var(--brand-orange); font-size: 1.2rem; width: 30px; text-align: center; }
-        .contact-form { flex: 1; min-width: 300px; background: var(--card-bg); padding: 30px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+        .contact-form { 
+            flex: 1; min-width: 300px; 
+            background: rgba(255,255,255,0.03); /* Lebih transparent */
+            padding: 35px; border-radius: 12px; 
+            border: 1px solid rgba(255,255,255,0.05); 
+        }
+        
         .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; color: #888; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; }
-        .form-input { width: 100%; padding: 15px; background: #0f1014; border: 1px solid #333; color: #fff; border-radius: 8px; outline: none; font-family: 'Montserrat'; transition: 0.3s; }
-        .form-input:focus { border-color: var(--brand-orange); }
-        .btn-send { width: 100%; background: var(--brand-orange); color: #000; padding: 15px; border: none; border-radius: 8px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
-        .btn-send:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
+        .form-group label { display: block; margin-bottom: 8px; color: #666; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .form-input { width: 100%; padding: 15px; background: #050505; border: 1px solid #333; color: #fff; border-radius: 6px; outline: none; font-family: 'Montserrat'; transition: 0.3s; }
+        .form-input:focus { border-color: var(--brand-orange); background: #000; }
+        
+        .btn-send { width: 100%; background: var(--brand-orange); color: #000; padding: 15px; border: none; border-radius: 6px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        .btn-send:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,0,0,0.3); }
+
+        /* FOOTER INFO */
+        .footer-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 5% 40px; 
+            border-bottom: 1px solid #222; /* Garis pemisah halus */
+        }
+        .footer-col h4 {
+            color: var(--brand-red); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .footer-col p { color: #888; font-size: 0.9rem; line-height: 1.6; }
+
+        .app-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .app-btn {
+            background: #222; color: #fff; padding: 10px 15px; border-radius: 5px; border: 1px solid #333;
+            display: flex; align-items: center; gap: 10px; font-size: 0.8rem; cursor: pointer; transition: 0.3s;
+        }
+        
+        .social-icons { display: flex; gap: 10px; margin-top: 15px; }
+        .social-icons a { 
+            width: 35px; height: 35px; background: #222; color: #aaa; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; transition: 0.3s; 
+        }
+        .social-icons a:hover { background: var(--brand-orange); color: #fff; }
+
+        .footer-bottom { text-align: center; padding: 30px 5%; color: #444; font-size: 0.8rem; }
+        .footer-links { margin-bottom: 15px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .footer-links a { color: #666; font-weight: 600; text-decoration: none; transition: 0.3s; }
+        .footer-links a:hover { color: #fff; }
+        
+        .visitor-counter { 
+            margin-top: 15px; font-size: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 1px; 
+            font-weight: bold; display: inline-block; padding: 5px 15px; 
+            background: #050505; border: 1px solid #222; border-radius: 20px; 
+        }
+        .visitor-counter span { color: #888; font-family: 'Courier New', monospace; }
 
         .float-wa { position: fixed; width: 60px; height: 60px; bottom: 30px; right: 30px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; transition: 0.3s; text-decoration: none; }
         .float-wa:hover { transform: scale(1.1); background-color: #128c7e; }
 
-        /* FOOTER */
-        footer { background-color: #000; padding: 40px 5% 20px; border-top: 1px solid #222; margin-top: auto; }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto 30px; }
-        .footer-col h4 { color: var(--brand-red); font-weight: 700; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        .footer-col p { color: #888; font-size: 0.9rem; line-height: 1.6; }
-        .footer-bottom { text-align: center; border-top: 1px solid #222; padding-top: 20px; color: #555; font-size: 0.8rem; }
-        .footer-links { margin-bottom: 10px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-        .footer-links a { color: #888; font-weight: 600; }
-        .footer-links a:hover { color: #fff; }
-        .visitor-counter { margin-top: 10px; font-size: 0.8rem; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; display: inline-block; padding: 5px 15px; background: #111; border: 1px solid #333; border-radius: 20px; }
-        .visitor-counter span { color: #fff; font-family: 'Courier New', monospace; }
-
-        /* --- MOBILE RESPONSIVE TWEAKS --- */
         @media (max-width: 900px) {
-            header { padding: 15px; }
-            .menu-toggle { display: block; }
-            
-            /* Navbar jadi Dropdown */
+            header { padding: 15px 5%; }
+            .menu-toggle { display: block; margin-left: 15px; }
             .nav-links {
-                position: absolute;
-                top: 70px; left: 0; width: 100%;
-                background: rgba(15, 16, 20, 0.95);
-                flex-direction: column;
-                align-items: center;
-                padding: 30px 0;
-                display: none; /* Hide default */
-                border-bottom: 1px solid #333;
-                border-top: 1px solid #333;
+                position: absolute; top: 100%; left: 0; width: 100%;
+                background: rgba(15, 16, 20, 0.98); flex-direction: column; align-items: center;
+                padding: 20px 0; display: none; border-bottom: 1px solid rgba(255,255,255,0.1);
             }
-            .nav-links.active { display: flex; } /* Tunjuk bila active */
+            .nav-links.active { display: flex; }
+            .nav-links a { padding: 15px; width: 100%; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
             
+            .auth-group { margin-left: auto; }
+            
+            .hero { padding: 60px 5%; }
             .hero h1 { font-size: 2.2rem; }
-            .hero-content { flex-direction: column; text-align: center; padding-top: 20px; }
-            .hero-text { margin-bottom: 30px; border-left: none; }
-            .hero p { border-left: none; padding-left: 0; }
-            .featured-image img { transform: none; }
+            .hero-content { flex-direction: column; text-align: center; gap: 30px; }
+            .hero-text { border-left: none; }
+            .hero p { padding-left: 0; }
+            .featured-image img { transform: none; width: 100%; }
             
-            .search-container { margin-top: 0; padding-top: 20px; }
-            .events-grid { grid-template-columns: 1fr; } /* Satu column di mobile */
+            .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .view-all { align-self: flex-end; }
+            .events-grid { grid-template-columns: 1fr; padding-bottom: 40px; }
             
-            .contact-container { flex-direction: column; }
-            .auth-group { margin-left: auto; margin-right: 15px; } /* Adjust kedudukan button login */
+            /* Contact Mobile Fix */
+            .contact-container { flex-direction: column; gap: 40px; }
+            .contact-form { padding: 25px; }
         }
     </style>
 </head>
@@ -160,17 +194,6 @@
             SEA<span>MOUNTAIN</span>
         </a>
 
-        <div class="auth-group">
-            <a href="my-tickets.html" id="qrBtn" class="qr-btn" title="My History & Tickets">
-                <i class="fas fa-qrcode"></i>
-            </a>
-            <a href="login.html" class="login-btn">Log In</a>
-        </div>
-
-        <button class="menu-toggle" onclick="toggleMenu()">
-            <i class="fas fa-bars"></i>
-        </button>
-
         <nav class="nav-links" id="navMenu">
             <a href="index.html">Events</a>
             <a href="results.html">Results</a>
@@ -179,6 +202,18 @@
             <a href="partners.html">Partners</a>
             <a href="#contact">Contact Us</a>
         </nav>
+
+        <div class="header-right">
+            <div class="auth-group">
+                <a href="my-tickets.html" id="qrBtn" class="qr-btn" title="My History & Tickets">
+                    <i class="fas fa-qrcode"></i>
+                </a>
+                <a href="login.html" class="login-btn">Log In</a>
+            </div>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
     </header>
 
     <section class="hero">
@@ -186,16 +221,13 @@
         <div class="hero-content">
             <div class="hero-text">
                 <span class="badge-featured">Featured Event</span>
-                
                 <h1 id="heroTitle">Loading Event...</h1>
                 <p>
                     <i class="far fa-calendar-alt"></i> <span id="heroDate">-</span> &nbsp;|&nbsp; 
                     <i class="fas fa-map-marker-alt"></i> <span id="heroVenue">-</span>
                 </p>
-                
                 <a href="#" id="heroLink" class="cta-btn">Register Race <i class="fas fa-arrow-right"></i></a>
             </div>
-            
             <div class="featured-image">
                 <img id="heroImage" src="https://via.placeholder.com/600x400?text=Loading..." alt="Featured Event">
             </div>
@@ -221,68 +253,89 @@
     </div>
     <div class="events-grid" id="upcoming-events-container"><p style="color:#666;">Loading upcoming events...</p></div>
 
-    <footer>
+    <div class="footer-wrapper">
+        
+        <section id="contact">
+            <div class="contact-container">
+                <div class="contact-info">
+                    <h2>Get In Touch</h2>
+                    <p>Have questions about the race? Interested in sponsorship? Or just want to say hi?</p>
+                    <div class="contact-item"><i class="fas fa-map-marker-alt"></i> <span>Sea Mountain HQ</span></div>
+                    <div class="contact-item"><i class="fas fa-envelope"></i> <span>info@seamountain.com</span></div>
+                    <div class="contact-item"><i class="fas fa-phone-alt"></i> <span>+60 12-345 6789</span></div>
+                </div>
+
+                <div class="contact-form">
+                    <form id="waForm">
+                        <div class="form-group">
+                            <label>Your Name</label>
+                            <input type="text" id="waName" class="form-input" placeholder="Enter name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea id="waMsg" class="form-input" rows="4" placeholder="How can we help?" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-send">Send to WhatsApp</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
         <div class="footer-grid">
             <div class="footer-col">
                 <h4>About</h4>
                 <p>THE SPORTS AND FITNESS ONLINE EVENT REGISTRATION SOLUTION.</p>
-                <p style="margin-top:10px; color:#fff;"><strong>info@seamountain.com</strong></p>
+                <p style="margin-top:10px; color:#aaa;"><strong>info@seamountain.com</strong></p>
             </div>
+
+            <div class="footer-col">
+                <h4>Get The App</h4>
+                <div class="app-buttons">
+                    <div class="app-btn">
+                        <i class="fab fa-apple"></i>
+                        <div style="text-align:left; line-height:1.2;">
+                            <span style="font-size:0.6rem; display:block;">Available on the</span>App Store
+                        </div>
+                    </div>
+                    <div class="app-btn">
+                        <i class="fab fa-google-play"></i>
+                        <div style="text-align:left; line-height:1.2;">
+                            <span style="font-size:0.6rem; display:block;">GET IT ON</span>Google Play
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="footer-col">
                 <h4>Follow Us</h4>
-                <div class="social-icons" style="display:flex; gap:10px; margin-top:10px;">
-                    <a href="#" style="color:#fff;"><i class="fab fa-facebook"></i></a>
-                    <a href="#" style="color:#fff;"><i class="fab fa-instagram"></i></a>
-                    <a href="#" style="color:#fff;"><i class="fab fa-twitter"></i></a>
+                <p>Stay connected on social media.</p>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
                 </div>
             </div>
         </div>
-
-        <section id="contact" class="contact-section">
-        <div class="contact-container">
-            <div class="contact-info">
-                <h2>Get In Touch</h2>
-                <p>Have questions about the race? Interested in sponsorship? Or just want to say hi?</p>
-                
-                <div class="contact-item"><i class="fas fa-map-marker-alt"></i> <span>Sea Mountain HQ</span></div>
-                <div class="contact-item"><i class="fas fa-envelope"></i> <span>info@seamountain.com</span></div>
-                <div class="contact-item"><i class="fas fa-phone-alt"></i> <span>+60 12-345 6789</span></div>
-            </div>
-
-            <div class="contact-form">
-                <form id="waForm">
-                    <div class="form-group">
-                        <label>Your Name</label>
-                        <input type="text" id="waName" class="form-input" placeholder="Enter name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Message</label>
-                        <textarea id="waMsg" class="form-input" rows="4" placeholder="How can we help?" required></textarea>
-                    </div>
-                    <button type="submit" class="btn-send">Send to WhatsApp</button>
-                </form>
-            </div>
-        </div>
-        </section>
-
-        <a href="https://wa.me/601158042310" class="float-wa" target="_blank" title="Chat with us">
-            <i class="fab fa-whatsapp"></i>
-        </a>
 
         <div class="footer-bottom">
             <div class="footer-links">
                 <a href="#">Privacy Policy</a>
                 <a href="#">Refund Policy</a>
                 <a href="#">Terms & Conditions</a>
-                <a href="admin-login.html" style="color:#333;">Admin</a>
-                <a href="participants.html" style="color:#0f1014;">Participants</a>
+                <a href="admin-login.html" style="color:#0f1014;">Admin</a>
+                <!--<a href="participants.html" style="color:#444;">Participants</a>-->
             </div>
             <p>&copy; 2025 Sea Mountain.Co. All Rights Reserved.</p>
             <div class="visitor-counter">
                 <i class="fas fa-eye"></i> Total Views: <span id="visitCount">...</span>
             </div>
         </div>
-    </footer>
+
+    </div>
+
+    <a href="https://wa.me/601158042310" class="float-wa" target="_blank" title="Chat with us">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
