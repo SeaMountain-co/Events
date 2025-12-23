@@ -93,8 +93,9 @@
 
         .btn-action { border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin-right: 5px; color: white; transition: 0.2s; width: 35px; height: 35px; }
         .btn-delete { background: #ff0000; } .btn-delete:hover { background: #cc0000; }
+        
+        /* BUTANG STATUS (Check vs Undo) */
         .btn-approve { background: #28a745; } .btn-approve:hover { background: #218838; }
-        /* NEW REVOKE BUTTON STYLE */
         .btn-revoke { background: #e67e22; } .btn-revoke:hover { background: #d35400; }
 
         /* MOBILE HINT */
@@ -260,6 +261,7 @@
 
         function loadData() {
             const dbRef = ref(db, 'registrations');
+            
             onValue(dbRef, (snapshot) => {
                 const data = snapshot.val();
                 const tableBody = document.getElementById('adminTableBody');
@@ -267,6 +269,8 @@
                 
                 document.getElementById('loadingMsg').style.display = 'none';
                 tableBody.innerHTML = ""; 
+                
+                // RESET ARRAY (PENTING!)
                 allRegistrations = []; 
                 let stats = { total: 0, paid: 0, pending: 0 };
                 let eventList = new Set(); 
@@ -275,12 +279,21 @@
                     Object.keys(data).forEach(eventId => {
                         eventList.add(eventId); 
                         const eventData = data[eventId];
-                        Object.keys(eventData).forEach(userId => {
-                            const runner = eventData[userId];
-                            allRegistrations.push({ eventId: eventId, userId: userId, ...runner });
-                            stats.total++;
-                            if(runner.status && runner.status.toLowerCase() === 'paid') stats.paid++; else stats.pending++;
-                        });
+                        
+                        if(eventData && typeof eventData === 'object') {
+                            Object.keys(eventData).forEach(userId => {
+                                const runner = eventData[userId];
+                                
+                                // PENAPIS KETAT: Elak data hantu/undefined
+                                if (runner && runner.first_name) {
+                                    allRegistrations.push({ eventId: eventId, userId: userId, ...runner });
+                                    
+                                    stats.total++;
+                                    const statusLower = (runner.status || "").toLowerCase();
+                                    if(statusLower === 'paid') stats.paid++; else stats.pending++;
+                                }
+                            });
+                        }
                     });
 
                     document.getElementById('totalReg').innerText = stats.total;
@@ -295,29 +308,52 @@
                             eventFilter.add(option);
                         });
                     }
-                    renderTable(allRegistrations);
+                    
+                    applyFilterAndRender();
+
                 } else {
                     tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No Data Found</td></tr>";
                 }
             });
         }
 
+        function applyFilterAndRender() {
+            const selectedEvent = document.getElementById('eventFilter').value;
+            const btnAnalytics = document.getElementById('btnClientView');
+
+            if(selectedEvent === 'all') {
+                renderTable(allRegistrations);
+                btnAnalytics.style.display = 'none';
+            } else {
+                const filtered = allRegistrations.filter(r => r.eventId === selectedEvent);
+                renderTable(filtered);
+                btnAnalytics.href = `participants.html?id=${selectedEvent}`;
+                btnAnalytics.style.display = 'flex';
+            }
+        }
+
         window.renderTable = function(dataArray) {
             const tableBody = document.getElementById('adminTableBody');
             tableBody.innerHTML = "";
 
+            if(dataArray.length === 0) {
+                tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No matches found</td></tr>";
+                return;
+            }
+
             dataArray.forEach(row => {
-                const isPaid = (row.status && row.status.toLowerCase() === 'paid');
+                const currentStatus = (row.status || "").toLowerCase();
+                const isPaid = currentStatus === 'paid';
                 const statusClass = isPaid ? "paid" : "pending";
                 
-                // LOGIC BUTANG (TOGGLE)
+                // --- MANUAL CHECK LOGIC ---
                 let actionBtn = "";
                 if(isPaid) {
-                    // Kalau dah Paid, tunjuk butang REVOKE (Undo)
-                    actionBtn = `<button class="btn-action btn-revoke" title="Revoke Payment (Set Pending)" onclick="revokeStatus('${row.eventId}', '${row.userId}')"><i class="fas fa-undo"></i></button>`;
+                    // Kalau dah Paid, tunjuk butang REVOKE (Oren) untuk undo
+                    actionBtn = `<button class="btn-action btn-revoke" title="Revoke (Set Pending)" onclick="togglePaymentStatus('${row.eventId}', '${row.userId}', 'Pending Payment')"><i class="fas fa-undo"></i></button>`;
                 } else {
-                    // Kalau belum Paid, tunjuk butang APPROVE (Check)
-                    actionBtn = `<button class="btn-action btn-approve" title="Approve Payment" onclick="updateStatus('${row.eventId}', '${row.userId}')"><i class="fas fa-check"></i></button>`;
+                    // Kalau belum Paid, tunjuk butang APPROVE (Hijau)
+                    actionBtn = `<button class="btn-action btn-approve" title="Approve (Set Paid)" onclick="togglePaymentStatus('${row.eventId}', '${row.userId}', 'Paid')"><i class="fas fa-check"></i></button>`;
                 }
 
                 const htmlRow = `
@@ -326,7 +362,7 @@
                         <td>${row.first_name} ${row.last_name}</td>
                         <td>${row.email}<br><small style="color:#888;">${row.phone}</small></td>
                         <td>${row.category} <span style="color:#aaa; font-size:0.8rem;">(${row.tshirt_size})</span></td>
-                        <td><span class="badge ${statusClass}">${row.status}</span></td>
+                        <td><span class="badge ${statusClass}">${row.status || 'Pending Payment'}</span></td>
                         <td style="white-space:nowrap;">
                             ${actionBtn}
                             <button class="btn-action btn-delete" title="Delete User" onclick="deleteRunner('${row.eventId}', '${row.userId}')"><i class="fas fa-trash"></i></button>
@@ -337,19 +373,7 @@
             });
         }
 
-        document.getElementById('eventFilter').addEventListener('change', function() {
-            const selectedEvent = this.value;
-            const btnAnalytics = document.getElementById('btnClientView');
-            if(selectedEvent === 'all') {
-                renderTable(allRegistrations);
-                btnAnalytics.style.display = 'none'; 
-            } else {
-                const filtered = allRegistrations.filter(r => r.eventId === selectedEvent);
-                renderTable(filtered);
-                btnAnalytics.href = `participants.html?id=${selectedEvent}`;
-                btnAnalytics.style.display = 'flex';
-            }
-        });
+        document.getElementById('eventFilter').addEventListener('change', applyFilterAndRender);
 
         window.downloadCSV = function() {
             let csvContent = "data:text/csv;charset=utf-8,";
@@ -385,20 +409,27 @@
         }
 
         window.deleteRunner = function(eventId, userId) {
-            if(confirm("Delete this runner permanently?")) { remove(ref(db, `registrations/${eventId}/${userId}`)).then(() => alert("User Deleted")); }
-        }
-        
-        // APPROVE FUNCTION
-        window.updateStatus = function(eventId, userId) {
-            if(confirm("Confirm payment received?")) { update(ref(db, `registrations/${eventId}/${userId}`), { status: "Paid" }).then(() => alert("Status Updated!")); }
-        }
-
-        // REVOKE FUNCTION (NEW)
-        window.revokeStatus = function(eventId, userId) {
-            if(confirm("Revoke payment status? Change back to Pending?")) { 
-                update(ref(db, `registrations/${eventId}/${userId}`), { status: "Pending Payment" }).then(() => alert("Status Reverted to Pending!")); 
+            if(confirm("Delete this runner permanently?")) { 
+                remove(ref(db, `registrations/${eventId}/${userId}`))
+                .then(() => alert("User Deleted Successfully"))
+                .catch((err) => alert("Error deleting: " + err.message)); 
             }
         }
+        
+        // --- SATU FUNGSI UNTUK TUKAR STATUS (PAID <-> PENDING) ---
+        window.togglePaymentStatus = function(eventId, userId, newStatus) {
+            if(confirm(`Confirm change status to '${newStatus}'?`)) { 
+                update(ref(db, `registrations/${eventId}/${userId}`), { status: newStatus })
+                .then(() => {
+                    // Tak perlu reload, onValue akan auto update.
+                    alert("Success! Status updated to " + newStatus);
+                })
+                .catch((err) => {
+                    alert("Error updating status: " + err.message);
+                });
+            }
+        }
+
     </script>
 </body>
 </html>
