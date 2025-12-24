@@ -93,8 +93,6 @@
 
         .btn-action { border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin-right: 5px; color: white; transition: 0.2s; width: 35px; height: 35px; }
         .btn-delete { background: #ff0000; } .btn-delete:hover { background: #cc0000; }
-        
-        /* BUTANG STATUS (Check vs Undo) */
         .btn-approve { background: #28a745; } .btn-approve:hover { background: #218838; }
         .btn-revoke { background: #e67e22; } .btn-revoke:hover { background: #d35400; }
 
@@ -258,7 +256,7 @@
             }
         });
 
-        // --- 1. LOAD DATA WITH STRICT FILTER ---
+        // --- 1. LOAD DATA (CORRECTED KEY LOGIC) ---
         function loadData() {
             const dbRef = ref(db, 'registrations');
             
@@ -276,25 +274,25 @@
                 if (data) {
                     Object.keys(data).forEach(eventId => {
                         const eventData = data[eventId];
-                        
-                        // PASTIKAN eventData adalah object, bukan string (untuk elak key tersesat)
                         if(eventData && typeof eventData === 'object') {
                             eventList.add(eventId); 
                             
-                            Object.keys(eventData).forEach(userId => {
-                                const runner = eventData[userId];
+                            // PENTING: Iterasi 'regKey' (Kunci Sebenar), bukan 'userId'
+                            Object.keys(eventData).forEach(regKey => {
+                                const runner = eventData[regKey];
                                 
-                                // --- PENAPIS KETAT (ANTI-UNDEFINED) ---
-                                // 1. Mesti object
-                                // 2. Mesti ada 'first_name' yang sah (bukan undefined/null)
-                                // 3. Key userId tidak boleh string "undefined"
+                                // Penapis Ketat + Guna 'regKey' sebagai ID rujukan utama
                                 if (runner && 
                                     typeof runner === 'object' && 
                                     runner.first_name && 
-                                    userId !== 'undefined' &&
-                                    userId !== 'null') {
+                                    regKey !== 'undefined') {
                                     
-                                    allRegistrations.push({ eventId: eventId, userId: userId, ...runner });
+                                    // SIMPAN 'regKey' sebagai ID utama untuk update/delete
+                                    allRegistrations.push({ 
+                                        eventId: eventId, 
+                                        regKey: regKey, // INI KUNCI SAKTI (-OhB...)
+                                        ...runner 
+                                    });
                                     
                                     stats.total++;
                                     const statusLower = (runner.status || "").toLowerCase();
@@ -316,9 +314,7 @@
                             eventFilter.add(option);
                         });
                     }
-                    
                     applyFilterAndRender();
-
                 } else {
                     tableBody.innerHTML = "<tr><td colspan='6' style='text-align:center'>No Data Found</td></tr>";
                 }
@@ -353,11 +349,12 @@
                 const isPaid = (row.status && row.status.toLowerCase() === 'paid');
                 const statusClass = isPaid ? "paid" : "pending";
                 
+                // PENTING: Guna row.regKey untuk fungsi update/delete
                 let actionBtn = "";
                 if(isPaid) {
-                    actionBtn = `<button class="btn-action btn-revoke" title="Revoke Payment" onclick="togglePaymentStatus('${row.eventId}', '${row.userId}', 'Pending Payment')"><i class="fas fa-undo"></i></button>`;
+                    actionBtn = `<button class="btn-action btn-revoke" title="Revoke Payment" onclick="togglePaymentStatus('${row.eventId}', '${row.regKey}', 'Pending Payment')"><i class="fas fa-undo"></i></button>`;
                 } else {
-                    actionBtn = `<button class="btn-action btn-approve" title="Mark as Paid" onclick="togglePaymentStatus('${row.eventId}', '${row.userId}', 'Paid')"><i class="fas fa-check"></i></button>`;
+                    actionBtn = `<button class="btn-action btn-approve" title="Mark as Paid" onclick="togglePaymentStatus('${row.eventId}', '${row.regKey}', 'Paid')"><i class="fas fa-check"></i></button>`;
                 }
 
                 const htmlRow = `
@@ -369,7 +366,7 @@
                         <td><span class="badge ${statusClass}">${row.status || 'Pending Payment'}</span></td>
                         <td style="white-space:nowrap;">
                             ${actionBtn}
-                            <button class="btn-action btn-delete" title="Delete User" onclick="deleteRunner('${row.eventId}', '${row.userId}')"><i class="fas fa-trash"></i></button>
+                            <button class="btn-action btn-delete" title="Delete User" onclick="deleteRunner('${row.eventId}', '${row.regKey}')"><i class="fas fa-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -412,31 +409,29 @@
             }
         }
 
-        // --- 2. DELETE FUNCTION WITH SAFEGUARDS ---
-        window.deleteRunner = function(eventId, userId) {
-            // Elak delete jika ID rosak
-            if(!eventId || !userId || userId === 'undefined') {
+        // --- 2. DELETE FUNCTION (USING REG KEY) ---
+        window.deleteRunner = function(eventId, regKey) {
+            if(!eventId || !regKey || regKey === 'undefined') {
                 alert("Cannot delete: Invalid ID. Try refreshing.");
                 return;
             }
 
             if(confirm("Delete this runner permanently?")) { 
-                remove(ref(db, `registrations/${eventId}/${userId}`))
+                remove(ref(db, `registrations/${eventId}/${regKey}`))
                 .then(() => alert("User Deleted Successfully"))
                 .catch((err) => alert("Error deleting: " + err.message)); 
             }
         }
         
-        // --- 3. TOGGLE STATUS FUNCTION ---
-        window.togglePaymentStatus = function(eventId, userId, newStatus) {
-            // Elak update jika ID rosak
-            if(!eventId || !userId || userId === 'undefined') {
+        // --- 3. TOGGLE STATUS FUNCTION (USING REG KEY) ---
+        window.togglePaymentStatus = function(eventId, regKey, newStatus) {
+            if(!eventId || !regKey || regKey === 'undefined') {
                 alert("Cannot update: Invalid ID. Try refreshing.");
                 return;
             }
 
             if(confirm(`Confirm change status to '${newStatus}'?`)) { 
-                update(ref(db, `registrations/${eventId}/${userId}`), { status: newStatus })
+                update(ref(db, `registrations/${eventId}/${regKey}`), { status: newStatus })
                 .then(() => {
                     alert("Success! Status updated to " + newStatus);
                 })
