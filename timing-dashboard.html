@@ -218,7 +218,7 @@
                             <thead>
                                 <tr>
                                     <th style="text-align:center;">Pos</th>
-                                    <th>Bib / ID</th>
+                                    <th>Event</th> <th>Bib / ID</th>
                                     <th>Name</th>
                                     <th>Country</th>
                                     <th>Category</th>
@@ -229,7 +229,7 @@
                                 </tr>
                             </thead>
                             <tbody id="leaderboardBody">
-                                <tr><td colspan="9" style="text-align:center; padding:30px; color:#666;">Select an event above to load data.</td></tr>
+                                <tr><td colspan="10" style="text-align:center; padding:30px; color:#666;">Select an event above to load data.</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -325,7 +325,6 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // --- SENARAI USER YANG DIBENARKAN ---
     const ALLOWED_TIMING_USERS = ["admin@sm.com", "crew@sm.com"];
 
     let currentEventId = "";
@@ -395,6 +394,10 @@
     
     onValue(ref(db, 'events'), (snap) => {
         eventSelect.innerHTML = '<option value="">-- Select Event First --</option>';
+        
+        // TAMBAH OPTION "ALL EVENTS"
+        eventSelect.innerHTML += '<option value="all" style="font-weight:bold; color:#00d2ff;">ALL EVENTS (VIEW & MANAGE)</option>';
+
         const data = snap.val();
         if(data) Object.keys(data).forEach(k => eventSelect.innerHTML += `<option value="${k}">${data[k].title}</option>`);
     });
@@ -404,17 +407,44 @@
         if(currentEventId) {
             loadData(currentEventId);
         } else {
-            document.getElementById('leaderboardBody').innerHTML = '<tr><td colspan="9" style="text-align:center;">Select an event to load data.</td></tr>';
+            document.getElementById('leaderboardBody').innerHTML = '<tr><td colspan="10" style="text-align:center;">Select an event to load data.</td></tr>';
         }
     });
 
     function loadData(eventId) {
-        document.getElementById('leaderboardBody').innerHTML = '<tr><td colspan="9" style="text-align:center;">Loading data...</td></tr>';
+        document.getElementById('leaderboardBody').innerHTML = '<tr><td colspan="10" style="text-align:center;">Loading data...</td></tr>';
         
-        onValue(ref(db, `registrations/${eventId}`), (snap) => {
+        // JIKA PILIH "ALL EVENTS"
+        let dbRef;
+        if(eventId === 'all') {
+            dbRef = ref(db, 'registrations');
+        } else {
+            dbRef = ref(db, `registrations/${eventId}`);
+        }
+
+        onValue(dbRef, (snap) => {
             const data = snap.val();
             allParticipants = [];
-            if(data) Object.keys(data).forEach(k => allParticipants.push({id: k, ...data[k]}));
+            
+            if(data) {
+                // LOGIK UNTUK "ALL"
+                if(eventId === 'all') {
+                    Object.keys(data).forEach(evId => {
+                        const eventData = data[evId];
+                        Object.keys(eventData).forEach(userId => {
+                            const p = eventData[userId];
+                            // Tambah field 'eventId' supaya kita tahu dia dari mana
+                            allParticipants.push({id: userId, eventId: evId, ...p});
+                        });
+                    });
+                } 
+                // LOGIK UNTUK SINGLE EVENT
+                else {
+                    Object.keys(data).forEach(k => {
+                        allParticipants.push({id: k, eventId: eventId, ...data[k]});
+                    });
+                }
+            }
             
             if(!activeMode) renderLeaderboard();
             else renderScannerUI();
@@ -427,7 +457,7 @@
         tbody.innerHTML = "";
 
         if(allParticipants.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No participants found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">No participants found.</td></tr>';
             return;
         }
 
@@ -453,11 +483,14 @@
 
             const flagUrl = "https://flagcdn.com/24x18/my.png"; 
             const countryCode = "MYS";
+            // Guna BIB atau ID Pendek
+            const displayBib = p.bib || p.id.substring(0,6) + "..";
 
             const row = `
                 <tr>
                     <td style="text-align:center;">${posHtml}</td>
-                    <td class="row-id" onclick="copyText('${p.id}')">${p.id.substring(0,6)}..</td>
+                    <td style="color:var(--accent); text-transform:uppercase; font-size:0.8rem; font-weight:bold;">${p.eventId || currentEventId}</td>
+                    <td class="row-id" onclick="copyText('${p.id}')">${displayBib}</td>
                     <td>${p.first_name}</td>
                     <td><img src="${flagUrl}" class="country-flag"> ${countryCode}</td>
                     <td>${p.category}</td>
@@ -503,20 +536,22 @@
         scannedList.reverse();
 
         scannedList.forEach(p => {
+            const displayBib = p.bib || p.id.substring(0,6) + "..";
             tbodyScanned.innerHTML += `
                 <tr>
                     <td class="row-time">${p.displayTime}</td>
-                    <td class="row-id" onclick="copyText('${p.id}')">${p.id.substring(0,6)}..</td>
+                    <td class="row-id" onclick="copyText('${p.id}')">${displayBib}</td>
                     <td>${p.first_name}</td>
                     <td><i class="fas fa-check-circle" style="color:var(--success)"></i></td>
                 </tr>`;
         });
 
         pendingList.forEach(p => {
+            const displayBib = p.bib || p.id.substring(0,6) + "..";
             tbodyPending.innerHTML += `
                 <tr>
                     <td>${p.category}</td>
-                    <td class="row-id" onclick="copyText('${p.id}')">${p.id.substring(0,6)}..</td>
+                    <td class="row-id" onclick="copyText('${p.id}')">${displayBib}</td>
                     <td>${p.first_name}</td>
                     <td class="row-pending">PENDING</td>
                 </tr>`;
@@ -547,7 +582,27 @@
 
     function processScan(tagId) {
         if(!tagId || !activeMode) return;
-        const userRef = ref(db, `registrations/${currentEventId}/${tagId}`);
+
+        // JIKA MOD 'ALL', kita kena cari user tu dari list local dulu untuk dapatkan eventId dia
+        let targetEventId = currentEventId;
+        if(currentEventId === 'all') {
+            const user = allParticipants.find(p => p.rfid_tag === tagId || p.id === tagId); // Cek RFID atau Key
+            if(user) {
+                targetEventId = user.eventId;
+            } else {
+                // Cuba cari direct dari database global (kalau local tak jumpa)
+                // Ini susah sikit sebab kena query semua.
+                // Untuk simple, kita assume tagId tu USER KEY (-OhB...)
+                // Tapi kalau tagId tu RFID tag, kita tak boleh direct.
+                // Jadi untuk mode ALL, better scan RFID tag yang dah di-map.
+                
+                // Fallback: Show Not Found
+                showFeedback(false, "TAG NOT FOUND IN LOADED LIST", { first_name: "UNKNOWN", last_name: "", id: tagId });
+                return;
+            }
+        }
+
+        const userRef = ref(db, `registrations/${targetEventId}/${tagId}`);
         
         onValue(userRef, (snap) => {
             if(snap.exists()) {
@@ -572,7 +627,14 @@
                     update(userRef, updates).then(() => showFeedback(true, "SUCCESS: " + activeMode, data));
                 }
             } else {
-                showFeedback(false, "TAG NOT FOUND", { first_name: "UNKNOWN", last_name: "", id: tagId });
+                // Kalau guna RFID Tag (bukan key), kena cari dalam list
+                const userByTag = allParticipants.find(p => p.rfid_tag === tagId);
+                if(userByTag) {
+                    // Jumpa guna RFID! Panggil semula processScan guna ID sebenar
+                    processScan(userByTag.id);
+                } else {
+                    showFeedback(false, "TAG NOT FOUND", { first_name: "UNKNOWN", last_name: "", id: tagId });
+                }
             }
         }, {onlyOnce: true});
     }
@@ -581,7 +643,7 @@
         const card = document.getElementById('scanStatusCard');
         document.getElementById('statusMsg').innerText = msg;
         document.getElementById('statusName').innerText = pData.first_name + " " + (pData.last_name || "");
-        document.getElementById('statusBib').innerText = pData.id || "---";
+        document.getElementById('statusBib').innerText = pData.bib || pData.id || "---"; // Papar BIB
         document.getElementById('statusTime').innerText = new Date().toLocaleTimeString();
 
         card.className = "scan-status"; 
