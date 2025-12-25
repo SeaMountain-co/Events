@@ -36,8 +36,10 @@
         .info-text { font-size: 0.9rem; color: #ddd; line-height: 1.6; }
         .info-label { display: block; font-size: 0.75rem; color: var(--text-gray); font-weight: 700; text-transform: uppercase; margin-bottom: 3px; }
         .sub-header { font-size: 1rem; font-weight: 700; color: var(--brand-red); margin: 10px 0 15px 0; text-transform: uppercase; letter-spacing: 1px; }
+        
         .action-btn { margin-top: auto; background: linear-gradient(45deg, var(--brand-red), #aa0000); color: #fff; border: 1px solid var(--brand-red); padding: 15px; border-radius: 30px; font-weight: 700; text-transform: uppercase; cursor: pointer; transition: 0.3s; text-align: center; width: 100%; }
         .action-btn:hover { background: var(--brand-red); transform: translateY(-2px); }
+        .action-btn.disabled { background: #333; border-color: #444; color: #777; cursor: not-allowed; pointer-events: none; } /* Disabled Style */
 
         /* COUNTDOWN & TABS */
         .countdown-section { text-align: center; margin-bottom: 60px; }
@@ -337,23 +339,54 @@
                 if(faqElement) faqElement.innerText = data.faq || "No FAQ available yet.";
 
                 const registerBtn = document.getElementById('registerBtn'); 
-                if(data.price) {
-                    registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
+                
+                // --- LOGIK SEMAK TARIKH TUTUP (AUTO DISABLE) ---
+                let isRegistrationClosed = false;
+                
+                // Cuba ambil tarikh tutup (sama ada date_end atau registration_close_date jika ada)
+                // Kita guna 'date' atau 'date_end' atau field baru 'reg_close_date' kalau ada.
+                // Di sini saya guna logic mudah: check 'date_end' atau 'date'
+                const closingDateString = data.registration_close_date || data.date_end || data.date; 
+                
+                if(closingDateString) {
+                    const closingDate = new Date(closingDateString);
+                    const now = new Date();
+                    
+                    // Kalau tarikh hari ini LEBIH BESAR dari tarikh tutup
+                    if(now > closingDate) {
+                        isRegistrationClosed = true;
+                    }
                 }
 
-                registerBtn.onclick = function(e) {
-                    e.preventDefault(); 
-                    if (isUserLoggedIn) {
-                        window.location.href = `register-event.html?event=${eventId}`;
-                    } else {
-                        if(confirm("You need to log in first.")) {
-                            sessionStorage.setItem('redirectAfterLogin', window.location.href);
-                            window.location.href = "login.html";
+                if(isRegistrationClosed) {
+                    registerBtn.innerHTML = "REGISTRATION CLOSED";
+                    registerBtn.classList.add("disabled"); // Tambah class CSS disabled
+                    registerBtn.href = "#"; // Matikan link
+                    registerBtn.onclick = function(e) { e.preventDefault(); } // Matikan click
+                } else if(data.price) {
+                    registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
+                    
+                    // Logik Click Asal (Hanya jika belum tutup)
+                    registerBtn.onclick = function(e) {
+                        e.preventDefault(); 
+                        if (isUserLoggedIn) {
+                            window.location.href = `register-event.html?event=${eventId}`;
+                        } else {
+                            if(confirm("You need to log in first.")) {
+                                sessionStorage.setItem('redirectAfterLogin', window.location.href);
+                                window.location.href = "login.html";
+                            }
                         }
-                    }
-                };
+                    };
+                }
 
-                if(data.countdown_date) startCountdown(data.countdown_date);
+                // Countdown Logic (Jika dah tutup, tulis CLOSED)
+                if(isRegistrationClosed) {
+                    const timerContainer = document.querySelector(".timer-container");
+                    if(timerContainer) timerContainer.innerHTML = "<h2 style='color:var(--brand-red)'>REGISTRATION CLOSED</h2>";
+                } else if(data.countdown_date) {
+                    startCountdown(data.countdown_date);
+                }
 
             } else {
                 document.querySelector('.main-container').innerHTML = "<h2 style='color:white; text-align:center; margin-top:50px;'>Event not found!</h2>";
@@ -367,7 +400,7 @@
     // Fungsi Countdown Timer
     function startCountdown(targetDateString) {
         const eventDate = new Date(targetDateString).getTime();
-        setInterval(() => {
+        const timerInterval = setInterval(() => {
             const now = new Date().getTime();
             const distance = eventDate - now;
             
@@ -377,8 +410,17 @@
                 document.getElementById("minutes").innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 document.getElementById("seconds").innerText = Math.floor((distance % (1000 * 60)) / 1000);
             } else {
+                clearInterval(timerInterval);
                 const timerContainer = document.querySelector(".timer-container");
                 if(timerContainer) timerContainer.innerHTML = "<h2 style='color:var(--brand-red)'>REGISTRATION CLOSED</h2>";
+                
+                // Double check untuk disable button kalau masa habis masa user tengah tengok page
+                const registerBtn = document.getElementById('registerBtn');
+                if(registerBtn) {
+                    registerBtn.innerHTML = "REGISTRATION CLOSED";
+                    registerBtn.classList.add("disabled");
+                    registerBtn.onclick = function(e) { e.preventDefault(); }
+                }
             }
         }, 1000);
     }
