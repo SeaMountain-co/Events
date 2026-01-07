@@ -39,10 +39,19 @@
         .btn-edit { background: #3498db; color: white; } .btn-edit:hover { background: #2980b9; }
         .btn-delete { background: #e74c3c; color: white; } .btn-delete:hover { background: #c0392b; }
         
-        /* BUTANG BINTANG BARU */
+        /* BUTANG STAR & ARCHIVE */
         .btn-star { background: transparent; border: 1px solid #ffd700; color: #ffd700; font-size: 1rem; }
         .btn-star:hover { background: #ffd700; color: #000; }
         .btn-star.featured { background: #ffd700; color: #000; border-color: #ffd700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+
+        /* NEW: ARCHIVE BUTTON STYLE */
+        .btn-archive { background: transparent; border: 1px solid #888; color: #888; font-size: 1rem; }
+        .btn-archive:hover { background: #888; color: #fff; }
+        .btn-archive.archived { background: #555; color: #aaa; border-color: #555; } /* Style bila dah archived */
+
+        /* VISUAL UNTUK ROW YANG DAH ARCHIVED */
+        tr.archived-row { opacity: 0.5; background: #111; }
+        tr.archived-row .event-title { text-decoration: line-through; }
 
     </style>
 </head>
@@ -65,8 +74,7 @@
                         <th>Event Info</th>
                         <th>Price</th>
                         <th>Reg Period</th>
-                        <th width="200">Actions</th>
-                    </tr>
+                        <th width="240">Actions</th> </tr>
                 </thead>
                 <tbody id="eventTableBody">
                     <tr><td colspan="5" style="text-align:center; padding:30px;">Loading Events...</td></tr>
@@ -78,7 +86,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        // PENTING: Import 'update' dan 'get'
         import { getDatabase, ref, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         // --- CONFIG FIREBASE ---
@@ -103,7 +110,7 @@
                 alert("ACCESS DENIED");
                 window.location.href = "admin-login.html";
             } else {
-                loadEvents(); // Load events lepas login confirm
+                loadEvents(); 
             }
         });
 
@@ -119,23 +126,32 @@
                     Object.keys(data).forEach(key => {
                         const event = data[key];
                         
-                        // Check Featured Status
+                        // Check Status
                         const isFeatured = event.isFeatured === true;
+                        const isArchived = event.isArchived === true; // Cek status Archive
+
+                        // Style Classes
                         const starClass = isFeatured ? 'btn-star featured' : 'btn-star';
                         const starTitle = isFeatured ? 'Currently Featured' : 'Set as Featured';
                         
+                        // Archive Button Style
+                        const archiveClass = isArchived ? 'btn-archive archived' : 'btn-archive';
+                        const archiveIcon = isArchived ? '<i class="fas fa-box-open"></i>' : '<i class="fas fa-archive"></i>'; // Icon berubah (Buka kotak vs Simpan kotak)
+                        const archiveTitle = isArchived ? 'Unarchive (Show on Main Page)' : 'Archive (Hide from Main Page)';
+                        const rowClass = isArchived ? 'archived-row' : '';
+
                         // Badge Text
-                        const featuredBadge = isFeatured ? 
-                            '<span style="background:#ffd700; color:#000; padding:2px 6px; border-radius:3px; font-size:0.7rem; margin-left:5px; font-weight:bold;">FEATURED</span>' : '';
+                        const featuredBadge = isFeatured ? '<span style="background:#ffd700; color:#000; padding:2px 6px; border-radius:3px; font-size:0.7rem; margin-left:5px; font-weight:bold;">FEATURED</span>' : '';
+                        const archivedBadge = isArchived ? '<span style="background:#555; color:#aaa; padding:2px 6px; border-radius:3px; font-size:0.7rem; margin-left:5px; font-weight:bold;">ARCHIVED</span>' : '';
 
                         const row = `
-                            <tr>
+                            <tr class="${rowClass}">
                                 <td>
                                     <img src="${event.image_url || 'https://via.placeholder.com/60'}" class="event-img">
                                 </td>
                                 <td>
                                     <span class="event-id">ID: ${key}</span>
-                                    <span class="event-title">${event.title} ${featuredBadge}</span>
+                                    <span class="event-title">${event.title} ${featuredBadge} ${archivedBadge}</span>
                                     <span class="event-date"><i class="far fa-calendar-alt"></i> ${event.date}</span>
                                 </td>
                                 <td>${event.price || '-'}</td>
@@ -143,6 +159,10 @@
                                 <td>
                                     <button class="btn-action ${starClass}" onclick="setFeatured('${key}')" title="${starTitle}">
                                         <i class="fas fa-star"></i>
+                                    </button>
+
+                                    <button class="btn-action ${archiveClass}" onclick="toggleArchive('${key}', ${isArchived})" title="${archiveTitle}">
+                                        ${archiveIcon}
                                     </button>
 
                                     <a href="admin-add-event.html?id=${key}" class="btn-action btn-edit" title="Edit Event">
@@ -163,32 +183,46 @@
             });
         }
 
-        // 3. SET FEATURED EVENT (LOGIC PENTING)
+        // 3. SET FEATURED EVENT
         window.setFeatured = async function(eventId) {
             if(!confirm("Set this event as the MAIN Featured Event on homepage?")) return;
 
-            // A. Ambil semua event dulu
             const snapshot = await get(ref(db, 'events'));
             if (snapshot.exists()) {
                 const data = snapshot.val();
                 const updates = {};
 
-                // B. Loop semua event -> Set 'isFeatured' = false
                 Object.keys(data).forEach(key => {
                     updates[`events/${key}/isFeatured`] = false;
                 });
 
-                // C. Set event yang kita pilih -> Set 'isFeatured' = true
                 updates[`events/${eventId}/isFeatured`] = true;
 
-                // D. Update Database
                 update(ref(db), updates)
                 .then(() => alert("Featured Event Updated!"))
                 .catch((err) => alert("Error: " + err.message));
             }
         }
 
-        // 4. DELETE EVENT FUNCTION
+        // 4. TOGGLE ARCHIVE (NEW FUNCTION)
+        window.toggleArchive = function(eventId, currentStatus) {
+            const newStatus = !currentStatus; // Terbalikkan status (True jadi False, False jadi True)
+            const actionText = newStatus ? "ARCHIVE" : "UNARCHIVE";
+            const confirmMsg = newStatus 
+                ? "Archive this event? It will be HIDDEN from the main page." 
+                : "Unarchive this event? It will be VISIBLE on the main page.";
+
+            if(confirm(confirmMsg)) {
+                update(ref(db, 'events/' + eventId), { isArchived: newStatus })
+                .then(() => {
+                    // Tak perlu alert success yang bising, table akan auto update
+                    console.log(`Event ${eventId} is now ${actionText}`);
+                })
+                .catch((err) => alert("Error: " + err.message));
+            }
+        }
+
+        // 5. DELETE EVENT FUNCTION
         window.deleteEvent = function(eventId) {
             if(confirm(`Are you sure you want to DELETE event: ${eventId}? This cannot be undone.`)) {
                 remove(ref(db, 'events/' + eventId))
