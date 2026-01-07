@@ -53,7 +53,7 @@
             color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; 
         }
         
-        /* INPUTS & SELECTS (LEBIH BESAR & KEMAS) */
+        /* INPUTS & SELECTS */
         .form-input, textarea, select { 
             width: 100%; padding: 15px; background: var(--input-bg); border: 1px solid #444; 
             border-radius: 8px; color: #fff; outline: none; font-family: 'Montserrat'; font-size: 0.95rem;
@@ -63,12 +63,11 @@
             border-color: var(--brand-red); box-shadow: 0 0 0 3px rgba(255,0,0,0.1); background: #111; 
         }
         
-        /* Disabled Input */
         .form-input:disabled { background: #151515; color: #555; border-color: #222; cursor: not-allowed; }
         
-        /* GRID SYSTEM (ROW & COL) - RESPONSIVE */
-        .row { display: flex; gap: 25px; flex-wrap: wrap; } /* Tambah flex-wrap */
-        .col { flex: 1; min-width: 250px; } /* Tambah min-width supaya tak jadi terlalu kurus */
+        /* GRID SYSTEM */
+        .row { display: flex; gap: 25px; flex-wrap: wrap; } 
+        .col { flex: 1; min-width: 250px; } 
 
         /* BUTTON */
         .btn-submit { 
@@ -83,6 +82,20 @@
             border-radius: 8px; border: 1px solid #444; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         
+        /* --- NEW: CATEGORY BUILDER STYLES --- */
+        .cat-builder-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .cat-input-name { flex: 2; }
+        .cat-input-price { flex: 1; }
+        .btn-add-cat { background: #28a745; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-remove-cat { background: #d9534f; color: #fff; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+        .cat-list-container { margin-top: 15px; border-top: 1px solid #333; padding-top: 15px; }
+
+        /* --- NEW: UPLOAD BUTTON --- */
+        .upload-group { display: flex; gap: 10px; }
+        .btn-upload { background: #333; color: #fff; border: 1px solid #555; padding: 0 20px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+        .btn-upload:hover { background: #444; }
+        input[type="file"] { display: none; }
+
         /* LOADING OVERLAY */
         .loading-overlay { 
             position: fixed; top:0; left:0; width:100%; height:100%; 
@@ -91,18 +104,14 @@
         }
         .loading-text { font-family: 'Russo One'; margin-top: 15px; font-size: 1.2rem; color: #fff; letter-spacing: 2px; }
 
-        /* MOBILE RESPONSIVE (MEDIA QUERY) */
         @media (max-width: 768px) {
             .container { padding: 20px; border: none; background: transparent; box-shadow: none; }
             .form-section { padding: 20px; background: var(--card-bg); border: 1px solid #333; }
-            .row { flex-direction: column; gap: 0; } /* Stack columns vertically */
+            .row { flex-direction: column; gap: 0; } 
             .col { margin-bottom: 20px; }
-            .form-group { margin-bottom: 20px; }
-            .header { margin-bottom: 30px; flex-direction: column; gap: 15px; align-items: flex-start; }
-            .back-btn { width: 100%; padding: 10px; background: #222; justify-content: center; border-radius: 5px; }
+            .cat-builder-row { flex-direction: column; align-items: stretch; }
         }
 
-        /* Fix Date Picker Icon Color */
         input[type="date"]::-webkit-calendar-picker-indicator, input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
     </style>
 </head>
@@ -131,50 +140,50 @@
                         <input type="text" id="eventId" class="form-input" placeholder="e.g. tmt2026" required>
                     </div>
                     <div class="col">
-                        <label class="form-label">Event Price (Display)</label>
-                        <input type="text" id="eventPrice" class="form-input" placeholder="e.g. RM 85.00" required>
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col">
                         <label class="form-label">Display Category</label>
                         <select id="eventCategory" class="form-input">
                             <option value="upcoming">Upcoming Run</option>
                             <option value="latest">Latest Run</option>
                         </select>
                     </div>
+                </div>
+                
+                <div class="row" style="margin-top:20px;">
                     <div class="col">
                         <label class="form-label">Total Quota (Pax)</label>
                         <input type="number" id="eventQuota" class="form-input" placeholder="e.g. 1000" required>
                     </div>
-                </div>
-
-                <div class="row">
                     <div class="col">
                         <label class="form-label">Distances (Label Only)</label>
                         <input type="text" id="eventDistance" class="form-input" placeholder="e.g. 5KM, 10KM" required>
                     </div>
-                    <div class="col">
-                        </div>
                 </div>
 
-                <div class="form-group" style="margin-top: 10px;">
+                <div class="form-group" style="margin-top: 20px;">
                     <label class="form-label">Full Event Title</label>
                     <input type="text" id="eventTitle" class="form-input" placeholder="Enter Full Event Name" required>
                 </div>
             </div>
 
             <div class="form-section">
-                <span class="section-title"><i class="fas fa-list"></i> Race Categories Setup</span>
-                <div class="form-group">
-                    <label class="form-label">Categories List (Separate by comma)</label>
-                    <textarea id="categoriesInput" class="form-input" rows="3" placeholder="e.g. 5KM Fun Run, 10KM Speed, 21KM Half Marathon"></textarea>
-                    <small style="color:#666; font-size: 0.75rem; margin-top: 8px; display:block; line-height: 1.4;">
-                        <i class="fas fa-info-circle"></i> These options will appear in the registration form dropdown for users to select.
-                    </small>
+                <span class="section-title"><i class="fas fa-tags"></i> Pricing & Categories (Early Bird)</span>
+                
+                <div class="row" style="margin-bottom:20px;">
+                    <div class="col">
+                        <label class="form-label">Early Bird End Date</label>
+                        <input type="date" id="earlyBirdDate" class="form-input">
+                        <small style="color:#888;">If set, price will auto-switch to Normal after this date.</small>
+                    </div>
+                    <div class="col"></div>
                 </div>
-            </div>
+
+                <label class="form-label">Manage Categories & Prices</label>
+                <div id="catBuilderContainer">
+                    </div>
+                
+                <button type="button" class="btn-add-cat" onclick="addCategoryRow()">+ Add Category</button>
+                
+                <input type="hidden" id="finalCategoriesJSON"> </div>
 
             <div class="form-section">
                 <span class="section-title"><i class="far fa-calendar-alt"></i> Date & Venue</span>
@@ -216,28 +225,36 @@
             </div>
 
             <div class="form-section">
-                <span class="section-title"><i class="fas fa-image"></i> Event Visuals</span>
+                <span class="section-title"><i class="fas fa-image"></i> Event Visuals (Link or Upload)</span>
 
-                <div class="row">
-                    <div class="col">
-                        <label class="form-label">Main Poster URL</label>
+                <div class="form-group">
+                    <label class="form-label">Main Poster</label>
+                    <div class="upload-group">
                         <input type="url" id="mainPoster" class="form-input" placeholder="https://..." onchange="previewImg(this, 'previewMain')">
-                        <img id="previewMain" class="img-preview">
+                        <button type="button" class="btn-upload" onclick="triggerUpload('uploadMain', 'mainPoster', 'previewMain')"><i class="fas fa-cloud-upload-alt"></i> Upload (Max 1MB)</button>
+                        <input type="file" id="uploadMain" accept="image/*" onchange="handleFileSelect(this, 'mainPoster', 'previewMain')">
                     </div>
-                    <div class="col">
-                        <label class="form-label">Entitlement / Medal URL</label>
+                    <img id="previewMain" class="img-preview">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Entitlement / Medal</label>
+                    <div class="upload-group">
                         <input type="url" id="entitlementPoster" class="form-input" placeholder="https://..." onchange="previewImg(this, 'previewEnt')">
-                        <img id="previewEnt" class="img-preview">
+                        <button type="button" class="btn-upload" onclick="triggerUpload('uploadEnt', 'entitlementPoster', 'previewEnt')"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
+                        <input type="file" id="uploadEnt" accept="image/*" onchange="handleFileSelect(this, 'entitlementPoster', 'previewEnt')">
                     </div>
+                    <img id="previewEnt" class="img-preview">
                 </div>
             
                 <div class="form-group" style="margin-top: 25px;">
-                    <label class="form-label">E-Certificate Template URL (Landscape A4)</label>
-                    <input type="url" id="certTemplate" class="form-input" placeholder="https://... (Kosongkan nama & masa)" onchange="previewImg(this, 'previewCert')">
+                    <label class="form-label">E-Certificate Template (Landscape A4)</label>
+                    <div class="upload-group">
+                        <input type="url" id="certTemplate" class="form-input" placeholder="https://..." onchange="previewImg(this, 'previewCert')">
+                        <button type="button" class="btn-upload" onclick="triggerUpload('uploadCert', 'certTemplate', 'previewCert')"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
+                        <input type="file" id="uploadCert" accept="image/*" onchange="handleFileSelect(this, 'certTemplate', 'previewCert')">
+                    </div>
                     <img id="previewCert" class="img-preview" style="border: 2px dashed #444; max-height: 200px;">
-                    <small style="color:#888; font-size: 0.75rem; margin-top: 5px; display:block;">
-                        <i class="fas fa-info-circle"></i> Gunakan gambar saiz A4 Landscape (Melintang). Pastikan ruang tengah kosong untuk nama.
-                    </small>
                 </div>
             </div>
 
@@ -299,12 +316,51 @@
         } else {
             const urlParams = new URLSearchParams(window.location.search);
             const editId = urlParams.get('id');
-
-            if(editId) {
-                enterEditMode(editId);
-            }
+            if(editId) enterEditMode(editId);
+            else addCategoryRow(); // Add 1 empty row by default
         }
     });
+
+    // --- NEW: CATEGORY BUILDER LOGIC ---
+    window.addCategoryRow = function(name="", normalPrice="", earlyPrice="") {
+        const container = document.getElementById('catBuilderContainer');
+        const div = document.createElement('div');
+        div.className = 'cat-builder-row';
+        div.innerHTML = `
+            <input type="text" class="form-input cat-input-name" placeholder="Category Name (e.g. 5KM Fun Run)" value="${name}" required>
+            <input type="number" class="form-input cat-input-price" placeholder="Normal Price (RM)" value="${normalPrice}" required>
+            <input type="number" class="form-input cat-input-price" placeholder="Early Bird Price (RM)" value="${earlyPrice}">
+            <button type="button" class="btn-remove-cat" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>
+        `;
+        container.appendChild(div);
+    }
+
+    // --- NEW: IMAGE UPLOAD LOGIC (Base64) ---
+    window.triggerUpload = function(inputId, targetInputId, previewId) {
+        document.getElementById(inputId).click();
+    }
+
+    window.handleFileSelect = function(input, targetInputId, previewId) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            
+            // Check Size (Max 1MB)
+            if(file.size > 1024 * 1024) {
+                alert("File too large! Max 1MB allowed.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Convert to Base64
+                const base64String = e.target.result;
+                document.getElementById(targetInputId).value = base64String;
+                document.getElementById(previewId).src = base64String;
+                document.getElementById(previewId).style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        }
+    }
 
     // 2. EDIT MODE (LOAD DATA)
     function enterEditMode(id) {
@@ -321,54 +377,57 @@
             if(snapshot.exists()) {
                 const data = snapshot.val();
                 
-                // BASIC INFO
                 document.getElementById('eventTitle').value = data.title || "";
-                document.getElementById('eventPrice').value = data.price || "";
                 document.getElementById('eventVenue').value = data.venue || "";
                 document.getElementById('eventDesc').value = data.description || "";
                 document.getElementById('kitDate').value = data.kit_date || "";
-                
-                // TEXT DATA
-                if(document.getElementById('entitlementInput')) document.getElementById('entitlementInput').value = data.entitlements || "";
-                if(document.getElementById('faqInput')) document.getElementById('faqInput').value = data.faq || "";
-                if(document.getElementById('tncInput')) document.getElementById('tncInput').value = data.tnc || "";
-                
-                // CATEGORIES (FIXED)
-                if(document.getElementById('categoriesInput')) {
-                    if(data.categories && Array.isArray(data.categories)) {
-                        document.getElementById('categoriesInput').value = data.categories.join(', ');
-                    } else if(data.categories) {
-                        document.getElementById('categoriesInput').value = data.categories; 
-                    }
-                }
-
-                // DROPDOWNS & NUMBERS
-                document.getElementById('eventCategory').value = data.category || "upcoming";
                 document.getElementById('eventQuota').value = data.quota || "";
                 document.getElementById('eventDistance').value = data.distance || "";
                 document.getElementById('currentRegistered').value = data.registered || 0;
+                document.getElementById('eventCategory').value = data.category || "upcoming";
+                document.getElementById('earlyBirdDate').value = data.early_bird_end || "";
 
-                // DATES
+                if(data.entitlements) document.getElementById('entitlementInput').value = data.entitlements;
+                if(data.faq) document.getElementById('faqInput').value = data.faq;
+                if(data.tnc) document.getElementById('tncInput').value = data.tnc;
+
+                // Dates
                 if(data.raw_reg_start) document.getElementById('regStart').value = data.raw_reg_start;
                 if(data.raw_reg_end) document.getElementById('regEnd').value = data.raw_reg_end;
                 if(data.raw_event_start) document.getElementById('eventStart').value = data.raw_event_start;
                 if(data.raw_event_end) document.getElementById('eventEnd').value = data.raw_event_end;
                 if(data.raw_countdown) document.getElementById('countdownDate').value = data.raw_countdown;
 
-                // IMAGES
+                // Images
                 if(data.image_url) {
                     document.getElementById('mainPoster').value = data.image_url;
                     previewImg(document.getElementById('mainPoster'), 'previewMain');
                 }
                 if(data.entitlement_image) { 
                     document.getElementById('entitlementPoster').value = data.entitlement_image;
-                     previewImg(document.getElementById('entitlementPoster'), 'previewEnt');
+                    previewImg(document.getElementById('entitlementPoster'), 'previewEnt');
                 }
-                
-                // CERT TEMPLATE
                 if(data.cert_template) {
                     document.getElementById('certTemplate').value = data.cert_template;
                     previewImg(document.getElementById('certTemplate'), 'previewCert');
+                }
+
+                // LOAD CATEGORIES (Advanced)
+                const container = document.getElementById('catBuilderContainer');
+                container.innerHTML = ""; // Clear default
+                
+                // If using new structure (Array of Objects)
+                if(data.categories_data && Array.isArray(data.categories_data)) {
+                    data.categories_data.forEach(cat => {
+                        addCategoryRow(cat.name, cat.price, cat.early_bird);
+                    });
+                } 
+                // Fallback for old structure (Simple Array/String)
+                else if(data.categories) {
+                    let cats = Array.isArray(data.categories) ? data.categories : data.categories.split(',');
+                    cats.forEach(c => addCategoryRow(c.trim(), data.price || "0", ""));
+                } else {
+                    addCategoryRow(); // Default empty
                 }
 
             } else {
@@ -389,13 +448,38 @@
         e.preventDefault();
 
         const eventId = document.getElementById('eventId').value.trim();
-        
-        // Dates
         const regStart = document.getElementById('regStart').value;
         const regEnd = document.getElementById('regEnd').value;
         const evStart = document.getElementById('eventStart').value;
         const evEnd = document.getElementById('eventEnd').value;
         const cdRaw = document.getElementById('countdownDate').value;
+
+        // Process Categories
+        const catRows = document.querySelectorAll('.cat-builder-row');
+        let categoriesData = [];
+        let simpleCategories = [];
+        let lowestPrice = 99999;
+
+        catRows.forEach(row => {
+            const name = row.querySelector('.cat-input-name').value.trim();
+            const price = row.querySelector('.cat-input-price:nth-of-type(2)').value.trim(); // Normal
+            const early = row.querySelector('.cat-input-price:nth-of-type(3)').value.trim(); // Early
+
+            if(name && price) {
+                categoriesData.push({
+                    name: name,
+                    price: price,
+                    early_bird: early || price // Default to normal if empty
+                });
+                simpleCategories.push(name);
+                if(parseFloat(price) < lowestPrice) lowestPrice = parseFloat(price);
+            }
+        });
+
+        if(categoriesData.length === 0) {
+            alert("Please add at least one category!");
+            return;
+        }
 
         let countdownStr = "";
         if(cdRaw) {
@@ -404,46 +488,31 @@
             countdownStr = `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}:00`;
         }
 
-        const currentReg = parseInt(document.getElementById('currentRegistered').value) || 0;
-
-        let entitlementsText = document.getElementById('entitlementInput') ? document.getElementById('entitlementInput').value : "";
-        let faqText = document.getElementById('faqInput') ? document.getElementById('faqInput').value : "";
-        let tncText = document.getElementById('tncInput') ? document.getElementById('tncInput').value : "";
-
-        // CATEGORIES (FIXED)
-        let categoriesArray = [];
-        if(document.getElementById('categoriesInput')) {
-            const catInput = document.getElementById('categoriesInput').value;
-            categoriesArray = catInput.split(',').map(s => s.trim()).filter(s => s !== "");
-        }
-
-        // CERT TEMPLATE (FIXED)
-        let certTemplateUrl = "";
-        if(document.getElementById('certTemplate')) {
-            certTemplateUrl = document.getElementById('certTemplate').value;
-        }
-
         const eventData = {
             title: document.getElementById('eventTitle').value,
-            price: document.getElementById('eventPrice').value,
+            // Price Display: Show lowest price "From RM X"
+            price: "RM " + lowestPrice.toFixed(2), 
             venue: document.getElementById('eventVenue').value,
             description: document.getElementById('eventDesc').value,
             
-            entitlements: entitlementsText,
-            faq: faqText,
-            tnc: tncText, 
+            entitlements: document.getElementById('entitlementInput').value,
+            faq: document.getElementById('faqInput').value,
+            tnc: document.getElementById('tncInput').value,
             
-            categories: categoriesArray,
+            // SAVE BOTH FORMATS (New for logic, Old for compatibility)
+            categories: simpleCategories, 
+            categories_data: categoriesData,
+            early_bird_end: document.getElementById('earlyBirdDate').value,
 
             image_url: document.getElementById('mainPoster').value,
             entitlement_image: document.getElementById('entitlementPoster').value,
-            cert_template: certTemplateUrl, // Save Template URL
+            cert_template: document.getElementById('certTemplate').value,
             kit_date: document.getElementById('kitDate').value,
             
             category: document.getElementById('eventCategory').value,
             quota: parseInt(document.getElementById('eventQuota').value), 
             distance: document.getElementById('eventDistance').value,
-            registered: currentReg, 
+            registered: parseInt(document.getElementById('currentRegistered').value) || 0,
             
             reg_duration: `${regStart} - ${regEnd}`,
             date: `${evStart} - ${evEnd}`,
