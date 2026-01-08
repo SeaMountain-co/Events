@@ -20,7 +20,7 @@
             padding: 15px 5%; background: rgba(15, 16, 20, 0.95); 
             backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; 
             border-bottom: 1px solid rgba(255,255,255,0.1); 
-            height: 70px; /* Tetapkan tinggi tetap */
+            height: 70px; /* Default height desktop */
         }
         .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; font-size: 1.2rem; color: #fff; text-transform: uppercase; letter-spacing: -1px; z-index: 1002; }
         .logo img { height: 35px; width: auto; }
@@ -32,7 +32,7 @@
         .header-right { display: flex; align-items: center; gap: 15px; z-index: 1002; }
         .auth-group { display: flex; align-items: center; gap: 10px; }
 
-        /* LOGIN BUTTON STYLE */
+        /* LOGIN BUTTON */
         .login-btn { 
             background: linear-gradient(45deg, var(--brand-orange), #ff7b00); 
             padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; 
@@ -41,10 +41,10 @@
         }
         .login-btn:hover { transform: translateY(-2px); }
 
-        /* Profile Icon Style (Logged In) */
+        /* NEW: Profile Icon Style (Bulat) */
         .login-btn.profile-mode {
-            padding: 0; width: 40px; height: 40px; border-radius: 50%; /* Bulat penuh */
-            font-size: 1.5rem; background: #28a745; color: #fff; /* Hijau */
+            padding: 0; width: 40px; height: 40px; border-radius: 50%; 
+            font-size: 1.5rem; background: #28a745; color: #fff; 
             box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
         }
 
@@ -128,7 +128,7 @@
 
         /* --- MOBILE TWEAKS (HEADER COMPACT) --- */
         @media (max-width: 900px) {
-            header { padding: 10px 5%; height: 60px; } /* Header lebih nipis */
+            header { padding: 10px 5%; height: 60px; } /* Header nipis */
             .logo { font-size: 1rem; } /* Font logo kecil sikit */
             .logo img { height: 28px; } /* Gambar logo kecil sikit */
             
@@ -307,17 +307,16 @@
             if (result.snapshot.exists()) document.getElementById('visitCount').innerText = result.snapshot.val().toLocaleString();
         });
 
-        // --- AUTHENTICATION UPDATE (COMPACT ICON) ---
         const loginBtn = document.querySelector('.login-btn'); 
         const qrBtn = document.getElementById('qrBtn'); 
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // USER LOGGED IN - Show Icon Only
+                // --- UPDATE: SHOW ICON ONLY ---
                 loginBtn.innerHTML = `<i class="fas fa-user-circle"></i>`; 
                 loginBtn.title = `Logged in as ${user.displayName || 'User'}`; // Hover untuk nama
                 loginBtn.href = "#"; 
-                loginBtn.classList.add('profile-mode'); // Guna class baru untuk style bulat
+                loginBtn.classList.add('profile-mode'); // Guna style bulat
                 
                 qrBtn.style.display = "flex";
 
@@ -328,7 +327,6 @@
                     }
                 });
             } else {
-                // USER LOGGED OUT - Text Normal
                 loginBtn.innerHTML = "Log In";
                 loginBtn.classList.remove('profile-mode');
                 loginBtn.href = "login.html";
