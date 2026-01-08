@@ -20,6 +20,7 @@
             padding: 15px 5%; background: rgba(15, 16, 20, 0.95); 
             backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; 
             border-bottom: 1px solid rgba(255,255,255,0.1); 
+            height: 70px; /* Tetapkan tinggi tetap */
         }
         .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; font-size: 1.2rem; color: #fff; text-transform: uppercase; letter-spacing: -1px; z-index: 1002; }
         .logo img { height: 35px; width: auto; }
@@ -31,8 +32,21 @@
         .header-right { display: flex; align-items: center; gap: 15px; z-index: 1002; }
         .auth-group { display: flex; align-items: center; gap: 10px; }
 
-        .login-btn { background: linear-gradient(45deg, var(--brand-orange), #ff7b00); padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; color: #000; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3); white-space: nowrap; }
+        /* LOGIN BUTTON STYLE */
+        .login-btn { 
+            background: linear-gradient(45deg, var(--brand-orange), #ff7b00); 
+            padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; 
+            color: #000; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3); white-space: nowrap; 
+            display: flex; align-items: center; justify-content: center;
+        }
         .login-btn:hover { transform: translateY(-2px); }
+
+        /* Profile Icon Style (Logged In) */
+        .login-btn.profile-mode {
+            padding: 0; width: 40px; height: 40px; border-radius: 50%; /* Bulat penuh */
+            font-size: 1.5rem; background: #28a745; color: #fff; /* Hijau */
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        }
 
         .qr-btn { width: 35px; height: 35px; background: #222; border: 1px solid #444; border-radius: 50%; display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
         .qr-btn:hover { background: var(--brand-orange); border-color: var(--brand-orange); color: #222; }
@@ -80,107 +94,70 @@
         .card-btn:hover { background: var(--brand-orange); color: #000; }
         .card-btn.disabled { background: #333 !important; color: #777 !important; border-color: #555 !important; cursor: not-allowed; pointer-events: none; }
 
-        /* --- CONTACT & FOOTER SECTION (KEMASKINI) --- */
-        
-        /* 1. Gabungkan Contact & Footer supaya seamless */
-        .footer-wrapper {
-            background: linear-gradient(to bottom, #111, #0a0a0a); /* Gradien Gelap Smooth */
-            border-top: 1px solid #222;
-            margin-top: 50px;
-            padding-top: 60px;
-        }
-
-        .contact-container { 
-            max-width: 1200px; margin: 0 auto; display: flex; gap: 60px; flex-wrap: wrap; 
-            padding: 0 5% 60px; /* Padding bawah */
-        }
-        
+        /* FOOTER */
+        .footer-wrapper { background: linear-gradient(to bottom, #111, #0a0a0a); border-top: 1px solid #222; margin-top: 50px; padding-top: 60px; }
+        .contact-container { max-width: 1200px; margin: 0 auto; display: flex; gap: 60px; flex-wrap: wrap; padding: 0 5% 60px; }
         .contact-info { flex: 1; min-width: 300px; }
         .contact-info h2 { font-family: 'Russo One'; font-size: 2rem; text-transform: uppercase; margin-bottom: 20px; color: #fff; }
         .contact-info p { color: #888; margin-bottom: 30px; line-height: 1.6; }
-        
         .contact-item { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; font-size: 1rem; color: #ccc; }
         .contact-item i { color: var(--brand-orange); font-size: 1.2rem; width: 30px; text-align: center; }
-
-        .contact-form { 
-            flex: 1; min-width: 300px; 
-            background: rgba(255,255,255,0.03); /* Lebih transparent */
-            padding: 35px; border-radius: 12px; 
-            border: 1px solid rgba(255,255,255,0.05); 
-        }
-        
+        .contact-form { flex: 1; min-width: 300px; background: rgba(255,255,255,0.03); padding: 35px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; color: #666; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
         .form-input { width: 100%; padding: 15px; background: #050505; border: 1px solid #333; color: #fff; border-radius: 6px; outline: none; font-family: 'Montserrat'; transition: 0.3s; }
         .form-input:focus { border-color: var(--brand-orange); background: #000; }
-        
         .btn-send { width: 100%; background: var(--brand-orange); color: #000; padding: 15px; border: none; border-radius: 6px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
         .btn-send:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,0,0,0.3); }
-
-        /* FOOTER INFO */
-        .footer-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-            gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 5% 40px; 
-            border-bottom: 1px solid #222; /* Garis pemisah halus */
-        }
-        .footer-col h4 {
-            color: var(--brand-red); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;
-        }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 5% 40px; border-bottom: 1px solid #222; }
+        .footer-col h4 { color: var(--brand-red); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
         .footer-col p { color: #888; font-size: 0.9rem; line-height: 1.6; }
-
         .app-buttons { display: flex; gap: 10px; margin-top: 15px; }
-        .app-btn {
-            background: #222; color: #fff; padding: 10px 15px; border-radius: 5px; border: 1px solid #333;
-            display: flex; align-items: center; gap: 10px; font-size: 0.8rem; cursor: pointer; transition: 0.3s;
-        }
-        
+        .app-btn { background: #222; color: #fff; padding: 10px 15px; border-radius: 5px; border: 1px solid #333; display: flex; align-items: center; gap: 10px; font-size: 0.8rem; cursor: pointer; transition: 0.3s; }
         .social-icons { display: flex; gap: 10px; margin-top: 15px; }
-        .social-icons a { 
-            width: 35px; height: 35px; background: #222; color: #aaa; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; transition: 0.3s; 
-        }
+        .social-icons a { width: 35px; height: 35px; background: #222; color: #aaa; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
         .social-icons a:hover { background: var(--brand-orange); color: #fff; }
-
         .footer-bottom { text-align: center; padding: 30px 5%; color: #444; font-size: 0.8rem; }
         .footer-links { margin-bottom: 15px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
         .footer-links a { color: #666; font-weight: 600; text-decoration: none; transition: 0.3s; }
         .footer-links a:hover { color: #fff; }
-        
-        .visitor-counter { 
-            margin-top: 15px; font-size: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 1px; 
-            font-weight: bold; display: inline-block; padding: 5px 15px; 
-            background: #050505; border: 1px solid #222; border-radius: 20px; 
-        }
+        .visitor-counter { margin-top: 15px; font-size: 0.75rem; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; display: inline-block; padding: 5px 15px; background: #050505; border: 1px solid #222; border-radius: 20px; }
         .visitor-counter span { color: #888; font-family: 'Courier New', monospace; }
-
         .float-wa { position: fixed; width: 60px; height: 60px; bottom: 30px; right: 30px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; transition: 0.3s; text-decoration: none; }
         .float-wa:hover { transform: scale(1.1); background-color: #128c7e; }
 
+        /* --- MOBILE TWEAKS (HEADER COMPACT) --- */
         @media (max-width: 900px) {
-            header { padding: 15px 5%; }
-            .menu-toggle { display: block; margin-left: 15px; }
+            header { padding: 10px 5%; height: 60px; } /* Header lebih nipis */
+            .logo { font-size: 1rem; } /* Font logo kecil sikit */
+            .logo img { height: 28px; } /* Gambar logo kecil sikit */
+            
+            .menu-toggle { display: block; margin-left: 15px; font-size: 1.2rem; } /* Icon menu kemas */
+            
             .nav-links {
-                position: absolute; top: 100%; left: 0; width: 100%;
+                position: absolute; top: 60px; /* Ikut tinggi header */
+                left: 0; width: 100%;
                 background: rgba(15, 16, 20, 0.98); flex-direction: column; align-items: center;
                 padding: 20px 0; display: none; border-bottom: 1px solid rgba(255,255,255,0.1);
             }
             .nav-links.active { display: flex; }
             .nav-links a { padding: 15px; width: 100%; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
             
-            .auth-group { margin-left: auto; }
+            .auth-group { margin-left: auto; gap: 8px; } /* Rapatkan butang */
             
+            /* Saiz butang login mobile */
+            .login-btn { padding: 6px 15px; font-size: 0.75rem; }
+            .qr-btn { width: 32px; height: 32px; font-size: 1rem; }
+
             .hero { padding: 60px 5%; }
             .hero h1 { font-size: 2.2rem; }
             .hero-content { flex-direction: column; text-align: center; gap: 30px; }
             .hero-text { border-left: none; }
             .hero p { padding-left: 0; }
             .featured-image img { transform: none; width: 100%; }
-            
             .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
             .view-all { align-self: flex-end; }
             .events-grid { grid-template-columns: 1fr; padding-bottom: 40px; }
-            
-            /* Contact Mobile Fix */
             .contact-container { flex-direction: column; gap: 40px; }
             .contact-form { padding: 25px; }
         }
@@ -254,7 +231,6 @@
     <div class="events-grid" id="upcoming-events-container"><p style="color:#666;">Loading upcoming events...</p></div>
 
     <div class="footer-wrapper">
-        
         <section id="contact">
             <div class="contact-container">
                 <div class="contact-info">
@@ -264,84 +240,48 @@
                     <div class="contact-item"><i class="fas fa-envelope"></i> <span>info@seamountain.com</span></div>
                     <div class="contact-item"><i class="fas fa-phone-alt"></i> <span>+60 12-345 6789</span></div>
                 </div>
-
                 <div class="contact-form">
                     <form id="waForm">
-                        <div class="form-group">
-                            <label>Your Name</label>
-                            <input type="text" id="waName" class="form-input" placeholder="Enter name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Message</label>
-                            <textarea id="waMsg" class="form-input" rows="4" placeholder="How can we help?" required></textarea>
-                        </div>
+                        <div class="form-group"><label>Your Name</label><input type="text" id="waName" class="form-input" placeholder="Enter name" required></div>
+                        <div class="form-group"><label>Message</label><textarea id="waMsg" class="form-input" rows="4" placeholder="How can we help?" required></textarea></div>
                         <button type="submit" class="btn-send">Send to WhatsApp</button>
                     </form>
                 </div>
             </div>
         </section>
-
         <div class="footer-grid">
             <div class="footer-col">
                 <h4>About</h4>
                 <p>THE SPORTS AND FITNESS ONLINE EVENT REGISTRATION SOLUTION.</p>
                 <p style="margin-top:10px; color:#aaa;"><strong>info@seamountain.com</strong></p>
             </div>
-
             <div class="footer-col">
                 <h4>Get The App</h4>
                 <div class="app-buttons">
-                    <div class="app-btn">
-                        <i class="fab fa-apple"></i>
-                        <div style="text-align:left; line-height:1.2;">
-                            <span style="font-size:0.6rem; display:block;">Available on the</span>App Store
-                        </div>
-                    </div>
-                    <div class="app-btn">
-                        <i class="fab fa-google-play"></i>
-                        <div style="text-align:left; line-height:1.2;">
-                            <span style="font-size:0.6rem; display:block;">GET IT ON</span>Google Play
-                        </div>
-                    </div>
+                    <div class="app-btn"><i class="fab fa-apple"></i><div style="text-align:left; line-height:1.2;"><span style="font-size:0.6rem; display:block;">Available on the</span>App Store</div></div>
+                    <div class="app-btn"><i class="fab fa-google-play"></i><div style="text-align:left; line-height:1.2;"><span style="font-size:0.6rem; display:block;">GET IT ON</span>Google Play</div></div>
                 </div>
             </div>
-
             <div class="footer-col">
                 <h4>Follow Us</h4>
                 <p>Stay connected on social media.</p>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                </div>
+                <div class="social-icons"><a href="#"><i class="fab fa-facebook-f"></i></a><a href="#"><i class="fab fa-instagram"></i></a><a href="#"><i class="fab fa-twitter"></i></a></div>
             </div>
         </div>
-
         <div class="footer-bottom">
-            <div class="footer-links">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Refund Policy</a>
-                <a href="#">Terms & Conditions</a>
-                <a href="admin-login.html" style="color:#0f1014;">Admin</a>
-                </div>
+            <div class="footer-links"><a href="#">Privacy Policy</a><a href="#">Refund Policy</a><a href="#">Terms & Conditions</a><a href="admin-login.html" style="color:#0f1014;">Admin</a></div>
             <p>&copy; 2025 Sea Mountain.Co. All Rights Reserved.</p>
-            <div class="visitor-counter">
-                <i class="fas fa-eye"></i> Total Views: <span id="visitCount">...</span>
-            </div>
+            <div class="visitor-counter"><i class="fas fa-eye"></i> Total Views: <span id="visitCount">...</span></div>
         </div>
-
     </div>
 
-    <a href="https://wa.me/601158042310" class="float-wa" target="_blank" title="Chat with us">
-        <i class="fab fa-whatsapp"></i>
-    </a>
+    <a href="https://wa.me/601158042310" class="float-wa" target="_blank" title="Chat with us"><i class="fab fa-whatsapp"></i></a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIG FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
             authDomain: "sea-mountain.firebaseapp.com",
@@ -356,43 +296,41 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // --- UI HELPER: TOGGLE MOBILE MENU ---
         window.toggleMenu = function() {
             const nav = document.getElementById('navMenu');
             nav.classList.toggle('active');
         }
 
-        // --- 1. VISITOR COUNTER ---
         const visitRef = ref(db, 'site_stats/visits');
         runTransaction(visitRef, (currentVisits) => (currentVisits || 0) + 1)
         .then((result) => {
-            if (result.snapshot.exists()) {
-                document.getElementById('visitCount').innerText = result.snapshot.val().toLocaleString();
-            }
+            if (result.snapshot.exists()) document.getElementById('visitCount').innerText = result.snapshot.val().toLocaleString();
         });
 
-        // --- 2. AUTHENTICATION ---
+        // --- AUTHENTICATION UPDATE (COMPACT ICON) ---
         const loginBtn = document.querySelector('.login-btn'); 
         const qrBtn = document.getElementById('qrBtn'); 
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // USER LOGGED IN
-                loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.displayName || 'User'}`;
+                // USER LOGGED IN - Show Icon Only
+                loginBtn.innerHTML = `<i class="fas fa-user-circle"></i>`; 
+                loginBtn.title = `Logged in as ${user.displayName || 'User'}`; // Hover untuk nama
                 loginBtn.href = "#"; 
-                loginBtn.style.background = "#28a745"; 
+                loginBtn.classList.add('profile-mode'); // Guna class baru untuk style bulat
                 
                 qrBtn.style.display = "flex";
 
                 loginBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    if(confirm("Log Out?")) {
+                    if(confirm(`Hi ${user.displayName || 'User'}! Log Out?`)) {
                         signOut(auth).then(() => window.location.reload());
                     }
                 });
             } else {
-                // USER LOGGED OUT
+                // USER LOGGED OUT - Text Normal
                 loginBtn.innerHTML = "Log In";
+                loginBtn.classList.remove('profile-mode');
                 loginBtn.href = "login.html";
                 loginBtn.style.background = ""; 
                 
@@ -400,9 +338,7 @@
             }
         });
 
-        // --- 3. FETCH EVENTS ---
         const eventsRef = ref(db, 'events');
-
         onValue(eventsRef, (snapshot) => {
             const data = snapshot.val();
             const latestContainer = document.getElementById('latest-events-container');
@@ -416,24 +352,17 @@
             if (data) {
                 Object.keys(data).forEach(key => {
                     const event = data[key];
-
-                    // --- PENAPIS ARCHIVE (BARU) ---
                     if (event.isArchived === true) return; 
-                    // -----------------------------
 
-                    // FEATURED
                     if (event.isFeatured === true) {
                         hasFeatured = true;
                         document.getElementById('heroTitle').innerHTML = event.title;
                         document.getElementById('heroDate').innerText = event.date;
                         document.getElementById('heroVenue').innerText = event.venue;
                         document.getElementById('heroLink').href = `event-details.html?id=${key}`;
-                        if (event.image_url) {
-                            document.getElementById('heroImage').src = event.image_url;
-                        }
+                        if (event.image_url) document.getElementById('heroImage').src = event.image_url;
                     }
 
-                    // CARDS
                     const registered = parseInt(event.registered) || 0;
                     const quota = parseInt(event.quota) || 99999;
                     const isSoldOut = registered >= quota;
@@ -462,11 +391,8 @@
                 });
             }
 
-            // Fallback Featured
             if (!hasFeatured && data) {
-                // Cari event pertama yg TAK archive
                 const firstKey = Object.keys(data).find(k => !data[k].isArchived);
-                
                 if(firstKey) {
                     const event = data[firstKey];
                     document.getElementById('heroTitle').innerHTML = event.title;
@@ -476,11 +402,9 @@
                     if (event.image_url) document.getElementById('heroImage').src = event.image_url;
                 }
             }
-
             setupSearch();
         });
 
-        // --- 4. SEARCH ---
         function setupSearch() {
             const searchInput = document.getElementById('searchInput');
             if(searchInput) {
@@ -496,7 +420,6 @@
             }
         }
 
-        // --- 5. WHATSAPP ---
         document.getElementById('waForm').addEventListener('submit', function(e) {
             e.preventDefault();
             let name = document.getElementById('waName').value;
