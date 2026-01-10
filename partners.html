@@ -9,86 +9,199 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
     
     <style>
-        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; --gold: #FFD700; --silver: #C0C0C0; }
+        :root { --brand-red: #ff0000; --brand-orange: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; --gold: #FFD700; --silver: #C0C0C0; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
         
-        body { background-color: var(--bg-dark); color: var(--text); overflow-x: hidden; }
+        body { background-color: var(--bg-dark); color: var(--text); overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* HEADER */
-        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: rgba(15, 16, 20, 0.95); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
-        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat'; font-weight: 900; font-style: italic; font-size: 1.5rem; color: #fff; text-transform: uppercase; text-decoration: none; }
-        .logo img { height: 40px; }
+        /* --- STANDARD HEADER DESKTOP (JANGAN USIK) --- */
+        header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 0 5%; /* Padding kiri kanan */
+            background: rgba(15, 16, 20, 0.95); 
+            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            height: 80px; /* Tinggi Tetap semua page */
+        }
+
+        /* LOGO (KIRI) */
+        .logo { 
+            display: flex; align-items: center; gap: 10px; 
+            font-family: 'Montserrat'; font-weight: 900; font-style: italic; 
+            font-size: 1.5rem; color: #fff; text-transform: uppercase; text-decoration: none; 
+            width: 250px; /* Tetapkan lebar tetap supaya tak tolak menu */
+            flex-shrink: 0;
+        }
+        .logo img { height: 35px; width: auto; }
         .logo span { color: var(--brand-red); font-weight: 300; }
-        .nav-links { display: flex; gap: 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
-        .nav-links a { text-decoration: none; color: #fff; transition: 0.3s; }
+
+        /* MENU (TENGAH - ABSOLUTE CENTER) */
+        /* Ini kunci supaya menu tak bergerak walau logo panjang/pendek */
+        .nav-links { 
+            position: absolute; 
+            left: 50%; 
+            transform: translateX(-50%);
+            display: flex; gap: 30px; 
+            font-weight: 600; text-transform: uppercase; font-size: 0.85rem; 
+            white-space: nowrap;
+        }
+        .nav-links a { text-decoration: none; color: #fff; transition: 0.3s; letter-spacing: 0.5px; }
         .nav-links a:hover { color: var(--brand-red); }
-        .login-btn { background: linear-gradient(45deg, var(--brand-red), #ff7b00); padding: 8px 20px; border-radius: 30px; font-weight: 800; text-decoration: none; color: #fff; text-transform: uppercase; }
+        .nav-links a.active-nav { color: var(--brand-red); cursor: default; }
+
+        /* KANAN (LOGIN & BUTTONS) */
+        .header-right { 
+            display: flex; align-items: center; gap: 15px; 
+            width: 250px; /* Sama lebar dengan logo */
+            justify-content: flex-end; /* Rapat kanan */
+            flex-shrink: 0;
+            z-index: 1002;
+        }
+
+        /* --- UI ELEMENTS LAIN --- */
+        .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        
+        .login-btn { 
+            background: linear-gradient(45deg, var(--brand-red), #ff4d4d); 
+            padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; 
+            color: #fff; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3); white-space: nowrap; 
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; border: 1px solid transparent;
+        }
+        .login-btn:hover { transform: translateY(-2px); }
+        .login-btn.profile-mode {
+            padding: 0; width: 40px; height: 40px; border-radius: 50%; 
+            font-size: 1.5rem; background: #28a745; color: #fff; 
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+            display: flex; align-items: center; justify-content: center; overflow: hidden; 
+        }
+
+        .qr-btn { 
+            width: 35px; height: 35px; background: #222; border: 1px solid #444; border-radius: 50%; 
+            display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; 
+            cursor: pointer; transition: 0.3s; text-decoration: none;
+        }
+        .qr-btn:hover { background: var(--brand-orange); border-color: var(--brand-orange); color: #222; }
+        .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
 
         /* HERO */
         .hero { text-align: center; padding: 80px 20px; background: radial-gradient(circle at center, #2a0000 0%, var(--bg-dark) 70%); }
-        .hero h1 { font-family: 'Russo One'; font-size: 3rem; text-transform: uppercase; margin-bottom: 15px; }
+        .hero h1 { font-family: 'Russo One'; font-size: 3rem; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 0 20px rgba(0,0,0,0.5); }
         .hero p { color: #aaa; max-width: 600px; margin: 0 auto; line-height: 1.6; }
 
         /* CONTENT */
-        .container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
-        .section-title { text-align: center; font-family: 'Russo One'; font-size: 2rem; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; position: relative; display: inline-block; width: 100%; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; flex: 1; }
+        .section-title { text-align: center; font-family: 'Russo One'; font-size: 2rem; margin-bottom: 40px; text-transform: uppercase; letter-spacing: 2px; position: relative; }
         .section-title::after { content: ''; display: block; width: 60px; height: 4px; background: var(--brand-red); margin: 15px auto 0; }
 
         /* GRIDS */
         .sponsor-grid { display: grid; gap: 30px; justify-content: center; margin-bottom: 80px; }
-        .grid-gold { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-        .grid-silver { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); max-width: 900px; margin-left: auto; margin-right: auto; }
+        .grid-gold { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 1000px; margin-left: auto; margin-right: auto; }
+        .grid-silver { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-width: 900px; margin-left: auto; margin-right: auto; }
 
         /* SPONSOR CARD */
-        .sponsor-card { background: var(--card-bg); border-radius: 15px; padding: 30px; display: flex; align-items: center; justify-content: center; transition: 0.3s; border: 1px solid #333; position: relative; overflow: hidden; aspect-ratio: 3/2; cursor: pointer; text-decoration: none; }
-        .sponsor-card:hover { transform: translateY(-5px); border-color: var(--brand-red); box-shadow: 0 10px 30px rgba(255,0,0,0.1); }
+        .sponsor-card { 
+            background: var(--card-bg); border-radius: 15px; padding: 30px; 
+            display: flex; align-items: center; justify-content: center; 
+            transition: 0.3s; border: 1px solid #333; position: relative; 
+            overflow: hidden; aspect-ratio: 3/2; cursor: pointer; text-decoration: none; 
+        }
+        .sponsor-card:hover { transform: translateY(-5px); }
         .sponsor-card img { max-width: 80%; max-height: 80%; filter: grayscale(100%); transition: 0.3s; opacity: 0.7; }
-        .sponsor-card:hover img { filter: grayscale(0%); opacity: 1; }
+        .sponsor-card:hover img { filter: grayscale(0%); opacity: 1; transform: scale(1.05); }
 
-        .gold-border { border: 1px solid var(--gold); box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
-        .gold-border:hover { box-shadow: 0 0 25px rgba(255, 215, 0, 0.3); border-color: var(--gold); }
-        .badge-tier { position: absolute; top: 10px; right: 10px; font-size: 0.7rem; font-weight: bold; padding: 3px 8px; border-radius: 4px; color: #000; text-transform: uppercase; }
+        .gold-border { border: 1px solid rgba(255, 215, 0, 0.3); box-shadow: 0 0 15px rgba(255, 215, 0, 0.05); }
+        .gold-border:hover { box-shadow: 0 0 25px rgba(255, 215, 0, 0.2); border-color: var(--gold); }
+        .badge-tier { position: absolute; top: 10px; right: 10px; font-size: 0.6rem; font-weight: 800; padding: 4px 8px; border-radius: 4px; color: #000; text-transform: uppercase; letter-spacing: 1px; }
         .bg-gold { background: var(--gold); }
 
         /* MARKETPLACE CARD */
-        .ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; justify-content: center; /* Center kan grid */width: 100%;}
-
-        /* Jika kosong, pastikan mesej duduk tengah */
-        .ad-grid:has(.empty-msg), .sponsor-grid:has(.empty-msg) {display: flex; justify-content: center;}
+        .ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; justify-content: center; width: 100%; }
         .ad-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid #333; display: flex; flex-direction: column; transition: 0.3s; }
-        .ad-card:hover { transform: translateY(-5px); border-color: #555; }
+        .ad-card:hover { transform: translateY(-5px); border-color: #555; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        
         .ad-img { width: 100%; height: 180px; object-fit: cover; background: #222; }
         .ad-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         .ad-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 8px; color: #fff; }
         .ad-desc { font-size: 0.85rem; color: #aaa; margin-bottom: 15px; line-height: 1.5; flex: 1; }
+        
         .btn-visit { background: transparent; border: 1px solid var(--brand-red); color: var(--brand-red); padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
         .btn-visit:hover { background: var(--brand-red); color: #fff; }
 
-        .empty-msg { text-align: center; width: 100%; color: #666; font-style: italic; }
+        .empty-msg { text-align: center; width: 100%; color: #666; font-style: italic; padding: 20px; grid-column: 1 / -1; }
 
         /* CTA BOX */
-        .cta-box { background: linear-gradient(45deg, #111, #1a1c23); border: 2px dashed var(--brand-red); border-radius: 15px; padding: 50px 20px; text-align: center; margin-top: 60px; }
+        .cta-box { 
+            background: linear-gradient(45deg, #111, #1a1c23); 
+            border: 2px dashed #333; border-radius: 15px; padding: 50px 20px; text-align: center; margin-top: 60px; 
+            transition: 0.3s;
+        }
+        .cta-box:hover { border-color: var(--brand-red); }
         .cta-box h3 { font-family: 'Russo One'; font-size: 1.8rem; margin-bottom: 15px; color: #fff; }
         .cta-box p { color: #888; margin-bottom: 25px; }
         .btn-cta { background: var(--brand-red); color: #fff; padding: 15px 40px; border-radius: 50px; font-weight: 800; text-transform: uppercase; text-decoration: none; display: inline-block; transition: 0.3s; }
         .btn-cta:hover { background: #fff; color: #000; box-shadow: 0 0 20px rgba(255,255,255,0.3); }
 
-        @media (max-width: 768px) { .nav-links { display: none; } }
+        footer { background-color: var(--card-bg); padding: 40px 5% 20px; border-top: 1px solid #222; margin-top: auto; text-align: center; font-size: 0.8rem; color: #666; }
+
+        /* --- MOBILE RESPONSIVE (KEKALKAN INI) --- */
+        @media (max-width: 1100px) {
+            .nav-links { position: static; transform: none; } /* Reset position bila skrin kecil */
+            .logo { width: auto; } /* Reset lebar logo */
+            .header-right { width: auto; margin-left: auto; } /* Reset kanan */
+        }
+
+        @media (max-width: 900px) {
+            header { padding: 10px 5%; height: 60px; }
+            .logo { font-size: 1rem; }
+            .logo img { height: 28px; }
+            .menu-toggle { display: block; margin-left: 15px; font-size: 1.2rem; }
+            
+            .nav-links {
+                position: absolute; top: 60px; left: 0; width: 100%;
+                background: rgba(15, 16, 20, 0.98); 
+                flex-direction: column; align-items: center;
+                padding: 20px 0; display: none; 
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                transform: none; 
+            }
+            .nav-links.active { display: flex; }
+            .nav-links a { padding: 15px; width: 100%; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+            .login-btn { padding: 6px 15px; font-size: 0.75rem; }
+            .qr-btn { width: 32px; height: 32px; font-size: 1rem; }
+        }
+
+            .hero h1 { font-size: 2.2rem; }
+            .grid-gold, .grid-silver, .ad-grid { grid-template-columns: 1fr; }
+        
+
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" class="logo"><img src="seaMLogo.png" alt="Logo"> SEA<span>MOUNTAIN</span></a>
-        <nav class="nav-links">
-            <a href="index.html">Events</a>
-            <a href="results.html">Results</a>
+        <a href="index.html" class="logo">
+            <img src="seaMLogo.png" alt="Logo"> SEA<span>MOUNTAIN</span>
+        </a>
+
+        <nav class="nav-links" id="navMenu">
+            <a href="index.html" class="active-nav">Events</a> <a href="results.html">Results</a>
             <a href="photos.html">Photos</a>
             <a href="leaderboard.html">Leaderboard</a>
-            <a href="partners.html" >Partners</a>
-            <a href="#contact">Contact Us</a> </nav>
+            <a href="partners.html">Partners</a>
+            <a href="#contact">Contact Us</a>
         </nav>
-        <a href="login.html" class="login-btn">Log In</a>
+
+        <div class="header-right">
+            <a href="my-tickets.html" id="qrBtn" class="qr-btn" title="My History & Tickets" style="display:none;">
+                <i class="fas fa-qrcode"></i>
+            </a>
+            <a href="login.html" class="login-btn">Log In</a>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
     </header>
 
     <div class="hero">
@@ -123,12 +236,13 @@
 
     </div>
 
-    <footer style="text-align:center; padding:30px; background:#111; color:#555; font-size:0.8rem; margin-top:50px; border-top:1px solid #222;">
-        &copy; 2025 Sea Mountain Co.
+    <footer>
+        <p>&copy; 2025 Sea Mountain.Co. All Rights Reserved.</p>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
@@ -143,8 +257,58 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
+        const auth = getAuth(app);
 
-        // FETCH DATA
+        // UI HELPERS
+        window.toggleMenu = function() {
+            const nav = document.getElementById('navMenu');
+            if(nav.style.display === 'flex') nav.style.display = 'none';
+            else { nav.style.display = 'flex'; nav.style.flexDirection = 'column'; }
+        }
+
+        const menuToggle = document.querySelector('.menu-toggle');
+        if(window.innerWidth <= 900) menuToggle.style.display = 'block';
+
+        // 1. AUTH HEADER LOGIC (Updated to Match Other Pages)
+        const loginBtn = document.querySelector('.login-btn'); 
+        const qrBtn = document.getElementById('qrBtn');
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Check Photo
+                if (user.photoURL) {
+                    loginBtn.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                    loginBtn.style.background = "transparent";
+                    loginBtn.style.boxShadow = "none";
+                    loginBtn.style.border = "2px solid #28a745"; 
+                } else {
+                    loginBtn.innerHTML = `<i class="fas fa-user-circle"></i>`; 
+                    loginBtn.style.background = "#28a745";
+                }
+                
+                loginBtn.title = `Logged in as ${user.displayName || 'User'}`;
+                loginBtn.href = "#"; 
+                loginBtn.classList.add('profile-mode'); 
+
+                if(qrBtn) qrBtn.style.display = "flex";
+            
+                loginBtn.onclick = function(e) {
+                    e.preventDefault();
+                    if(confirm(`Hi ${user.displayName || 'User'}! Log Out?`)) {
+                        signOut(auth).then(() => window.location.reload());
+                    }
+                };
+            } else {
+                loginBtn.innerHTML = "Log In";
+                loginBtn.classList.remove('profile-mode');
+                loginBtn.href = "login.html";
+                loginBtn.style.background = ""; 
+                loginBtn.onclick = null;
+                if(qrBtn) qrBtn.style.display = "none";
+            }
+        });
+
+        // 2. FETCH DATA
         onValue(ref(db, 'partners'), (snapshot) => {
             const data = snapshot.val();
             
@@ -160,13 +324,16 @@
                 let hasGold = false, hasSilver = false, hasMarket = false;
 
                 Object.values(data).forEach(p => {
+                    // Fallback Image
+                    const imgUrl = p.image || 'https://via.placeholder.com/300x200?text=No+Image';
+
                     // RENDER GOLD
                     if(p.type === 'gold') {
                         hasGold = true;
                         goldContainer.innerHTML += `
                             <a href="${p.link}" target="_blank" class="sponsor-card gold-border">
                                 <div class="badge-tier bg-gold">Partner</div>
-                                <img src="${p.image}" alt="${p.name}">
+                                <img src="${imgUrl}" alt="${p.name}">
                             </a>
                         `;
                     }
@@ -175,7 +342,7 @@
                         hasSilver = true;
                         silverContainer.innerHTML += `
                             <a href="${p.link}" target="_blank" class="sponsor-card">
-                                <img src="${p.image}" alt="${p.name}">
+                                <img src="${imgUrl}" alt="${p.name}">
                             </a>
                         `;
                     }
@@ -184,7 +351,7 @@
                         hasMarket = true;
                         marketContainer.innerHTML += `
                             <div class="ad-card">
-                                <img src="${p.image}" class="ad-img">
+                                <img src="${imgUrl}" class="ad-img">
                                 <div class="ad-content">
                                     <div class="ad-title">${p.name}</div>
                                     <p class="ad-desc">${p.desc || 'No description.'}</p>
