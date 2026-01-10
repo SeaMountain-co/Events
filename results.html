@@ -13,6 +13,7 @@
     <style>
         :root {
             --brand-red: #ff0000;
+            --brand-orange: #ff0000; 
             --bg-dark: #0f1014;
             --card-bg: #1a1c23;
             --text-white: #ffffff;
@@ -27,21 +28,107 @@
             background-image: radial-gradient(circle at 50% 0%, rgba(255, 0, 0, 0.05) 0%, transparent 60%);
             min-height: 100vh;
             display: flex; flex-direction: column;
+            overflow-x: hidden;
         }
 
-        /* HEADER */
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 5%; background: rgba(15, 16, 20, 0.95); position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+        /* --- STANDARD HEADER DESKTOP (JANGAN USIK) --- */
+        header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 0 5%; /* Padding kiri kanan */
+            background: rgba(15, 16, 20, 0.95); 
+            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            height: 80px; /* Tinggi Tetap semua page */
         }
-        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat'; font-weight: 900; font-style: italic; font-size: 1.5rem; color: #fff; text-transform: uppercase; text-decoration: none; }
-        .logo img { height: 40px; }
+
+        /* LOGO (KIRI) */
+        .logo { 
+            display: flex; align-items: center; gap: 10px; 
+            font-family: 'Montserrat'; font-weight: 900; font-style: italic; 
+            font-size: 1.5rem; color: #fff; text-transform: uppercase; text-decoration: none; 
+            width: 250px; /* Tetapkan lebar tetap supaya tak tolak menu */
+            flex-shrink: 0;
+        }
+        .logo img { height: 35px; width: auto; }
         .logo span { color: var(--brand-red); font-weight: 300; }
-        .nav-links { display: flex; gap: 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
-        .nav-links a { text-decoration: none; color: #fff; transition: 0.3s; }
-        .nav-links a:hover, .nav-links a.active { color: var(--brand-red); }
-        .login-btn { background: linear-gradient(45deg, var(--brand-red), #ff7b00); padding: 8px 20px; border-radius: 30px; font-weight: 800; text-decoration: none; color: #fff; text-transform: uppercase; }
+
+        /* MENU (TENGAH - ABSOLUTE CENTER) */
+        /* Ini kunci supaya menu tak bergerak walau logo panjang/pendek */
+        .nav-links { 
+            position: absolute; 
+            left: 50%; 
+            transform: translateX(-50%);
+            display: flex; gap: 30px; 
+            font-weight: 600; text-transform: uppercase; font-size: 0.85rem; 
+            white-space: nowrap;
+        }
+        .nav-links a { text-decoration: none; color: #fff; transition: 0.3s; letter-spacing: 0.5px; }
+        .nav-links a:hover { color: var(--brand-red); }
+        .nav-links a.active-nav { color: var(--brand-red); cursor: default; }
+
+        /* KANAN (LOGIN & BUTTONS) */
+        .header-right { 
+            display: flex; align-items: center; gap: 15px; 
+            width: 250px; /* Sama lebar dengan logo */
+            justify-content: flex-end; /* Rapat kanan */
+            flex-shrink: 0;
+            z-index: 1002;
+        }
+
+        /* --- UI ELEMENTS LAIN --- */
+        .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        
+        .login-btn { 
+            background: linear-gradient(45deg, var(--brand-red), #ff4d4d); 
+            padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; 
+            color: #fff; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3); white-space: nowrap; 
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; border: 1px solid transparent;
+        }
+        .login-btn:hover { transform: translateY(-2px); }
+        .login-btn.profile-mode {
+            padding: 0; width: 40px; height: 40px; border-radius: 50%; 
+            font-size: 1.5rem; background: #28a745; color: #fff; 
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+            display: flex; align-items: center; justify-content: center; overflow: hidden; 
+        }
+
+        .qr-btn { 
+            width: 35px; height: 35px; background: #222; border: 1px solid #444; border-radius: 50%; 
+            display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; 
+            cursor: pointer; transition: 0.3s; text-decoration: none;
+        }
+        .qr-btn:hover { background: var(--brand-orange); border-color: var(--brand-orange); color: #222; }
+        
+        /* HEADER RIGHT (LOGIN & HAMBURGER) */
+        .header-right { display: flex; align-items: center; gap: 15px; margin-left: auto; z-index: 1002; }
+
+        .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+
+        /* LOGIN BUTTON STYLE */
+        .login-btn { 
+            background: linear-gradient(45deg, var(--brand-orange), #ff7b00); 
+            padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; 
+            color: #fff; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3); white-space: nowrap; 
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; border: 1px solid transparent;
+        }
+        .login-btn:hover { transform: translateY(-2px); }
+
+        /* Profile Icon Style (Logged In) */
+        .login-btn.profile-mode {
+            padding: 0; width: 40px; height: 40px; border-radius: 50%; 
+            font-size: 1.5rem; background: #28a745; color: #fff; 
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+            display: flex; align-items: center; justify-content: center; overflow: hidden; 
+        }
+
+        .qr-btn { 
+            width: 35px; height: 35px; background: #222; border: 1px solid #444; border-radius: 50%; 
+            display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; 
+            cursor: pointer; transition: 0.3s; text-decoration: none;
+        }
+        .qr-btn:hover { background: var(--brand-orange); border-color: var(--brand-orange); color: #222; }
 
         /* SEARCH HERO SECTION */
         .hero-search {
@@ -54,7 +141,9 @@
         .hero-sub { color: #ccc; margin-bottom: 30px; font-size: 1.1rem; }
 
         .search-box-wrapper {
-            max-width: 800px; margin: 0 auto; display: flex; gap: 10px; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);
+            max-width: 800px; margin: 0 auto; 
+            display: flex; gap: 10px; 
+            background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(5px);
         }
         .event-select, .search-input {
             padding: 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 6px; font-size: 1rem; outline: none;
@@ -69,7 +158,7 @@
         select option { background-color: #000; color: #fff; padding: 10px; }
 
         /* RESULTS CONTENT */
-        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; flex: 1; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; flex: 1; width: 100%; }
         
         .result-stats-bar {
             display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333;
@@ -90,18 +179,18 @@
 
         .rank-box {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            width: 70px; height: 70px; background: #000; border-radius: 8px; border: 1px solid #333;
+            width: 70px; height: 70px; background: #000; border-radius: 8px; border: 1px solid #333; flex-shrink: 0;
         }
         .rank-num { font-family: 'Russo One'; font-size: 1.8rem; line-height: 1; }
         .rank-lbl { font-size: 0.6rem; color: #666; text-transform: uppercase; font-weight: 700; margin-top: 3px; }
 
-        .racer-info { flex: 1; }
-        .racer-name { font-weight: 800; font-size: 1.2rem; margin-bottom: 4px; color: #fff; }
-        .racer-meta { display: flex; gap: 15px; font-size: 0.85rem; color: #aaa; }
+        .racer-info { flex: 1; min-width: 0; }
+        .racer-name { font-weight: 800; font-size: 1.2rem; margin-bottom: 4px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .racer-meta { display: flex; gap: 15px; font-size: 0.85rem; color: #aaa; flex-wrap: wrap; }
         .meta-item { display: flex; align-items: center; gap: 5px; }
         .meta-item i { color: var(--brand-red); }
 
-        .racer-time { text-align: right; }
+        .racer-time { text-align: right; flex-shrink: 0; }
         .time-val { font-family: 'Russo One'; font-size: 1.5rem; color: var(--brand-red); display: block; }
         .time-lbl { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 1px; }
 
@@ -147,15 +236,57 @@
         }
         .error-msg { color: #ff4d4d; font-size: 0.85rem; margin-top: 10px; display: none; font-weight: bold; }
 
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .search-box-wrapper { flex-direction: column; }
-            .result-card { flex-direction: column; align-items: flex-start; gap: 15px; }
-            .racer-time { text-align: left; width: 100%; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333; padding-top: 10px; margin-top: 5px; }
-            .btn-ecert { width: 100%; justify-content: center; margin: 0; }
-            .rank-box { width: 50px; height: 50px; position: absolute; right: 20px; top: 20px; }
-            .rank-num { font-size: 1.4rem; }
+        /* --- MOBILE RESPONSIVE (KEKALKAN INI) --- */
+        @media (max-width: 1100px) {
+            .nav-links { position: static; transform: none; } /* Reset position bila skrin kecil */
+            .logo { width: auto; } /* Reset lebar logo */
+            .header-right { width: auto; margin-left: auto; } /* Reset kanan */
         }
+
+        @media (max-width: 900px) {
+            header { padding: 10px 5%; height: 60px; }
+            .logo { font-size: 1rem; }
+            .logo img { height: 28px; }
+            .menu-toggle { display: block; margin-left: 15px; font-size: 1.2rem; }
+            
+            .nav-links {
+                position: absolute; top: 60px; left: 0; width: 100%;
+                background: rgba(15, 16, 20, 0.98); 
+                flex-direction: column; align-items: center;
+                padding: 20px 0; display: none; 
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                transform: none; 
+            }
+            .nav-links.active { display: flex; }
+            .nav-links a { padding: 15px; width: 100%; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+            .login-btn { padding: 6px 15px; font-size: 0.75rem; }
+            .qr-btn { width: 32px; height: 32px; font-size: 1rem; }
+        }
+
+            .hero-search { padding: 40px 15px; }
+            .hero-title { font-size: 2rem; }
+            
+            /* Search Bar Stack (Menegak) */
+            .search-box-wrapper { flex-direction: column; gap: 15px; }
+            .event-select, .search-input { width: 100%; }
+            .search-btn { width: 100%; padding: 15px; }
+
+            /* Result Card Stack */
+            .result-card { flex-direction: column; text-align: center; gap: 15px; padding: 25px; }
+            .result-card::before { width: 100%; height: 4px; top: 0; left: 0; }
+            
+            .racer-info { width: 100%; }
+            .racer-meta { justify-content: center; gap: 10px; }
+            
+            .racer-time { text-align: center; width: 100%; border-top: 1px solid #333; padding-top: 15px; }
+            .time-val { font-size: 2rem; margin-bottom: 10px; }
+            
+            .btn-ecert { margin: 10px auto 0; width: 100%; justify-content: center; padding: 12px; }
+            
+            .result-stats-bar { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .category-filter { width: 100%; }
+        
     </style>
 </head>
 <body>
@@ -164,14 +295,24 @@
         <a href="index.html" class="logo">
             <img src="seaMLogo.png" alt="Logo"> SEA<span>MOUNTAIN</span>
         </a>
-        <nav class="nav-links">
-            <a href="index.html">Events</a>
-            <a href="results.html">Results</a>
+
+        <nav class="nav-links" id="navMenu">
+            <a href="index.html" class="active-nav">Events</a> <a href="results.html">Results</a>
             <a href="photos.html">Photos</a>
             <a href="leaderboard.html">Leaderboard</a>
-            <a href="partners.html" >Partners</a>
+            <a href="partners.html">Partners</a>
+            <a href="#contact">Contact Us</a>
         </nav>
-        <a href="login.html" class="login-btn">Log In</a>
+
+        <div class="header-right">
+            <a href="my-tickets.html" id="qrBtn" class="qr-btn" title="My History & Tickets" style="display:none;">
+                <i class="fas fa-qrcode"></i>
+            </a>
+            <a href="login.html" class="login-btn">Log In</a>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
     </header>
 
     <div class="hero-search">
@@ -184,7 +325,7 @@
                 <option value="loading">Loading Events...</option>
             </select>
             <input type="text" id="searchInput" class="search-input" placeholder="Search by Name or BIB Number...">
-            <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i></button>
+            <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i> SEARCH</button>
         </div>
     </div>
 
@@ -242,16 +383,55 @@
         const auth = getAuth(app);
 
         let allResultsData = [];
-        let currentRunnerData = null; // Store data sementara untuk verifikasi
-        let currentEventTemplate = null; // Store URL Template
+        let currentRunnerData = null; 
+        let currentEventTemplate = null;
 
-        // 1. AUTH HEADER
+        // UI HELPER
+        window.toggleMenu = function() {
+            const nav = document.getElementById('navMenu');
+            nav.classList.toggle('active');
+        }
+
+        // 1. AUTH HEADER (UPDATED LOGIC)
         const loginBtn = document.querySelector('.login-btn'); 
+        const qrBtn = document.getElementById('qrBtn');
+
         onAuthStateChanged(auth, (user) => {
-            if (user && loginBtn) {
-                loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.displayName || 'User'}`;
-                loginBtn.href = "#"; loginBtn.style.background = "#28a745"; 
-                loginBtn.onclick = (e) => { e.preventDefault(); if(confirm("Log out?")) signOut(auth).then(()=>window.location.reload()); };
+            if (user) {
+                // --- KOD BARU: CEK GAMBAR ---
+                if (user.photoURL) {
+                    loginBtn.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                    loginBtn.style.background = "transparent";
+                    loginBtn.style.boxShadow = "none";
+                    loginBtn.style.border = "2px solid #28a745"; 
+                } else {
+                    loginBtn.innerHTML = `<i class="fas fa-user-circle"></i>`;
+                    loginBtn.style.background = "#28a745";
+                    loginBtn.style.boxShadow = "0 0 10px rgba(40, 167, 69, 0.5)";
+                }
+
+                loginBtn.title = `Logged in as ${user.displayName || 'User'}`; 
+                loginBtn.href = "#"; 
+                loginBtn.classList.add('profile-mode'); 
+                
+                if(qrBtn) qrBtn.style.display = "flex";
+
+                loginBtn.onclick = function(e) {
+                    e.preventDefault();
+                    if(confirm(`Hi ${user.displayName || 'User'}! Log Out?`)) {
+                        signOut(auth).then(() => window.location.reload());
+                    }
+                };
+            } else {
+                // --- LOGOUT STATE ---
+                loginBtn.innerHTML = "Log In";
+                loginBtn.classList.remove('profile-mode');
+                loginBtn.href = "login.html";
+                loginBtn.style.background = ""; 
+                loginBtn.style.border = "";
+                loginBtn.style.boxShadow = "";
+                loginBtn.onclick = null;
+                if(qrBtn) qrBtn.style.display = "none";
             }
         });
 
@@ -265,7 +445,10 @@
             
             if (data) {
                 Object.entries(data).forEach(([key, event]) => {
-                    eventSelect.innerHTML += `<option value="${key}">${event.title}</option>`;
+                    // Hanya paparkan event yang BELUM diarkib
+                    if (event.isArchived !== true) {
+                        eventSelect.innerHTML += `<option value="${key}">${event.title}</option>`;
+                    }
                 });
             } else {
                 eventSelect.innerHTML = '<option value="">No Events Found</option>';
@@ -339,7 +522,7 @@
                 const matchCat = filterCat === "ALL" || r.category === filterCat;
                 const matchSearch = (r.first_name + " " + r.last_name).toLowerCase().includes(term) || 
                                     (r.id || "").toLowerCase().includes(term) ||
-                                    (r.bib || "").toLowerCase().includes(term); // Boleh search by BIB jugak
+                                    (r.bib || "").toLowerCase().includes(term); 
                 return matchCat && matchSearch;
             });
 
@@ -356,7 +539,6 @@
                 
                 const btnHtml = `<button class="btn-ecert" data-id="${r.id}"><i class="fas fa-lock"></i> E-CERT</button>`;
 
-                // LOGIC BIB: Kalau ada 'bib', guna 'bib'. Kalau tak ada, guna ID pendek.
                 const displayBib = r.bib || r.id.substring(0,6).toUpperCase();
 
                 const card = `
