@@ -14,38 +14,98 @@
         body { background-color: var(--bg-dark); color: var(--text-white); background-image: radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.05) 0%, transparent 20%); overflow-x: hidden; }
         a { text-decoration: none; color: inherit; transition: 0.3s; }
 
-        /* HEADER */
+        /* --- STANDARD HEADER DESKTOP (JANGAN USIK) --- */
         header { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px 5%; background: rgba(15, 16, 20, 0.95); 
+            padding: 0 5%; /* Padding kiri kanan */
+            background: rgba(15, 16, 20, 0.95); 
             backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; 
             border-bottom: 1px solid rgba(255,255,255,0.1); 
-            height: 70px; /* Default height desktop */
+            height: 80px; /* Tinggi Tetap semua page */
         }
-        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; font-size: 1.2rem; color: #fff; text-transform: uppercase; letter-spacing: -1px; z-index: 1002; }
+
+        /* LOGO (KIRI) */
+        .logo { 
+            display: flex; align-items: center; gap: 10px; 
+            font-family: 'Montserrat'; font-weight: 900; font-style: italic; 
+            font-size: 1.5rem; color: #fff; text-transform: uppercase; text-decoration: none; 
+            width: 250px; /* Tetapkan lebar tetap supaya tak tolak menu */
+            flex-shrink: 0;
+        }
         .logo img { height: 35px; width: auto; }
-        .logo span { color: var(--brand-orange); font-weight: 300; }
+        .logo span { color: var(--brand-red); font-weight: 300; }
+
+        /* MENU (TENGAH - ABSOLUTE CENTER) */
+        /* Ini kunci supaya menu tak bergerak walau logo panjang/pendek */
+        .nav-links { 
+            position: absolute; 
+            left: 50%; 
+            transform: translateX(-50%);
+            display: flex; gap: 30px; 
+            font-weight: 600; text-transform: uppercase; font-size: 0.85rem; 
+            white-space: nowrap;
+        }
+        .nav-links a { text-decoration: none; color: #fff; transition: 0.3s; letter-spacing: 0.5px; }
+        .nav-links a:hover { color: var(--brand-red); }
+        .nav-links a.active-nav { color: var(--brand-red); cursor: default; }
+
+        /* KANAN (LOGIN & BUTTONS) */
+        .header-right { 
+            display: flex; align-items: center; gap: 15px; 
+            width: 250px; /* Sama lebar dengan logo */
+            justify-content: flex-end; /* Rapat kanan */
+            flex-shrink: 0;
+            z-index: 1002;
+        }
+
+        /* --- UI ELEMENTS LAIN --- */
+        .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
         
-        .nav-links { display: flex; gap: 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
-        .nav-links a:hover { color: var(--brand-orange); }
-        
-        .header-right { display: flex; align-items: center; gap: 15px; z-index: 1002; }
+        .login-btn { 
+            background: linear-gradient(45deg, var(--brand-red), #ff4d4d); 
+            padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; 
+            color: #fff; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3); white-space: nowrap; 
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; border: 1px solid transparent;
+        }
+        .login-btn:hover { transform: translateY(-2px); }
+        .login-btn.profile-mode {
+            padding: 0; width: 40px; height: 40px; border-radius: 50%; 
+            font-size: 1.5rem; background: #28a745; color: #fff; 
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+            display: flex; align-items: center; justify-content: center; overflow: hidden; 
+        }
+
+        .qr-btn { 
+            width: 35px; height: 35px; background: #222; border: 1px solid #444; border-radius: 50%; 
+            display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; 
+            cursor: pointer; transition: 0.3s; text-decoration: none;
+        }
+        .qr-btn:hover { background: var(--brand-orange); border-color: var(--brand-orange); color: #222; }
         .auth-group { display: flex; align-items: center; gap: 10px; }
 
         /* LOGIN BUTTON */
         .login-btn { 
             background: linear-gradient(45deg, var(--brand-orange), #ff7b00); 
             padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; 
-            color: #000; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3); white-space: nowrap; 
+            color: #ffffff; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 170, 0, 0.3); white-space: nowrap; 
             display: flex; align-items: center; justify-content: center;
         }
         .login-btn:hover { transform: translateY(-2px); }
 
         /* NEW: Profile Icon Style (Bulat) */
         .login-btn.profile-mode {
-            padding: 0; width: 40px; height: 40px; border-radius: 50%; 
-            font-size: 1.5rem; background: #28a745; color: #fff; 
+            padding: 0; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; /* Jadi bulat */
+            font-size: 1.5rem; 
+            background: #28a745; 
+            color: #fff; 
             box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
         }
 
         .qr-btn { width: 35px; height: 35px; background: #222; border: 1px solid #444; border-radius: 50%; display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
@@ -126,28 +186,33 @@
         .float-wa { position: fixed; width: 60px; height: 60px; bottom: 30px; right: 30px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; transition: 0.3s; text-decoration: none; }
         .float-wa:hover { transform: scale(1.1); background-color: #128c7e; }
 
-        /* --- MOBILE TWEAKS (HEADER COMPACT) --- */
+        /* --- MOBILE RESPONSIVE (KEKALKAN INI) --- */
+        @media (max-width: 1100px) {
+            .nav-links { position: static; transform: none; } /* Reset position bila skrin kecil */
+            .logo { width: auto; } /* Reset lebar logo */
+            .header-right { width: auto; margin-left: auto; } /* Reset kanan */
+        }
+
         @media (max-width: 900px) {
-            header { padding: 10px 5%; height: 60px; } /* Header nipis */
-            .logo { font-size: 1rem; } /* Font logo kecil sikit */
-            .logo img { height: 28px; } /* Gambar logo kecil sikit */
-            
-            .menu-toggle { display: block; margin-left: 15px; font-size: 1.2rem; } /* Icon menu kemas */
+            header { padding: 10px 5%; height: 60px; }
+            .logo { font-size: 1rem; }
+            .logo img { height: 28px; }
+            .menu-toggle { display: block; margin-left: 15px; font-size: 1.2rem; }
             
             .nav-links {
-                position: absolute; top: 60px; /* Ikut tinggi header */
-                left: 0; width: 100%;
-                background: rgba(15, 16, 20, 0.98); flex-direction: column; align-items: center;
-                padding: 20px 0; display: none; border-bottom: 1px solid rgba(255,255,255,0.1);
+                position: absolute; top: 60px; left: 0; width: 100%;
+                background: rgba(15, 16, 20, 0.98); 
+                flex-direction: column; align-items: center;
+                padding: 20px 0; display: none; 
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                transform: none; 
             }
             .nav-links.active { display: flex; }
             .nav-links a { padding: 15px; width: 100%; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-            
-            .auth-group { margin-left: auto; gap: 8px; } /* Rapatkan butang */
-            
-            /* Saiz butang login mobile */
+
             .login-btn { padding: 6px 15px; font-size: 0.75rem; }
             .qr-btn { width: 32px; height: 32px; font-size: 1rem; }
+        }
 
             .hero { padding: 60px 5%; }
             .hero h1 { font-size: 2.2rem; }
@@ -160,20 +225,18 @@
             .events-grid { grid-template-columns: 1fr; padding-bottom: 40px; }
             .contact-container { flex-direction: column; gap: 40px; }
             .contact-form { padding: 25px; }
-        }
+        
     </style>
 </head>
 <body>
 
     <header>
         <a href="index.html" class="logo">
-            <img src="seaMLogo.png" alt="Sea Mountain Logo">
-            SEA<span>MOUNTAIN</span>
+            <img src="seaMLogo.png" alt="Logo"> SEA<span>MOUNTAIN</span>
         </a>
 
         <nav class="nav-links" id="navMenu">
-            <a href="index.html">Events</a>
-            <a href="results.html">Results</a>
+            <a href="index.html" class="active-nav">Events</a> <a href="results.html">Results</a>
             <a href="photos.html">Photos</a>
             <a href="leaderboard.html">Leaderboard</a>
             <a href="partners.html">Partners</a>
@@ -181,12 +244,10 @@
         </nav>
 
         <div class="header-right">
-            <div class="auth-group">
-                <a href="my-tickets.html" id="qrBtn" class="qr-btn" title="My History & Tickets">
-                    <i class="fas fa-qrcode"></i>
-                </a>
-                <a href="login.html" class="login-btn">Log In</a>
-            </div>
+            <a href="my-tickets.html" id="qrBtn" class="qr-btn" title="My History & Tickets" style="display:none;">
+                <i class="fas fa-qrcode"></i>
+            </a>
+            <a href="login.html" class="login-btn">Log In</a>
             <button class="menu-toggle" onclick="toggleMenu()">
                 <i class="fas fa-bars"></i>
             </button>
@@ -323,32 +384,54 @@
         const loginBtn = document.querySelector('.login-btn'); 
         const qrBtn = document.getElementById('qrBtn'); 
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // USER LOGGED IN
-                loginBtn.innerHTML = `<i class="fas fa-user-circle"></i>`; 
-                loginBtn.title = `Logged in as ${user.displayName || 'User'}`; 
-                loginBtn.href = "#"; 
-                loginBtn.classList.add('profile-mode'); 
-                
-                if(qrBtn) qrBtn.style.display = "flex";
-
-                loginBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    if(confirm("Log Out?")) {
-                        signOut(auth).then(() => window.location.reload());
-                    }
-                });
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // --- 1. CEK ADA GAMBAR KE TAK? ---
+            if (user.photoURL) {
+                // Kalau ada gambar (Google/FB), guna gambar tu
+                loginBtn.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                // Reset background color supaya tak ganggu gambar
+                loginBtn.style.background = "transparent";
+                loginBtn.style.boxShadow = "none";
+                loginBtn.style.border = "2px solid #28a745"; // Bagi border hijau sikit
             } else {
-                // USER LOGGED OUT
-                loginBtn.innerHTML = "Log In";
-                loginBtn.href = "login.html";
-                loginBtn.classList.remove('profile-mode');
-                loginBtn.style.background = ""; 
-                
-                if(qrBtn) qrBtn.style.display = "none";
+                // Kalau tak ada gambar, guna IKON DEFAULT
+                loginBtn.innerHTML = `<i class="fas fa-user-circle"></i>`;
+                // Kekalkan style hijau asal
+                loginBtn.style.background = "#28a745";
+                loginBtn.style.boxShadow = "0 0 10px rgba(40, 167, 69, 0.5)";
             }
-        });
+
+            loginBtn.title = `Logged in as ${user.displayName || 'User'}`; 
+            loginBtn.href = "#"; 
+
+            // Tambah class bulat
+            loginBtn.classList.add('profile-mode'); 
+
+            if(typeof qrBtn !== 'undefined' && qrBtn) qrBtn.style.display = "flex";
+
+            loginBtn.onclick = function(e) {
+                e.preventDefault();
+                if(confirm(`Hi ${user.displayName || 'User'}! Log Out?`)) {
+                    signOut(auth).then(() => window.location.reload());
+                }
+            };
+        } else {
+            // --- USER LOGGED OUT ---
+            loginBtn.innerHTML = "Log In";
+            loginBtn.classList.remove('profile-mode');
+            loginBtn.href = "login.html";
+
+            // Reset style asal butang login
+            loginBtn.style.background = ""; 
+            loginBtn.style.border = "";
+            loginBtn.style.boxShadow = "";
+
+            loginBtn.onclick = null;
+
+            if(typeof qrBtn !== 'undefined' && qrBtn) qrBtn.style.display = "none";
+        }
+    });
 
         // --- 3. FETCH EVENTS (INI PALING PENTING) ---
         const eventsRef = ref(db, 'events');
@@ -470,4 +553,3 @@
     </script>
 </body>
 </html>
-
