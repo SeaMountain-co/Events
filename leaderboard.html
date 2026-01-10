@@ -11,6 +11,7 @@
     <style>
         :root {
             --brand-red: #ff0000;
+            --brand-orange: #ff0000;
             --bg-dark: #0f1014;
             --card-bg: #1a1c23;
             --text-white: #ffffff;
@@ -28,35 +29,89 @@
             background-image: radial-gradient(circle at 50% 0%, rgba(255, 0, 0, 0.1) 0%, transparent 50%);
             min-height: 100vh;
             display: flex; flex-direction: column;
+            overflow-x: hidden; 
         }
 
         a { text-decoration: none; color: inherit; transition: 0.3s; }
 
-        /* HEADER */
-        header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 5%; background: rgba(15, 16, 20, 0.95); position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+        /* --- STANDARD HEADER DESKTOP (JANGAN USIK) --- */
+        header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 0 5%; /* Padding kiri kanan */
+            background: rgba(15, 16, 20, 0.95); 
+            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            height: 80px; /* Tinggi Tetap semua page */
         }
 
-        .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat'; font-weight: 900; font-style: italic; font-size: 1.5rem; color: #fff; text-transform: uppercase; }
-        .logo img { height: 40px; width: auto; display: block; }
+        /* LOGO (KIRI) */
+        .logo { 
+            display: flex; align-items: center; gap: 10px; 
+            font-family: 'Montserrat'; font-weight: 900; font-style: italic; 
+            font-size: 1.5rem; color: #fff; text-transform: uppercase; text-decoration: none; 
+            width: 250px; /* Tetapkan lebar tetap supaya tak tolak menu */
+            flex-shrink: 0;
+        }
+        .logo img { height: 35px; width: auto; }
         .logo span { color: var(--brand-red); font-weight: 300; }
 
-        .nav-links { display: flex; gap: 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; }
+        /* MENU (TENGAH - ABSOLUTE CENTER) */
+        /* Ini kunci supaya menu tak bergerak walau logo panjang/pendek */
+        .nav-links { 
+            position: absolute; 
+            left: 50%; 
+            transform: translateX(-50%);
+            display: flex; gap: 30px; 
+            font-weight: 600; text-transform: uppercase; font-size: 0.85rem; 
+            white-space: nowrap;
+        }
+        .nav-links a { text-decoration: none; color: #fff; transition: 0.3s; letter-spacing: 0.5px; }
         .nav-links a:hover { color: var(--brand-red); }
         .nav-links a.active-nav { color: var(--brand-red); cursor: default; }
 
-        .login-btn { background: linear-gradient(45deg, var(--brand-red), #ff7b00); padding: 10px 25px;
-            border-radius: 30px; font-weight: 800; text-transform: uppercase; color: #fff;
+        /* KANAN (LOGIN & BUTTONS) */
+        .header-right { 
+            display: flex; align-items: center; gap: 15px; 
+            width: 250px; /* Sama lebar dengan logo */
+            justify-content: flex-end; /* Rapat kanan */
+            flex-shrink: 0;
+            z-index: 1002;
         }
 
+        /* --- UI ELEMENTS LAIN --- */
+        .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        
+        .login-btn { 
+            background: linear-gradient(45deg, var(--brand-red), #ff4d4d); 
+            padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; 
+            color: #fff; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3); white-space: nowrap; 
+            display: flex; align-items: center; justify-content: center;
+            text-decoration: none; border: 1px solid transparent;
+        }
+        .login-btn:hover { transform: translateY(-2px); }
+        .login-btn.profile-mode {
+            padding: 0; width: 40px; height: 40px; border-radius: 50%; 
+            font-size: 1.5rem; background: #28a745; color: #fff; 
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+            display: flex; align-items: center; justify-content: center; overflow: hidden; 
+        }
+
+        .qr-btn { 
+            width: 35px; height: 35px; background: #222; border: 1px solid #444; border-radius: 50%; 
+            display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; 
+            cursor: pointer; transition: 0.3s; text-decoration: none;
+        }
+        .qr-btn:hover { background: var(--brand-orange); border-color: var(--brand-orange); color: #222; }
+
         /* MAIN CONTENT */
-        .container { max-width: 1400px; margin: 40px auto; padding: 0 5%; flex: 1; }
+        .container { 
+            max-width: 1400px; margin: 40px auto; padding: 0 5%; flex: 1; width: 100%;
+        }
         
         .page-title {
             text-align: center; font-family: 'Russo One', sans-serif; font-size: 2.5rem;
             text-transform: uppercase; margin-bottom: 10px; font-style: italic;
+            word-wrap: break-word; 
         }
         .page-subtitle { text-align: center; color: var(--text-gray); margin-bottom: 30px; }
 
@@ -118,7 +173,9 @@
         .racer-bib { color: var(--text-gray); font-size: 0.9rem; letter-spacing: 1px; margin-bottom: 10px; font-weight: bold; }
 
         /* TABLE */
-        .table-responsive { overflow-x: auto; border-radius: 10px; border: 1px solid #333; }
+        .table-responsive { 
+            overflow-x: auto; border-radius: 10px; border: 1px solid #333; width: 100%; -webkit-overflow-scrolling: touch; 
+        }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; background: var(--card-bg); }
         
         thead { background-color: #000; color: #aaa; border-bottom: 2px solid #333; }
@@ -142,32 +199,74 @@
 
         footer { background-color: var(--card-bg); padding: 40px 5% 20px; border-top: 1px solid #222; margin-top: auto; text-align: center; font-size: 0.8rem; color: #666; }
 
-        @media (max-width: 768px) {
-            .nav-links { display: none; }
-            .event-selector-bar { flex-direction: column; }
-            .event-dropdown, .category-dropdown { width: 100%; min-width: unset; }
-            .podium-wrapper { flex-direction: column; align-items: center; }
-            .rank-1, .rank-2, .rank-3 { order: unset; width: 100%; height: auto; border-bottom: none; border-left: 5px solid; transform: none; margin-bottom: 10px;}
-            .rank-1 { border-color: var(--gold); } .rank-2 { border-color: var(--silver); } .rank-3 { border-color: var(--bronze); }
+        /* --- MOBILE RESPONSIVE (KEKALKAN INI) --- */
+        @media (max-width: 1100px) {
+            .nav-links { position: static; transform: none; } /* Reset position bila skrin kecil */
+            .logo { width: auto; } /* Reset lebar logo */
+            .header-right { width: auto; margin-left: auto; } /* Reset kanan */
         }
+
+        @media (max-width: 900px) {
+            header { padding: 10px 5%; height: 60px; }
+            .logo { font-size: 1rem; }
+            .logo img { height: 28px; }
+            .menu-toggle { display: block; margin-left: 15px; font-size: 1.2rem; }
+            
+            .nav-links {
+                position: absolute; top: 60px; left: 0; width: 100%;
+                background: rgba(15, 16, 20, 0.98); 
+                flex-direction: column; align-items: center;
+                padding: 20px 0; display: none; 
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                transform: none; 
+            }
+            .nav-links.active { display: flex; }
+            .nav-links a { padding: 15px; width: 100%; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+            .login-btn { padding: 6px 15px; font-size: 0.75rem; }
+            .qr-btn { width: 32px; height: 32px; font-size: 1rem; }
+        }
+
+            /* Layout Fix */
+            .container { padding: 0 15px; margin-top: 20px; }
+            .page-title { font-size: 1.8rem; line-height: 1.1; margin-bottom: 15px; }
+            .event-selector-bar { flex-direction: column; gap: 15px; margin-bottom: 30px; }
+            .event-dropdown, .category-dropdown { width: 100%; min-width: 0; }
+
+            .podium-wrapper { align-items: center; }
+            .rank-1 { order: 1; transform: none; height: auto; margin-bottom: 20px; width: 100%; }
+            .rank-2, .rank-3 { order: 2; height: auto; width: 100%; }
+            .podium-card { width: 100%; padding: 15px; }
+            
+            .table-responsive { border: 1px solid #444; margin-bottom: 30px; width: 100%; }
+        
+
     </style>
 </head>
 <body>
 
     <header>
         <a href="index.html" class="logo">
-            <img src="seaMLogo.png" alt="Sea Mountain Logo">
-            SEA<span>MOUNTAIN</span>
+            <img src="seaMLogo.png" alt="Logo"> SEA<span>MOUNTAIN</span>
         </a>
 
-        <nav class="nav-links">
-            <a href="index.html">Events</a>
-            <a href="results.html">Results</a>
+        <nav class="nav-links" id="navMenu">
+            <a href="index.html" class="active-nav">Events</a> <a href="results.html">Results</a>
             <a href="photos.html">Photos</a>
-            <a href="leaderboard.html" class="active-nav">Leaderboard</a>
-            <a href="partners.html" >Partners</a>
+            <a href="leaderboard.html">Leaderboard</a>
+            <a href="partners.html">Partners</a>
+            <a href="#contact">Contact Us</a>
         </nav>
-        <a href="login.html" class="login-btn">Log In</a>
+
+        <div class="header-right">
+            <a href="my-tickets.html" id="qrBtn" class="qr-btn" title="My History & Tickets" style="display:none;">
+                <i class="fas fa-qrcode"></i>
+            </a>
+            <a href="login.html" class="login-btn">Log In</a>
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
     </header>
 
     <div class="container">
@@ -235,19 +334,54 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        let allRunnersData = []; // Simpan data global untuk filtering
+        let allRunnersData = []; 
+
+        window.toggleMenu = function() {
+            const nav = document.getElementById('navMenu');
+            if(nav.style.display === 'flex') nav.style.display = 'none';
+            else { nav.style.display = 'flex'; nav.style.flexDirection = 'column'; }
+        }
 
         // 1. AUTH HEADER LOGIC
         const loginBtn = document.querySelector('.login-btn'); 
+        const qrBtn = document.getElementById('qrBtn');
+        const menuToggle = document.querySelector('.menu-toggle');
+
+        if(window.innerWidth <= 900) menuToggle.style.display = 'block';
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                if(loginBtn) {
-                    loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.displayName || 'User'}`;
-                    loginBtn.href = "#"; loginBtn.style.background = "#28a745"; 
-                    loginBtn.onclick = (e) => { e.preventDefault(); if(confirm("Log out?")) signOut(auth).then(()=>window.location.reload()); };
+                if (user.photoURL) {
+                    loginBtn.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                    loginBtn.style.background = "transparent";
+                    loginBtn.style.boxShadow = "none";
+                    loginBtn.style.border = "2px solid #28a745"; 
+                } else {
+                    loginBtn.innerHTML = `<i class="fas fa-user-circle"></i>`; 
+                    loginBtn.style.background = "#28a745";
                 }
+                
+                loginBtn.title = `Logged in as ${user.displayName || 'User'}`;
+                loginBtn.href = "#"; 
+                loginBtn.classList.add('profile-mode'); 
+
+                if(qrBtn) qrBtn.style.display = "flex";
+            
+                loginBtn.onclick = function(e) {
+                    e.preventDefault();
+                    if(confirm(`Hi ${user.displayName || 'User'}! Log Out?`)) {
+                        signOut(auth).then(() => window.location.reload());
+                    }
+                };
+            } else {
+                loginBtn.innerHTML = "Log In";
+                loginBtn.classList.remove('profile-mode');
+                loginBtn.href = "login.html";
+                loginBtn.style.background = ""; 
+                loginBtn.onclick = null;
+                if(qrBtn) qrBtn.style.display = "none";
             }
-        });
+        });     
 
         // 2. POPULATE DROPDOWN
         const eventSelector = document.getElementById('eventSelector');
@@ -261,7 +395,10 @@
                 Object.entries(data).forEach(([key, event]) => {
                     const urlParams = new URLSearchParams(window.location.search);
                     const preSelected = urlParams.get('id') === key ? 'selected' : '';
-                    eventSelector.innerHTML += `<option value="${key}" ${preSelected}>${event.title}</option>`;
+                    
+                    if(event.isArchived !== true) {
+                        eventSelector.innerHTML += `<option value="${key}" ${preSelected}>${event.title}</option>`;
+                    }
                 });
 
                 const urlId = new URLSearchParams(window.location.search).get('id');
@@ -274,9 +411,8 @@
             loadLeaderboard(this.value);
         });
 
-        // HANDLE CATEGORY FILTER CHANGE
         categoryFilter.addEventListener('change', function() {
-            renderTable(this.value); // Render semula table ikut kategori
+            renderTable(this.value); 
         });
 
         // 4. LOAD LEADERBOARD DATA
@@ -287,16 +423,13 @@
             tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:40px;">Fetching Live Results...</td></tr>';
             podiumSection.style.display = 'none';
             
-            // Reset Category Filter
             categoryFilter.innerHTML = '<option value="ALL">All Categories</option>';
             categoryFilter.disabled = true;
 
-            // Ambil Nama Event
             onValue(ref(db, `events/${eventId}/title`), (snap) => {
                 if(snap.exists()) document.getElementById('eventSubtitle').innerText = snap.val();
             });
 
-            // Ambil Data Peserta
             onValue(ref(db, `registrations/${eventId}`), (snapshot) => {
                 const data = snapshot.val();
                 
@@ -306,9 +439,8 @@
                     return;
                 }
 
-                // Convert to Array & Sort
                 allRunnersData = [];
-                const categoriesFound = new Set(); // Set untuk simpan kategori unik
+                const categoriesFound = new Set(); 
 
                 Object.keys(data).forEach(key => {
                     const r = { id: key, ...data[key] };
@@ -316,13 +448,11 @@
                     if(r.category) categoriesFound.add(r.category);
                 });
 
-                // Populate Category Filter
                 categoriesFound.forEach(cat => {
                     categoryFilter.innerHTML += `<option value="${cat}">${cat}</option>`;
                 });
                 if(categoriesFound.size > 0) categoryFilter.disabled = false;
 
-                // Default Sort (Overall - Finisher First)
                 allRunnersData.sort((a, b) => {
                     if (a.finish_time && b.finish_time) return a.finish_time.localeCompare(b.finish_time);
                     if (a.finish_time) return -1;
@@ -330,12 +460,11 @@
                     return 0; 
                 });
 
-                // Render Table & Podium (Default: ALL)
                 renderTable("ALL");
             });
         }
 
-        // 5. RENDER TABLE FUNCTION (Updated with BIB Display)
+        // 5. RENDER TABLE FUNCTION
         function renderTable(filterCat) {
             const tableBody = document.getElementById('leaderboardTable');
             const podiumSection = document.getElementById('podiumSection');
@@ -343,7 +472,6 @@
             podiumSection.innerHTML = "";
             podiumSection.style.display = 'none';
 
-            // Filter Runners
             let filteredRunners = allRunnersData;
             if (filterCat !== "ALL") {
                 filteredRunners = allRunnersData.filter(r => r.category === filterCat);
@@ -354,13 +482,11 @@
                 return;
             }
 
-            // --- GENERATE PODIUM (Top 3 Finishers in filtered list) ---
+            // PODIUM
             const finishers = filteredRunners.filter(r => r.finish_time);
             
             if (finishers.length >= 1) {
                 podiumSection.style.display = 'flex';
-                
-                // Podium Order: 2nd, 1st, 3rd
                 const podiumOrder = [1, 0, 2]; 
                 
                 podiumOrder.forEach(idx => {
@@ -369,14 +495,12 @@
                         const rank = idx + 1;
                         const rankClass = `rank-${rank}`;
                         const icon = rank === 1 ? '<i class="fas fa-crown"></i>' : rank;
-                        
-                        // LOGIC BIB PODIUM (Check r.bib)
                         const displayBib = r.bib || "NO BIB";
 
                         podiumSection.innerHTML += `
                             <div class="podium-card ${rankClass}">
                                 <div class="rank-badge">${icon}</div>
-                                <img src="https://i.pravatar.cc/150?u=${r.id}" class="racer-avatar">
+                                <img src="https://ui-avatars.com/api/?name=${r.first_name}&background=random" class="racer-avatar">
                                 <div class="racer-name">${r.first_name}</div>
                                 <div class="racer-bib">BIB: ${displayBib}</div>
                                 <div style="flex-grow:1"></div>
@@ -388,7 +512,7 @@
                 });
             }
 
-            // --- GENERATE TABLE ---
+            // TABLE ROWS
             let rankCounter = 1;
             
             filteredRunners.forEach(r => {
@@ -406,8 +530,6 @@
                 const flagUrl = `https://flagcdn.com/24x18/${countryCode}.png`;
                 const iso3 = { 'my':'MYS', 'sg':'SGP', 'id':'IDN', 'th':'THA', 'bn':'BRN', 'vn':'VNM', 'ph':'PHL' };
                 const displayCountry = iso3[countryCode] || countryCode.toUpperCase();
-
-                // LOGIC BIB TABLE (Check r.bib)
                 const displayBib = r.bib || r.id.substring(0,6) + "..";
 
                 const row = `
