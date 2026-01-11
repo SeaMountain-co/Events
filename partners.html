@@ -14,33 +14,27 @@
         
         body { background-color: var(--bg-dark); color: var(--text); overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* --- STANDARD HEADER DESKTOP (JANGAN USIK) --- */
+        /* --- STANDARD HEADER DESKTOP --- */
         header { 
             display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 5%; /* Padding kiri kanan */
-            background: rgba(15, 16, 20, 0.95); 
+            padding: 0 5%; background: rgba(15, 16, 20, 0.95); 
             backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; 
             border-bottom: 1px solid rgba(255,255,255,0.1); 
-            height: 80px; /* Tinggi Tetap semua page */
+            height: 80px; 
         }
 
-        /* LOGO (KIRI) */
         .logo { 
             display: flex; align-items: center; gap: 10px; 
             font-family: 'Montserrat'; font-weight: 900; font-style: italic; 
             font-size: 1.5rem; color: #fff; text-transform: uppercase; text-decoration: none; 
-            width: 250px; /* Tetapkan lebar tetap supaya tak tolak menu */
-            flex-shrink: 0;
+            width: 250px; flex-shrink: 0;
         }
         .logo img { height: 35px; width: auto; }
         .logo span { color: var(--brand-red); font-weight: 300; }
 
-        /* MENU (TENGAH - ABSOLUTE CENTER) */
-        /* Ini kunci supaya menu tak bergerak walau logo panjang/pendek */
+        /* NAV LINKS - CENTERED */
         .nav-links { 
-            position: absolute; 
-            left: 50%; 
-            transform: translateX(-50%);
+            position: absolute; left: 50%; transform: translateX(-50%);
             display: flex; gap: 30px; 
             font-weight: 600; text-transform: uppercase; font-size: 0.85rem; 
             white-space: nowrap;
@@ -49,26 +43,21 @@
         .nav-links a:hover { color: var(--brand-red); }
         .nav-links a.active-nav { color: var(--brand-red); cursor: default; }
 
-        /* KANAN (LOGIN & BUTTONS) */
         .header-right { 
             display: flex; align-items: center; gap: 15px; 
-            width: 250px; /* Sama lebar dengan logo */
-            justify-content: flex-end; /* Rapat kanan */
-            flex-shrink: 0;
-            z-index: 1002;
+            width: 250px; justify-content: flex-end; flex-shrink: 0; z-index: 1002;
         }
 
-        /* --- UI ELEMENTS LAIN --- */
-        .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
-        
+        /* --- LOGIN BUTTON --- */
         .login-btn { 
             background: linear-gradient(45deg, var(--brand-red), #ff4d4d); 
-            padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; 
-            color: #fff; font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3); white-space: nowrap; 
+            padding: 8px 20px; border-radius: 30px; font-weight: 800; 
+            text-decoration: none; color: #fff; text-transform: uppercase; 
+            font-size: 0.8rem; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
             display: flex; align-items: center; justify-content: center;
-            text-decoration: none; border: 1px solid transparent;
         }
-        .login-btn:hover { transform: translateY(-2px); }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5); }
+
         .login-btn.profile-mode {
             padding: 0; width: 40px; height: 40px; border-radius: 50%; 
             font-size: 1.5rem; background: #28a745; color: #fff; 
@@ -81,7 +70,7 @@
             display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; 
             cursor: pointer; transition: 0.3s; text-decoration: none;
         }
-        .qr-btn:hover { background: var(--brand-orange); border-color: var(--brand-orange); color: #222; }
+        .qr-btn:hover { background: var(--brand-red); border-color: var(--brand-red); }
         .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
 
         /* HERO */
@@ -95,19 +84,23 @@
         .section-title::after { content: ''; display: block; width: 60px; height: 4px; background: var(--brand-red); margin: 15px auto 0; }
 
         /* GRIDS */
-        .sponsor-grid { display: grid; gap: 30px; justify-content: center; margin-bottom: 80px; }
-        .grid-gold { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 1000px; margin-left: auto; margin-right: auto; }
-        .grid-silver { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-width: 900px; margin-left: auto; margin-right: auto; }
+        .sponsor-grid { 
+            display: flex; flex-wrap: wrap; justify-content: center; 
+            gap: 30px; margin-bottom: 80px; 
+        }
+        
+        .grid-gold .sponsor-card { width: 300px; height: 200px; }
+        .grid-silver .sponsor-card { width: 220px; height: 150px; }
 
         /* SPONSOR CARD */
         .sponsor-card { 
-            background: var(--card-bg); border-radius: 15px; padding: 30px; 
+            background: var(--card-bg); border-radius: 15px; padding: 20px; 
             display: flex; align-items: center; justify-content: center; 
             transition: 0.3s; border: 1px solid #333; position: relative; 
-            overflow: hidden; aspect-ratio: 3/2; cursor: pointer; text-decoration: none; 
+            overflow: hidden; cursor: pointer; text-decoration: none; 
         }
         .sponsor-card:hover { transform: translateY(-5px); }
-        .sponsor-card img { max-width: 80%; max-height: 80%; filter: grayscale(100%); transition: 0.3s; opacity: 0.7; }
+        .sponsor-card img { max-width: 85%; max-height: 85%; filter: grayscale(100%); transition: 0.3s; opacity: 0.7; }
         .sponsor-card:hover img { filter: grayscale(0%); opacity: 1; transform: scale(1.05); }
 
         .gold-border { border: 1px solid rgba(255, 215, 0, 0.3); box-shadow: 0 0 15px rgba(255, 215, 0, 0.05); }
@@ -116,7 +109,8 @@
         .bg-gold { background: var(--gold); }
 
         /* MARKETPLACE CARD */
-        .ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; justify-content: center; width: 100%; }
+        .ad-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; justify-content: center; width: 100%; max-width: 1000px; margin: 0 auto; }
+        
         .ad-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid #333; display: flex; flex-direction: column; transition: 0.3s; }
         .ad-card:hover { transform: translateY(-5px); border-color: #555; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         
@@ -128,7 +122,15 @@
         .btn-visit { background: transparent; border: 1px solid var(--brand-red); color: var(--brand-red); padding: 10px; text-align: center; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
         .btn-visit:hover { background: var(--brand-red); color: #fff; }
 
-        .empty-msg { text-align: center; width: 100%; color: #666; font-style: italic; padding: 20px; grid-column: 1 / -1; }
+        /* FIX ALIGNMENT EMPTY MSG */
+        .empty-msg { 
+            text-align: center; 
+            width: 100%; 
+            color: #666; 
+            font-style: italic; 
+            padding: 20px; 
+            grid-column: 1 / -1; /* INI KUNCI DIA - SPAN ALL COLUMNS */
+        }
 
         /* CTA BOX */
         .cta-box { 
@@ -144,11 +146,11 @@
 
         footer { background-color: var(--card-bg); padding: 40px 5% 20px; border-top: 1px solid #222; margin-top: auto; text-align: center; font-size: 0.8rem; color: #666; }
 
-        /* --- MOBILE RESPONSIVE (KEKALKAN INI) --- */
+        /* --- MOBILE RESPONSIVE --- */
         @media (max-width: 1100px) {
-            .nav-links { position: static; transform: none; } /* Reset position bila skrin kecil */
-            .logo { width: auto; } /* Reset lebar logo */
-            .header-right { width: auto; margin-left: auto; } /* Reset kanan */
+            .nav-links { position: static; transform: none; }
+            .logo { width: auto; }
+            .header-right { width: auto; margin-left: auto; }
         }
 
         @media (max-width: 900px) {
@@ -170,11 +172,14 @@
 
             .login-btn { padding: 6px 15px; font-size: 0.75rem; }
             .qr-btn { width: 32px; height: 32px; font-size: 1rem; }
-        }
 
             .hero h1 { font-size: 2.2rem; }
-            .grid-gold, .grid-silver, .ad-grid { grid-template-columns: 1fr; }
-        
+            
+            /* Mobile Grid (Balik ke asal 1fr) */
+            .sponsor-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+            .grid-gold .sponsor-card, .grid-silver .sponsor-card { width: 100%; height: auto; aspect-ratio: 3/2; }
+            .ad-grid { grid-template-columns: 1fr; }
+        }
 
     </style>
 </head>
@@ -184,15 +189,16 @@
         <a href="index.html" class="logo">
             <img src="seaMLogo.png" alt="Logo"> SEA<span>MOUNTAIN</span>
         </a>
-
+        
         <nav class="nav-links" id="navMenu">
-            <a href="index.html" class="active-nav">Events</a> <a href="results.html">Results</a>
+            <a href="index.html">Events</a>
+            <a href="results.html">Results</a>
             <a href="photos.html">Photos</a>
             <a href="leaderboard.html">Leaderboard</a>
-            <a href="partners.html">Partners</a>
+            <a href="partners.html" class="active-nav">Partners</a>
             <a href="#contact">Contact Us</a>
         </nav>
-
+        
         <div class="header-right">
             <a href="my-tickets.html" id="qrBtn" class="qr-btn" title="My History & Tickets" style="display:none;">
                 <i class="fas fa-qrcode"></i>
@@ -269,13 +275,12 @@
         const menuToggle = document.querySelector('.menu-toggle');
         if(window.innerWidth <= 900) menuToggle.style.display = 'block';
 
-        // 1. AUTH HEADER LOGIC (Updated to Match Other Pages)
+        // 1. AUTH HEADER LOGIC
         const loginBtn = document.querySelector('.login-btn'); 
         const qrBtn = document.getElementById('qrBtn');
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Check Photo
                 if (user.photoURL) {
                     loginBtn.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
                     loginBtn.style.background = "transparent";
@@ -324,10 +329,8 @@
                 let hasGold = false, hasSilver = false, hasMarket = false;
 
                 Object.values(data).forEach(p => {
-                    // Fallback Image
                     const imgUrl = p.image || 'https://via.placeholder.com/300x200?text=No+Image';
 
-                    // RENDER GOLD
                     if(p.type === 'gold') {
                         hasGold = true;
                         goldContainer.innerHTML += `
@@ -337,7 +340,6 @@
                             </a>
                         `;
                     }
-                    // RENDER SILVER
                     else if(p.type === 'silver') {
                         hasSilver = true;
                         silverContainer.innerHTML += `
@@ -346,7 +348,6 @@
                             </a>
                         `;
                     }
-                    // RENDER MARKETPLACE
                     else if(p.type === 'market') {
                         hasMarket = true;
                         marketContainer.innerHTML += `
