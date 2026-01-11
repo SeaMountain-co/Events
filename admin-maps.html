@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Map Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; padding: 40px 20px; }
+        
+        .container { max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 30px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { font-family: 'Russo One'; text-align: center; color: var(--brand-red); margin-bottom: 30px; letter-spacing: 1px; }
+
+        /* BACK BUTTON STYLE */
+        .btn-back { 
+            display: inline-flex; align-items: center; gap: 8px; 
+            color: #888; text-decoration: none; font-weight: 700; font-size: 0.9rem; 
+            margin-bottom: 20px; transition: 0.3s; 
+        }
+        .btn-back:hover { color: #fff; transform: translateX(-5px); }
+
+        .form-group { margin-bottom: 20px; position: relative; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 0.9rem; color: #aaa; text-transform: uppercase; }
+        input, select, textarea { 
+            width: 100%; padding: 12px; background: #000; border: 1px solid #444; 
+            color: #fff; border-radius: 6px; outline: none; font-family: 'Montserrat';
+            transition: 0.3s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--brand-red); }
+
+        /* TOGGLE SWITCH STYLE */
+        .toggle-group { display: flex; align-items: center; gap: 15px; background: #000; padding: 15px; border-radius: 8px; border: 1px solid #444; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--brand-red); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .toggle-label { font-weight: bold; color: #fff; font-size: 0.9rem; }
+        .toggle-desc { font-size: 0.75rem; color: #888; display: block; margin-top: 5px; }
+
+        .input-group { display: flex; gap: 10px; }
+        .btn-upload { 
+            background: #333; color: #fff; border: 1px solid #555; padding: 0 20px; 
+            border-radius: 6px; cursor: pointer; white-space: nowrap; font-size: 0.8rem;
+            display: flex; align-items: center; gap: 5px; transition: 0.3s;
+        }
+        .btn-upload:hover { background: #555; border-color: #777; }
+
+        .btn-save { 
+            width: 100%; background: var(--brand-red); color: #fff; border: none; 
+            padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px;
+            font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
+        }
+        .btn-save:hover { background: #cc0000; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
+
+        .preview-box { 
+            margin-top: 10px; padding: 10px; background: #000; border: 1px dashed #555; 
+            text-align: center; border-radius: 6px; min-height: 100px; display: flex; 
+            align-items: center; justify-content: center; flex-direction: column;
+        }
+        .preview-box img { max-width: 100%; max-height: 200px; border-radius: 5px; display: none; }
+        .preview-text { color: #555; font-size: 0.8rem; font-style: italic; }
+        
+        .helper-text { font-size: 0.75rem; color: #666; margin-top: 5px; }
+
+        /* Progress Bar */
+        .progress-container { width: 100%; background: #222; height: 5px; border-radius: 5px; margin-top: 5px; display: none; }
+        .progress-bar { height: 100%; background: var(--brand-red); width: 0%; border-radius: 5px; transition: width 0.2s; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="admin-dashboard.html" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+
+        <h2><i class="fas fa-map-marked-alt"></i> MAP MANAGER</h2>
+
+        <div class="form-group">
+            <label>Select Event</label>
+            <select id="eventSelect"><option value="">Loading events...</option></select>
+        </div>
+
+        <div id="formArea" style="display:none; border-top: 1px solid #333; padding-top: 20px;">
+            
+            <div class="form-group">
+                <div class="toggle-group">
+                    <label class="switch">
+                        <input type="checkbox" id="forceUnlock">
+                        <span class="slider"></span>
+                    </label>
+                    <div>
+                        <span class="toggle-label">FORCE UNLOCK MAP (TEST MODE)</span>
+                        <span class="toggle-desc">Aktifkan ini untuk tunjuk map SEKARANG walaupun belum tarikh event.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Waze Link (Venue)</label>
+                <input type="text" id="wazeLink" placeholder="https://waze.com/ul/...">
+            </div>
+
+            <div class="form-group">
+                <label>Google Maps Link (Venue)</label>
+                <input type="text" id="gmapsLink" placeholder="http://googleusercontent.com/maps.google.com/...">
+            </div>
+
+            <div class="form-group">
+                <label>Route Map Image (Trail/Topo)</label>
+                
+                <div class="input-group">
+                    <input type="text" id="routeMapUrl" placeholder="Image URL or Base64 code..." oninput="previewImage()">
+                    
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileUpload(this)">
+                    <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                </div>
+
+                <div id="uploadProgress" class="progress-container"><div id="progressBar" class="progress-bar"></div></div>
+
+                <div class="helper-text">Tips: Sila upload gambar bersaiz kecil (Bawah 500KB) supaya loading laju.</div>
+                
+                <div class="preview-box">
+                    <span id="prevText" class="preview-text">No image selected</span>
+                    <img id="prevImg" src="">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Wikiloc Embed Code (Optional)</label>
+                <textarea id="embedCode" rows="3" placeholder='<iframe src="https://wikiloc.com/..." ...></iframe>'></textarea>
+            </div>
+
+            <button class="btn-save" onclick="saveMaps()">SAVE MAP DATA</button>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        // KITA TAK GUNA STORAGE IMPORT DAH
+
+        // CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+            authDomain: "sea-mountain.firebaseapp.com",
+            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sea-mountain",
+            storageBucket: "sea-mountain.appspot.com",
+            messagingSenderId: "812228825024",
+            appId: "1:812228825024:web:717049c1a64b39c8a60225"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const eventSelect = document.getElementById('eventSelect');
+        const formArea = document.getElementById('formArea');
+
+        // 1. LOAD EVENTS
+        onValue(ref(db, 'events'), (snapshot) => {
+            const data = snapshot.val();
+            eventSelect.innerHTML = '<option value="">-- Select Event to Manage --</option>';
+            if(data) {
+                Object.entries(data).forEach(([key, event]) => {
+                    eventSelect.innerHTML += `<option value="${key}">${event.title}</option>`;
+                });
+            }
+        });
+
+        // 2. LOAD DATA
+        eventSelect.addEventListener('change', () => {
+            const eventId = eventSelect.value;
+            if(!eventId) { formArea.style.display = 'none'; return; }
+
+            formArea.style.display = 'block';
+            
+            onValue(ref(db, `events/${eventId}`), (snap) => {
+                const data = snap.val();
+                if(data) {
+                    document.getElementById('wazeLink').value = data.waze_link || '';
+                    document.getElementById('gmapsLink').value = data.gmaps_link || '';
+                    document.getElementById('routeMapUrl').value = data.route_map_url || '';
+                    document.getElementById('embedCode').value = data.map_embed_code || '';
+                    document.getElementById('forceUnlock').checked = (data.map_force_unlock === true);
+                    previewImage();
+                }
+            }, { onlyOnce: true });
+        });
+
+        // 3. PREVIEW IMAGE
+        window.previewImage = function() {
+            const url = document.getElementById('routeMapUrl').value;
+            const img = document.getElementById('prevImg');
+            const txt = document.getElementById('prevText');
+            
+            if(url) {
+                img.src = url;
+                img.style.display = 'inline-block';
+                txt.style.display = 'none';
+            } else {
+                img.style.display = 'none';
+                txt.style.display = 'inline';
+            }
+        }
+
+        // 4. HANDLE FILE UPLOAD (VERSI DATABASE BASE64)
+        window.handleFileUpload = function(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            // Limit saiz 1MB
+            if (file.size > 1048576) {
+                alert("File terlalu besar! Sila guna gambar bawah 1MB.");
+                return;
+            }
+
+            document.getElementById('uploadProgress').style.display = 'block';
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = '20%';
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const base64String = e.target.result;
+                document.getElementById('routeMapUrl').value = base64String;
+                
+                progressBar.style.width = '100%';
+                previewImage(); 
+
+                setTimeout(() => {
+                    document.getElementById('uploadProgress').style.display = 'none';
+                    progressBar.style.width = '0%';
+                }, 500);
+            };
+
+            reader.onerror = function(error) {
+                console.log('Error: ', error);
+                alert("Gagal membaca fail.");
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // 5. SAVE DATA
+        window.saveMaps = function() {
+            const eventId = eventSelect.value;
+            if(!eventId) return alert("Please select an event.");
+
+            // Validasi ringkas
+            const routeMapVal = document.getElementById('routeMapUrl').value;
+            if (routeMapVal.length > 2000000) { 
+                alert("Gambar terlalu besar untuk disimpan dalam database. Sila compress gambar dahulu.");
+                return;
+            }
+
+            const updates = {
+                waze_link: document.getElementById('wazeLink').value,
+                gmaps_link: document.getElementById('gmapsLink').value,
+                route_map_url: routeMapVal,
+                map_embed_code: document.getElementById('embedCode').value,
+                map_force_unlock: document.getElementById('forceUnlock').checked
+            };
+
+            update(ref(db, `events/${eventId}`), updates)
+            .then(() => alert("Map data updated successfully!"))
+            .catch((err) => alert("Error: " + err.message));
+        }
+
+    </script>
+</body>
+</html>
