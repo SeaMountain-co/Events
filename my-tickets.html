@@ -106,7 +106,7 @@
             .ticket-card { flex-direction: column; }
             .ticket-divider { 
                 width: 100%; height: 0; border-left: none; border-top: 2px dashed #ddd; margin: 0; 
-                display: none; /* Hide divider on mobile for cleaner look */
+                display: none; 
             }
             .ticket-qr { width: 100%; padding: 40px 20px; border-top: 4px solid var(--brand-red); }
             .ticket-info { padding: 30px 25px; }
@@ -133,7 +133,7 @@
 
         <div id="emptyState" class="empty-state" style="display:none;">
             <i class="fas fa-ticket-alt"></i>
-            <p>You haven't registered for any events yet.</p>
+            <p>No active tickets found.</p>
             <a href="index.html" class="btn-browse">Browse Events</a>
         </div>
     </div>
@@ -167,29 +167,56 @@
             }
         });
 
-        // 2. LOAD DATA
-        function loadUserTickets(user) {
+        // 2. LOAD DATA (UPDATED: FILTER ARCHIVED EVENTS)
+        async function loadUserTickets(user) {
             const ticketContainer = document.getElementById('ticketList');
             const loading = document.getElementById('loading');
             const emptyState = document.getElementById('emptyState');
 
-            get(ref(db, 'registrations')).then((snapshot) => {
+            try {
+                // Tarik DUA-DUA data serentak (Events & Registrations)
+                const [regSnap, eventSnap] = await Promise.all([
+                    get(ref(db, 'registrations')),
+                    get(ref(db, 'events'))
+                ]);
+
                 loading.style.display = 'none';
-                
-                if (!snapshot.exists()) {
+
+                if (!regSnap.exists()) {
                     emptyState.style.display = 'block';
                     return;
                 }
 
-                const allEvents = snapshot.val();
+                const allEvents = eventSnap.exists() ? eventSnap.val() : {};
+                const allRegistrations = regSnap.val();
                 let hasTickets = false;
 
-                Object.keys(allEvents).forEach(eventId => {
-                    const participants = allEvents[eventId];
+                // Loop setiap event ID dalam registrations
+                Object.keys(allRegistrations).forEach(eventId => {
+                    
+                    // --- LOGIC TAPISAN (FILTER) ---
+                    const eventDetails = allEvents[eventId];
+                    
+                    // Kalau event tak wujud dalam DB, atau 'isArchived' adalah true
+                    if (!eventDetails || eventDetails.isArchived === true) {
+                        return; // Skip (Jangan tunjuk tiket ni)
+                    }
+
+                    // Kalau event dah tamat tarikh (Optional: boleh enable kalau nak)
+                    /*
+                    if (eventDetails.date_end) {
+                        const endDate = new Date(eventDetails.date_end);
+                        const now = new Date();
+                        if (now > endDate) return; // Skip kalau dah expired
+                    }
+                    */
+                    // ------------------------------
+
+                    const participants = allRegistrations[eventId];
                     Object.keys(participants).forEach(regId => {
                         const data = participants[regId];
                         
-                        // Check ownership
+                        // Check ownership (Milik user ke tak)
                         if (data.userId === user.uid || data.email === user.email) {
                             hasTickets = true;
                             renderTicket(regId, eventId, data);
@@ -199,11 +226,16 @@
 
                 if (!hasTickets) {
                     emptyState.style.display = 'block';
+                    emptyState.querySelector('p').innerText = "No upcoming tickets found.";
                 }
-            });
+
+            } catch (error) {
+                console.error("Error loading tickets:", error);
+                loading.innerText = "Error loading data.";
+            }
         }
 
-        // 3. RENDER TICKET CARD (PREMIUM)
+        // 3. RENDER TICKET CARD
         function renderTicket(regId, eventId, data) {
             const container = document.getElementById('ticketList');
             
@@ -256,13 +288,13 @@
 
             container.innerHTML += html;
 
-            // Generate QR Code (Delayed slightly to ensure DOM render)
+            // Generate QR Code
             setTimeout(() => {
                 const qrElement = document.getElementById(qrContainerId);
                 if (qrElement) {
                     new QRCode(qrElement, {
                         text: regId, 
-                        width: 150,  // SAIZ ASAL QR SEBELUM SCALE
+                        width: 150, 
                         height: 150,
                         colorDark : "#000000",
                         colorLight : "#ffffff",
