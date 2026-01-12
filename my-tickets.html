@@ -6,103 +6,204 @@
     <title>My Tickets - Sea Mountain</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&family=Russo+One&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
-        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; margin: 0; padding-bottom: 80px; background-image: radial-gradient(circle at 50% 0%, rgba(255, 0, 0, 0.15) 0%, transparent 60%); min-height: 100vh; }
+        :root { 
+            --brand-red: #ff0000; 
+            --brand-glow: rgba(255, 0, 0, 0.4);
+            --bg-dark: #0a0a0c; 
+            --card-bg: #141418; 
+            --text: #ffffff; 
+            --gold: #d4af37;
+        }
+
+        body { 
+            background-color: var(--bg-dark); 
+            color: var(--text); 
+            font-family: 'Montserrat', sans-serif; 
+            margin: 0; padding-bottom: 80px; 
+            background-image: radial-gradient(circle at 50% -20%, #2a0000 0%, #0a0a0c 60%); 
+            min-height: 100vh; 
+        }
         * { box-sizing: border-box; }
 
         /* HEADER */
-        .header { padding: 25px 5%; display: flex; align-items: center; justify-content: space-between; }
-        .logo { font-family: 'Russo One'; font-size: 1.4rem; color: #fff; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; }
+        .header { padding: 30px 10%; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-family: 'Russo One'; font-size: 1.5rem; color: #fff; text-decoration: none; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 15px rgba(255,0,0,0.5); }
         .logo span { color: var(--brand-red); }
-        .btn-back { color: #aaa; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
-        .btn-back:hover { color: #fff; transform: translateX(-5px); }
+        .btn-back { color: #888; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1); padding: 8px 15px; border-radius: 30px; }
+        .btn-back:hover { color: #fff; border-color: #fff; background: rgba(255,255,255,0.05); }
 
-        .container { max-width: 700px; margin: 20px auto; padding: 0 20px; }
-        h2 { font-family: 'Russo One'; text-transform: uppercase; margin-bottom: 40px; text-align: center; font-size: 2.2rem; text-shadow: 0 0 20px rgba(255,0,0,0.3); }
+        .container { max-width: 850px; margin: 40px auto; padding: 0 20px; }
+        h2 { 
+            font-family: 'Russo One'; text-transform: uppercase; margin-bottom: 50px; 
+            text-align: center; font-size: 2.5rem; 
+            background: -webkit-linear-gradient(#fff, #999); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
 
-        /* TICKET CARD */
-        .ticket-list { display: flex; flex-direction: column; gap: 35px; }
+        /* TICKET LIST */
+        .ticket-list { display: flex; flex-direction: column; gap: 40px; }
         
+        /* PREMIUM TICKET CARD */
         .ticket-card { 
-            background: var(--card-bg); border-radius: 20px; overflow: hidden; 
-            display: flex; box-shadow: 0 15px 40px rgba(0,0,0,0.6); position: relative; 
-            transition: 0.4s; border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(20, 20, 24, 0.7); 
+            backdrop-filter: blur(10px);
+            border-radius: 20px; 
+            overflow: hidden; 
+            display: flex; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.08);
+            position: relative;
+            transition: all 0.4s ease;
         }
-        .ticket-card:hover { transform: translateY(-8px); box-shadow: 0 20px 50px rgba(255,0,0,0.15); border-color: rgba(255,0,0,0.3); }
+        .ticket-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 30px 70px rgba(255, 0, 0, 0.15), 0 0 0 1px rgba(255, 0, 0, 0.3);
+        }
 
+        /* Left Side: Info Area */
         .ticket-info { 
-            flex: 1; padding: 35px; display: flex; flex-direction: column; justify-content: center; 
-            position: relative; background: linear-gradient(135deg, #1a1c23 0%, #252830 100%);
+            flex: 1.8; padding: 40px; display: flex; flex-direction: column; justify-content: center; 
+            position: relative; 
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%);
         }
         
-        .ticket-divider { width: 0; border-left: 2px dashed #333; position: relative; margin: 20px 0; }
-        .ticket-divider::before, .ticket-divider::after { content: ""; position: absolute; left: -12px; width: 24px; height: 24px; background-color: var(--bg-dark); border-radius: 50%; }
-        .ticket-divider::before { top: -32px; } .ticket-divider::after { bottom: -32px; }
+        /* Premium Divider (Dots) */
+        .ticket-divider {
+            width: 0; border-left: 3px dotted rgba(255,255,255,0.1); position: relative;
+            margin: 25px 0;
+        }
+        .ticket-divider::before, .ticket-divider::after {
+            content: ""; position: absolute; left: -15px; width: 30px; height: 30px;
+            background-color: var(--bg-dark); border-radius: 50%; box-shadow: inset 0 0 10px #000;
+        }
+        .ticket-divider::before { top: -45px; } 
+        .ticket-divider::after { bottom: -45px; }
 
-        .event-name { font-family: 'Russo One'; font-size: 1.6rem; color: #fff; line-height: 1.1; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .runner-name { font-size: 1.1rem; color: #ccc; margin-bottom: 25px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .event-name { 
+            font-family: 'Russo One'; font-size: 1.8rem; color: #fff; line-height: 1.2; 
+            margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; 
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .runner-name { 
+            font-size: 1.2rem; color: #aaa; margin-bottom: 30px; font-weight: 600; 
+            text-transform: uppercase; letter-spacing: 2px; 
+        }
         
-        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
         .meta-item { display: flex; flex-direction: column; }
-        .meta-label { font-size: 0.7rem; color: #666; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
-        .meta-value { font-size: 1rem; color: #fff; font-weight: 600; }
-        .meta-value.highlight { color: var(--brand-red); font-family: 'Russo One'; font-size: 1.2rem; }
+        .meta-label { font-size: 0.65rem; color: #666; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; }
+        .meta-value { font-size: 1.1rem; color: #eee; font-weight: 500; font-family: 'Montserrat'; }
+        .meta-value.highlight { color: var(--brand-red); font-family: 'Russo One'; font-size: 1.4rem; letter-spacing: 1px; text-shadow: 0 0 10px rgba(255,0,0,0.4); }
 
         /* MAPS SECTION */
-        .maps-area { margin-top: 25px; border-top: 1px solid #333; padding-top: 20px; }
-        .locked-msg { color: #555; font-size: 0.8rem; font-style: italic; display: flex; align-items: center; gap: 8px; }
-        .unlocked-container { display: flex; flex-direction: column; gap: 10px; }
-        .nav-buttons { display: flex; gap: 10px; }
-        .btn-map { flex: 1; text-align: center; padding: 10px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 0.8rem; color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
-        .btn-waze { background: #33ccff; color: #000; }
-        .btn-gmaps { background: #ea4335; }
-        .btn-route { background: #222; border: 1px solid #555; color: #ddd; width: 100%; margin-top: 5px; cursor: pointer; }
-        .btn-map:hover { transform: translateY(-2px); opacity: 0.9; }
-        .btn-route:hover { border-color: var(--brand-red); color: #fff; }
+        .maps-area { margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 25px; }
+        .locked-msg { 
+            color: #666; font-size: 0.8rem; font-style: italic; display: flex; align-items: center; gap: 10px; 
+            background: rgba(0,0,0,0.3); padding: 10px 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .unlocked-container { display: flex; flex-direction: column; gap: 12px; }
+        .nav-buttons { display: flex; gap: 12px; }
+        
+        .btn-map { 
+            flex: 1; text-align: center; padding: 12px; border-radius: 10px; 
+            text-decoration: none; font-weight: 700; font-size: 0.85rem; color: #fff; 
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .btn-waze { background: linear-gradient(45deg, #05c1ff, #0099cc); }
+        .btn-gmaps { background: linear-gradient(45deg, #ea4335, #c5221f); }
+        .btn-route { 
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); 
+            color: #ccc; width: 100%; margin-top: 5px; 
+        }
+        
+        .btn-map:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.5); filter: brightness(1.1); }
+        .btn-route:hover { border-color: var(--brand-red); color: #fff; background: rgba(255,0,0,0.1); }
 
-        .ticket-qr { width: 260px; background: #fff; display: flex; align-items: center; justify-content: center; padding: 30px; flex-direction: column; text-align: center; }
-        .qr-code-box { background: #fff; padding: 10px; border-radius: 10px; transform: scale(1.3); margin-bottom: 15px; }
-        .qr-label { color: #000; font-size: 0.75rem; font-weight: 900; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .ticket-id { font-family: monospace; color: #555; font-size: 0.8rem; margin-top: 5px; letter-spacing: 1px; }
+        /* Right Side: QR Area */
+        .ticket-qr { 
+            width: 300px; background: #fff; display: flex; align-items: center; justify-content: center; 
+            padding: 40px; flex-direction: column; text-align: center;
+            position: relative;
+        }
+        .ticket-qr::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(#ddd 1px, transparent 1px); background-size: 10px 10px; opacity: 0.3; pointer-events: none;
+        }
 
-        .status-badge { position: absolute; top: 20px; right: 20px; padding: 6px 14px; border-radius: 30px; font-size: 0.65rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .status-paid { background: #2ecc71; color: #000; }
-        .status-pending { background: #f1c40f; color: #000; }
+        .qr-code-box { 
+            background: #fff; padding: 10px; border-radius: 15px; 
+            transform: scale(1.4); margin-bottom: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #eee;
+            cursor: pointer; /* Menunjukkan boleh klik */
+            transition: transform 0.3s;
+        }
+        .qr-code-box:active { transform: scale(1.3); }
+        
+        .qr-label { color: #000; font-size: 0.7rem; font-weight: 900; margin-top: 15px; text-transform: uppercase; letter-spacing: 2px; }
+        .ticket-id { font-family: monospace; color: #444; font-size: 0.9rem; margin-top: 5px; letter-spacing: 1px; background: #eee; padding: 5px 10px; border-radius: 5px; }
+        .tap-hint { color: #888; font-size: 0.6rem; font-weight: bold; margin-top: 5px; text-transform: uppercase; animation: pulse 2s infinite; }
 
-        .empty-state { text-align: center; padding: 80px 20px; color: #555; }
-        .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.5; }
-        .empty-state p { font-size: 1.2rem; margin-bottom: 20px; }
-        .btn-browse { background: var(--brand-red); color: #fff; padding: 12px 30px; border-radius: 50px; font-weight: 800; text-transform: uppercase; text-decoration: none; transition: 0.3s; box-shadow: 0 5px 15px rgba(255,0,0,0.3); }
-        .btn-browse:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,0,0,0.5); }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-        /* --- UPDATED MAP MODAL (SUPPORT IFRAME) --- */
-        .map-modal {
+        /* STATUS BADGE */
+        .status-badge { 
+            position: absolute; top: 30px; right: 30px; 
+            padding: 8px 18px; border-radius: 50px; 
+            font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+        }
+        .status-paid { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.2); }
+        .status-pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; border-color: #f1c40f; }
+
+        .empty-state { text-align: center; padding: 100px 20px; color: #555; }
+        .btn-browse { background: var(--brand-red); color: #fff; padding: 15px 40px; border-radius: 50px; font-weight: 800; text-transform: uppercase; text-decoration: none; transition: 0.3s; box-shadow: 0 5px 20px rgba(255,0,0,0.4); }
+
+        /* MODAL COMMON (Utk Map & QR) */
+        .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 2000; display: none;
-            justify-content: center; align-items: center; padding: 20px;
+            justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(10px);
         }
+        .close-modal { position: absolute; top: 30px; right: 30px; color: #fff; font-size: 2.5rem; cursor: pointer; transition: 0.3s; z-index: 2001; }
+        .close-modal:hover { color: var(--brand-red); transform: rotate(90deg); }
+
+        /* MAP CONTENT */
         .map-content { 
-            width: 100%; max-width: 800px; height: 70vh; /* Tinggi fixed supaya map besar */
-            position: relative; background: #000; border-radius: 10px; border: 1px solid #333;
+            width: 100%; max-width: 900px; height: 75vh; 
+            position: relative; background: #0a0a0c; border-radius: 15px; border: 1px solid #333;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            overflow: hidden;
+            overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
         }
         .map-content img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        
-        /* Iframe untuk Wikiloc */
         .map-content iframe { width: 100%; height: 100%; border: none; }
 
-        .close-map { position: absolute; top: -40px; right: 0; color: #fff; font-size: 2rem; cursor: pointer; }
+        /* QR FULL CONTENT */
+        .qr-full-content {
+            background: #fff; padding: 40px; border-radius: 20px; text-align: center;
+            box-shadow: 0 0 50px rgba(255,255,255,0.2); animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+        /* --- MOBILE RESPONSIVE --- */
         @media (max-width: 700px) {
-            .ticket-card { flex-direction: column; }
+            .container { padding: 0 15px; }
+            .header { padding: 20px 5%; }
+            .ticket-card { flex-direction: column; border-radius: 15px; margin-bottom: 20px; }
             .ticket-divider { display: none; }
-            .ticket-qr { width: 100%; border-top: 4px solid var(--brand-red); }
+            .ticket-info { padding: 25px; flex: auto; border-bottom: 2px dashed #333; }
+            .event-name { font-size: 1.4rem; }
+            .meta-grid { gap: 15px; }
+            .ticket-qr { width: 100%; padding: 30px 20px; background: #fff; border-top: none; }
+            .qr-code-box { transform: scale(1.2); margin-bottom: 15px; }
+            .status-badge { top: 20px; right: 20px; font-size: 0.6rem; padding: 5px 12px; }
             .map-content { height: 60vh; }
         }
     </style>
@@ -121,10 +222,17 @@
         <div id="emptyState" class="empty-state" style="display:none;"><p>No active tickets found.</p><a href="index.html" class="btn-browse">Browse Events</a></div>
     </div>
 
-    <div id="routeModal" class="map-modal" onclick="closeRouteMap()">
-        <div class="map-content" id="mapContentBox" onclick="event.stopPropagation()">
-            </div>
-        <span class="close-map" onclick="closeRouteMap()" style="position:absolute; top:20px; right:20px;">×</span>
+    <div id="routeModal" class="modal-overlay" onclick="closeRouteMap()">
+        <span class="close-modal" onclick="closeRouteMap()">×</span>
+        <div class="map-content" id="mapContentBox" onclick="event.stopPropagation()"></div>
+    </div>
+
+    <div id="qrModal" class="modal-overlay" onclick="closeQrModal()">
+        <span class="close-modal" onclick="closeQrModal()">×</span>
+        <div class="qr-full-content" onclick="event.stopPropagation()">
+            <div id="qrFullTarget"></div>
+            <p style="color:#000; font-weight:bold; margin-top:20px; text-transform:uppercase;">Scan at Check-in Counter</p>
+        </div>
     </div>
 
     <script type="module">
@@ -184,6 +292,12 @@
 
         function renderTicket(regId, eventId, data, eventDetails) {
             const container = document.getElementById('ticketList');
+            
+            let statusHtml = '<span class="status-badge status-pending"><i class="fas fa-clock"></i> Pending</span>';
+            if (data.status && data.status.toLowerCase() === 'paid') {
+                statusHtml = '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Confirmed</span>';
+            }
+
             const eventName = data.event_name || eventId.toUpperCase();
             const qrContainerId = `qr-${regId}`;
             const regDate = data.registration_time ? data.registration_time.split(',')[0] : 'N/A';
@@ -196,31 +310,24 @@
                 const now = new Date().getTime();
                 const wazeLink = eventDetails.waze_link || '#';
                 const gmapsLink = eventDetails.gmaps_link || '#';
-                
-                // DATA MAP (GAMBAR & EMBED)
                 const routeMapUrl = eventDetails.route_map_url || '';
-                const embedCode = eventDetails.map_embed_code || ''; // Ambil embed code
+                const embedCode = eventDetails.map_embed_code || '';
 
-                // Check Force Unlock
                 const isForced = eventDetails.map_force_unlock ? true : false;
                 const isTime = now >= eventTime;
 
                 if (isForced || isTime) {
                     let routeBtnHtml = '';
-                    
-                    // Kalau ada Embed Code ATAU Gambar, tunjuk button
                     if (routeMapUrl || embedCode) {
-                        // Kita pass data secara 'escaped' supaya tak pecah HTML
                         const safeImg = encodeURIComponent(routeMapUrl);
                         const safeEmbed = encodeURIComponent(embedCode);
-                        
                         routeBtnHtml = `<button onclick="openRouteMap('${safeImg}', '${safeEmbed}')" class="btn-map btn-route"><i class="fas fa-map"></i> View Race Route</button>`;
                     }
 
                     mapSection = `
                         <div class="maps-area">
-                            <p style="color:#2ecc71; font-size:0.75rem; font-weight:bold; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px;">
-                                <i class="fas fa-flag-checkered"></i> Event Active: Navigate to Venue
+                            <p style="color:#2ecc71; font-size:0.75rem; font-weight:bold; margin-bottom:10px; text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:5px;">
+                                <i class="fas fa-broadcast-tower"></i> Live Navigation Active
                             </p>
                             <div class="unlocked-container">
                                 <div class="nav-buttons">
@@ -235,7 +342,7 @@
                     const prettyDate = new Date(eventDateStr).toLocaleDateString();
                     mapSection = `
                         <div class="maps-area">
-                            <div class="locked-msg"><i class="fas fa-lock" style="color:var(--brand-red);"></i> Location & Trail Map unlocks on ${prettyDate}</div>
+                            <div class="locked-msg"><i class="fas fa-lock" style="color:var(--brand-red);"></i> Route unlocks on ${prettyDate}</div>
                         </div>
                     `;
                 }
@@ -244,19 +351,23 @@
             const html = `
                 <div class="ticket-card">
                     <div class="ticket-info">
-                        <span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Paid & Confirmed</span>
+                        ${statusHtml}
                         <div class="event-name">${eventName}</div>
                         <div class="runner-name">${data.first_name} ${data.last_name || ''}</div>
+                        
                         <div class="meta-grid">
                             <div class="meta-item"><span class="meta-label">Category</span><span class="meta-value highlight">${data.category}</span></div>
                             <div class="meta-item"><span class="meta-label">T-Shirt Size</span><span class="meta-value">${data.tshirt_size}</span></div>
+                            <div class="meta-item"><span class="meta-label">Date Registered</span><span class="meta-value">${regDate}</span></div>
                             <div class="meta-item"><span class="meta-label">Bib Number</span><span class="meta-value" style="color:#aaa;">To be assigned</span></div>
                         </div>
                         ${mapSection}
                     </div>
                     <div class="ticket-divider"></div>
+                    
                     <div class="ticket-qr">
-                        <div id="${qrContainerId}" class="qr-code-box"></div>
+                        <div id="${qrContainerId}" class="qr-code-box" onclick="openFullQR('${regId}')" title="Tap to Enlarge"></div>
+                        <div class="tap-hint"><i class="fas fa-search-plus"></i> Tap to Enlarge</div>
                         <div class="qr-label">Scan for Check-in</div>
                         <div class="ticket-id">REF: ${regId.substring(0,8).toUpperCase()}</div>
                     </div>
@@ -266,33 +377,49 @@
 
             setTimeout(() => {
                 const qrElement = document.getElementById(qrContainerId);
-                if (qrElement) new QRCode(qrElement, { text: regId, width: 150, height: 150 });
+                if (qrElement) new QRCode(qrElement, { text: regId, width: 150, height: 150, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
             }, 150);
         }
 
-        // FUNGSI BUKA MAP (PRIORITI: EMBED > GAMBAR)
+        // --- MAP FUNCTIONS ---
         window.openRouteMap = function(encImg, encEmbed) {
             const imgUrl = decodeURIComponent(encImg);
             const embedCode = decodeURIComponent(encEmbed);
             const box = document.getElementById('mapContentBox');
             
-            if (embedCode && embedCode.trim() !== '') {
-                // Kalau ada embed code (Wikiloc), guna itu
-                box.innerHTML = embedCode;
-            } else if (imgUrl) {
-                // Kalau takde embed, guna gambar
-                box.innerHTML = `<img src="${imgUrl}" alt="Race Route">`;
-            } else {
-                box.innerHTML = `<p style="color:white;">No map data available.</p>`;
-            }
+            if (embedCode && embedCode.trim() !== '') box.innerHTML = embedCode;
+            else if (imgUrl) box.innerHTML = `<img src="${imgUrl}" alt="Race Route">`;
+            else box.innerHTML = `<p style="color:white;">No map data available.</p>`;
 
             document.getElementById('routeModal').style.display = 'flex';
         }
 
         window.closeRouteMap = function() {
             document.getElementById('routeModal').style.display = 'none';
-            // Kosongkan content supaya iframe tak bunyi/berat bila tutup
             document.getElementById('mapContentBox').innerHTML = '';
+        }
+
+        // --- NEW: FULL SCREEN QR FUNCTION ---
+        window.openFullQR = function(regId) {
+            const modal = document.getElementById('qrModal');
+            const target = document.getElementById('qrFullTarget');
+            target.innerHTML = ""; // Bersihkan QR lama
+            
+            // Generate QR Besar (300x300)
+            new QRCode(target, { 
+                text: regId, 
+                width: 300, 
+                height: 300,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            
+            modal.style.display = 'flex';
+        }
+
+        window.closeQrModal = function() {
+            document.getElementById('qrModal').style.display = 'none';
         }
     </script>
 </body>
