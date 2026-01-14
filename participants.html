@@ -14,10 +14,25 @@
         body { background-color: var(--bg-dark); color: #fff; font-family: 'Montserrat', sans-serif; margin: 0; padding-bottom: 50px; }
 
         /* HEADER */
-        header { background: rgba(26, 28, 35, 0.95); padding: 20px 5%; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
-        .brand { font-family: 'Russo One'; font-size: 1.5rem; color: #fff; text-transform: uppercase; }
+        header { 
+            background: rgba(26, 28, 35, 0.95); padding: 20px 5%; 
+            border-bottom: 1px solid #333; display: flex; justify-content: space-between; 
+            align-items: center; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); 
+        }
+        
+        .header-left { display: flex; align-items: center; }
+
+        .brand { font-family: 'Russo One'; font-size: 1.5rem; color: #fff; text-transform: uppercase; white-space: nowrap; }
         .brand span { color: var(--brand-red); }
-        .event-title { font-size: 1.2rem; font-weight: bold; color: var(--brand-red); margin-left: 20px; border-left: 2px solid #555; padding-left: 20px;}
+        
+        .event-title { 
+            font-size: 1.2rem; font-weight: bold; color: var(--brand-red); 
+            margin-left: 20px; border-left: 2px solid #555; padding-left: 20px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .btn-back { color:#aaa; text-decoration:none; font-size:0.9rem; transition: 0.3s; white-space: nowrap; }
+        .btn-back:hover { color: #fff; }
 
         /* LAYOUT */
         .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
@@ -33,7 +48,7 @@
         .progress-fill { background: var(--brand-red); height: 100%; width: 0%; transition: width 1s ease-in-out; }
         .kpi-sub { font-size: 0.8rem; color: #888; margin-top: 5px; }
 
-        /* CHARTS SECTION (GRID UPDATED) */
+        /* CHARTS SECTION */
         .charts-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
         .chart-box { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; }
         .chart-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
@@ -60,22 +75,64 @@
         .status-paid { color: #28a745; font-weight: bold; background: rgba(40, 167, 69, 0.1); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; }
         .status-pending { color: #ffc107; font-weight: bold; background: rgba(255, 193, 7, 0.1); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; }
 
+        /* --- MOBILE RESPONSIVE FIX (DIPERBAIKI) --- */
         @media (max-width: 1000px) {
+            /* 1. Header Fix */
+            header { 
+                flex-direction: column; /* Susun menegak */
+                align-items: flex-start; /* Rapat kiri */
+                gap: 15px; 
+                padding: 15px 20px;
+            }
+            
+            .header-left { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                width: 100%;
+            }
+
+            .brand { font-size: 1.3rem; margin-bottom: 5px; }
+            
+            .event-title { 
+                margin-left: 0; 
+                border-left: none; 
+                padding-left: 0; 
+                font-size: 1rem; 
+                color: #ccc; /* Warna lembut sikit supaya tak sakit mata */
+                line-height: 1.4;
+            }
+
+            .btn-back { 
+                align-self: flex-start; /* Letak kiri juga */
+                background: #333; padding: 8px 15px; border-radius: 5px; /* Jadi button supaya senang tekan */
+                color: #fff; font-size: 0.8rem;
+                margin-top: 5px;
+            }
+
+            /* 2. Content Fix */
+            .container { padding: 0 15px; margin-top: 20px; }
             .charts-grid { grid-template-columns: 1fr; }
             .kpi-grid { grid-template-columns: 1fr; }
-            .table-header { flex-direction: column; gap: 10px; align-items: flex-start; }
+            
+            /* 3. Table Fix */
+            .table-header { flex-direction: column; gap: 10px; align-items: stretch; }
             .search-input { width: 100%; }
+            .btn-export { width: 100%; }
+            
+            /* Table Scroll Styling */
+            .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            table { min-width: 800px; /* Paksa table lebar supaya boleh scroll horizontal, tak penyek */ }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div style="display:flex; align-items:center;">
+        <div class="header-left">
             <div class="brand">SEA<span>MOUNTAIN</span></div>
             <div class="event-title" id="displayEventTitle">Loading Event...</div>
         </div>
-        <a href="admin-dashboard.html" style="color:#aaa; text-decoration:none; font-size:0.9rem;">
+        <a href="admin-dashboard.html" class="btn-back">
             <i class="fas fa-arrow-left"></i> Back to Admin
         </a>
     </header>
@@ -130,7 +187,7 @@
         <div class="table-container">
             <div class="table-header">
                 <span class="chart-title" style="font-size:1.2rem;">Participant List</span>
-                <div style="display:flex; gap:10px;">
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <input type="text" id="searchInput" class="search-input" placeholder="Search name, email, or ID...">
                     <button id="btnExport" class="btn-export"><i class="fas fa-file-download"></i> Export CSV</button>
                 </div>
@@ -199,7 +256,6 @@
 
             if(!snapshot.exists()) {
                 tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No participants found.</td></tr>`;
-                // FIX: Hantar objek kosong kalau takde data
                 updateKPI(0, 0, maxQuota, {}, {}, {});
                 return;
             }
@@ -217,14 +273,11 @@
                 
                 const shirt = reg.tshirt_size || "Unknown";
                 const category = reg.category || "General";
-                // FIX: Pastikan check voucherUsed atau voucher_code (ikut database)
-                // Kita check dua-dua field untuk selamat
                 const voucher = reg.voucherUsed || reg.voucher_code || "-";
 
                 shirtStats[shirt] = (shirtStats[shirt] || 0) + 1;
                 categoryStats[category] = (categoryStats[category] || 0) + 1;
                 
-                // Logic Voucher Stats (Hanya kira kalau bukan "-" dan bukan "NONE")
                 if(voucher !== "-" && voucher !== "NONE") {
                     voucherStats[voucher] = (voucherStats[voucher] || 0) + 1;
                 }
@@ -248,7 +301,6 @@
             });
 
             tbody.innerHTML = rowsHTML;
-            // FIX: Hantar voucherStats ke updateKPI
             updateKPI(count, count * eventPrice, maxQuota, shirtStats, categoryStats, voucherStats);
         });
     }
@@ -262,12 +314,11 @@
         document.getElementById('quotaBar').style.width = percent + "%";
         document.getElementById('quotaText').innerText = `${count} / ${maxQuota} Quota used`;
 
-        // FIX: Panggil function renderCharts dengan voucherStats
         renderCharts(shirtStats, categoryStats);
         renderVoucherList(voucherStats);
     }
 
-    // RENDER VOUCHER LIST (HTML List Only - seperti asal)
+    // RENDER VOUCHER LIST
     function renderVoucherList(stats) {
         const container = document.getElementById('voucherListContainer');
         const totalLabel = document.getElementById('totalVoucherUsed');
@@ -295,14 +346,8 @@
         totalLabel.innerText = `${totalUsed} Used`;
     }
 
-    // RENDER CHARTS (Sekarang kita boleh tambah VOUCHER CHART jika mahu)
-    // Nota: Dalam HTML anda, tak ada <canvas id="voucherChart">, hanya ada list.
-    // Jika anda nak chart juga, anda kena tambah <canvas> dalam HTML dulu.
-    // Tapi ikut soalan "tak show kat tengah tu", saya rasa anda rujuk kepada LIST voucher.
-    
+    // RENDER CHARTS
     function renderCharts(shirtData, categoryData) {
-        
-        // Shirt Chart (Doughnut)
         const shirtCtx = document.getElementById('shirtChart').getContext('2d');
         if(window.myShirtChart) window.myShirtChart.destroy();
         window.myShirtChart = new Chart(shirtCtx, {
@@ -321,7 +366,6 @@
             }
         });
 
-        // Category Chart (Bar)
         const catCtx = document.getElementById('categoryChart').getContext('2d');
         if(window.myCatChart) window.myCatChart.destroy();
         window.myCatChart = new Chart(catCtx, {
@@ -347,7 +391,7 @@
         });
     }
 
-    // SEARCH & EXPORT (Sama macam asal)
+    // SEARCH & EXPORT
     const searchInput = document.getElementById('searchInput');
     searchInput.addEventListener('keyup', function() {
         const filter = searchInput.value.toLowerCase();
@@ -376,6 +420,6 @@
         downloadLink.click();
     });
 
-</script>
+    </script>
 </body>
 </html>
