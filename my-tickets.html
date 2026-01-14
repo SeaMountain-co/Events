@@ -298,19 +298,19 @@
                 statusHtml = '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Confirmed</span>';
             }
 
-            const eventName = data.event_name || eventId.toUpperCase();
+            // --- USE EVENT NAME FROM DATABASE (REALTIME UPDATE) ---
+            const eventName = eventDetails.title || data.event_name || eventId.toUpperCase();
+            
             const qrContainerId = `qr-${regId}`;
             
-            // --- FIX DATE FORMAT (DATE REGISTERED) ---
-            // Convert registration_time (String/Date) to DD/MM/YYYY
+            // Fix Date Format
             let regDateFormatted = 'N/A';
             if(data.registration_time) {
-                // Try parse
                 const rDate = new Date(data.registration_time);
                 if(!isNaN(rDate)) {
-                    regDateFormatted = rDate.toLocaleDateString('en-GB'); // UK Format: DD/MM/YYYY
+                    regDateFormatted = rDate.toLocaleDateString('en-GB'); // UK Format
                 } else {
-                    regDateFormatted = data.registration_time.split(',')[0]; // Fallback
+                    regDateFormatted = data.registration_time.split(',')[0]; 
                 }
             }
 
@@ -351,8 +351,7 @@
                         </div>
                     `;
                 } else {
-                    // --- FIX DATE FORMAT (UNLOCK MESSAGE) ---
-                    const prettyDate = new Date(eventDateStr).toLocaleDateString('en-GB'); // DD/MM/YYYY
+                    const prettyDate = new Date(eventDateStr).toLocaleDateString('en-GB');
                     mapSection = `
                         <div class="maps-area">
                             <div class="locked-msg"><i class="fas fa-lock" style="color:var(--brand-red);"></i> Route unlocks on ${prettyDate}</div>
