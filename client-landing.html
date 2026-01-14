@@ -79,7 +79,7 @@
 
     const grid = document.getElementById('eventsGrid');
 
-    // 1. LOAD ALL EVENTS (PUBLIC VIEW)
+    // 1. LOAD ALL EVENTS
     const eventsRef = ref(db, 'events');
     onValue(eventsRef, (snapshot) => {
         grid.innerHTML = "";
@@ -89,6 +89,11 @@
             Object.keys(data).forEach(key => {
                 const event = data[key];
                 
+                // --- PENAPIS ARCHIVE ---
+                // Kalau isArchived == true, jangan tunjuk (return)
+                if (event.isArchived === true) return; 
+                // -----------------------
+
                 const card = document.createElement('div');
                 card.className = 'event-card';
                 
