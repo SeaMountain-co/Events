@@ -43,8 +43,14 @@
             display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
         }
         .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
-        .admin-badge { display: flex; align-items: center; gap: 10px; background: #000; padding: 8px 15px; border-radius: 30px; border: 1px solid #333; font-size: 0.85rem; color: #ccc; }
-        .btn-logout { background: transparent; border: 1px solid #ff4d4d; color: #ff4d4d; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.3s; }
+        
+        .admin-badge { 
+            display: flex; align-items: center; gap: 10px; background: #000; 
+            padding: 8px 15px; border-radius: 30px; border: 1px solid #333; 
+            font-size: 0.85rem; color: #ccc; white-space: nowrap;
+        }
+        
+        .btn-logout { background: transparent; border: 1px solid #ff4d4d; color: #ff4d4d; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.3s; white-space: nowrap; }
         .btn-logout:hover { background: #ff4d4d; color: #fff; }
 
         /* CONTENT SCROLLABLE */
@@ -65,41 +71,25 @@
         .btn-download:hover { background: #218838; }
         .btn-analytics { text-decoration: none; background: #3498db; color: #fff; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; display: none; align-items: center; gap: 8px; }
 
-        /* --- TABLE FIX (SCROLLABLE) --- */
-        .table-wrapper {
-            background: var(--card-bg); border-radius: 10px; padding: 10px; border: 1px solid var(--border);
-            width: 100%;
-            overflow: hidden; 
-        }
-        
-        .table-container { 
-            width: 100%; 
-            overflow-x: auto; 
-            -webkit-overflow-scrolling: touch; 
-            padding-bottom: 10px;
-        }
-
+        /* TABLE FIX */
+        .table-wrapper { background: var(--card-bg); border-radius: 10px; padding: 10px; border: 1px solid var(--border); width: 100%; overflow: hidden; }
+        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        
         th { text-align: left; padding: 15px; background: #222; color: #aaa; font-size: 0.75rem; border-bottom: 2px solid #333; cursor: pointer; text-transform: uppercase; white-space: nowrap; }
         th:hover { color: #fff; background: #333; }
-        
         td { padding: 15px; border-bottom: 1px solid #2a2c35; font-size: 0.9rem; white-space: nowrap; }
         tr:hover { background: #252830; }
-
         .badge { padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; text-transform: uppercase; }
         .pending { background: rgba(255, 165, 0, 0.15); color: orange; border: 1px solid orange; }
         .paid { background: rgba(0, 255, 0, 0.15); color: #2ecc71; border: 1px solid #2ecc71; }
-
         .btn-action { border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin-right: 5px; color: white; transition: 0.2s; width: 35px; height: 35px; }
         .btn-delete { background: #ff0000; } .btn-delete:hover { background: #cc0000; }
         .btn-approve { background: #28a745; } .btn-approve:hover { background: #218838; }
         .btn-revoke { background: #e67e22; } .btn-revoke:hover { background: #d35400; }
 
-        /* MOBILE HINT */
         .scroll-hint { display: none; font-size: 0.75rem; color: #888; margin-bottom: 5px; text-align: right; font-style: italic; }
 
-        /* MOBILE RESPONSIVE */
+        /* --- MOBILE RESPONSIVE FIX --- */
         @media (max-width: 1000px) {
             .sidebar { transform: translateX(-100%); width: 280px; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
             .sidebar.active { transform: translateX(0); }
@@ -107,6 +97,40 @@
             .menu-toggle { display: block; }
             .content-scroll { padding: 15px; }
             
+            /* TOPBAR FIX */
+            .topbar { 
+                padding: 10px 15px; 
+                gap: 10px;
+                /* Pastikan elemen tak terkeluar */
+                overflow: hidden; 
+            }
+            
+            /* Kecilkan title "Overview" */
+            .topbar h2 { font-size: 1rem !important; }
+
+            /* Sembunyikan Email Panjang, Tunjuk Icon Je */
+            .admin-badge { 
+                padding: 6px 10px; 
+                max-width: 40px; /* Hadkan lebar */
+                justify-content: center;
+                overflow: hidden;
+            }
+            .admin-badge i { font-size: 1rem; } /* Besarkan ikon sikit */
+            .admin-badge span { display: none; } /* Sorok teks email dalam span (kena tambah span kat JS) */
+            
+            /* Tapi sebab JS tulis terus innerHTML, kita guna trick text-indent atau font-size 0 */
+            .admin-badge {
+                font-size: 0; /* Sorok teks */
+            }
+            .admin-badge i {
+                font-size: 1rem; /* Tunjuk ikon semula */
+                margin: 0;
+            }
+
+            .btn-logout { padding: 6px 10px; font-size: 0.75rem; }
+            .btn-logout i { margin: 0; }
+            .btn-logout span { display: none; } /* Kalau ada span text */
+
             .toolbar { flex-direction: column; align-items: stretch; }
             .filter-select { max-width: 100%; }
             .btn-download, .btn-analytics { justify-content: center; }
@@ -132,7 +156,7 @@
             <a href="admin-dashboard.html" class="btn-nav active"><i class="fas fa-home"></i> Dashboard</a>
             <a href="admin-manage-events.html" class="btn-nav"><i class="fas fa-calendar-alt"></i> Manage Events</a>
             <a href="admin-add-event.html" class="btn-nav"><i class="fas fa-plus-circle"></i> Add Event</a>
-            <a href="admin-maps.html" class="btn-nav"><i class="fa-solid fa-map"></i> Add Event</a>
+            <a href="admin-maps.html" class="btn-nav"><i class="fa-solid fa-map"></i> Maps & Route</a>
             
             <div class="nav-label">Tools</div>
             <a href="admin-vouchers.html" class="btn-nav"><i class="fas fa-ticket-alt"></i> Vouchers</a>
@@ -149,16 +173,18 @@
     <div class="main-wrapper">
         
         <div class="topbar">
-            <div style="display:flex; align-items:center; gap:15px;">
+            <div style="display:flex; align-items:center; gap:10px;">
                 <button class="menu-toggle" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
                 <h2 style="margin:0; font-size:1.2rem;">Overview</h2>
             </div>
             
-            <div style="display:flex; align-items:center; gap:15px;">
-                <div class="admin-badge" id="adminDisplay">
-                    <i class="fas fa-spinner fa-spin"></i> Verifying...
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div class="admin-badge" id="adminDisplay" title="Admin">
+                    <i class="fas fa-user-shield"></i>
                 </div>
-                <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                <button id="logoutBtn" class="btn-logout" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i> <span class="hide-mobile">Logout</span>
+                </button>
             </div>
         </div>
 
@@ -243,7 +269,8 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.email === ALLOWED_ADMIN) {
-                document.getElementById('adminDisplay').innerHTML = `<i class="fas fa-user-shield"></i> ${user.email}`;
+                // KITA LETAK SPAN SUPAYA BOLEH HIDE DI MOBILE
+                document.getElementById('adminDisplay').innerHTML = `<i class="fas fa-user-shield"></i> <span style="margin-left:5px;">${user.email}</span>`;
                 loadData();
             } else {
                 alert("ACCESS DENIED");
@@ -257,7 +284,7 @@
             }
         });
 
-        // --- 1. LOAD DATA (CORRECTED KEY LOGIC) ---
+        // --- 1. LOAD DATA ---
         function loadData() {
             const dbRef = ref(db, 'registrations');
             
@@ -278,20 +305,14 @@
                         if(eventData && typeof eventData === 'object') {
                             eventList.add(eventId); 
                             
-                            // PENTING: Iterasi 'regKey' (Kunci Sebenar), bukan 'userId'
                             Object.keys(eventData).forEach(regKey => {
                                 const runner = eventData[regKey];
                                 
-                                // Penapis Ketat + Guna 'regKey' sebagai ID rujukan utama
-                                if (runner && 
-                                    typeof runner === 'object' && 
-                                    runner.first_name && 
-                                    regKey !== 'undefined') {
+                                if (runner && typeof runner === 'object' && runner.first_name && regKey !== 'undefined') {
                                     
-                                    // SIMPAN 'regKey' sebagai ID utama untuk update/delete
                                     allRegistrations.push({ 
                                         eventId: eventId, 
-                                        regKey: regKey, // INI KUNCI SAKTI (-OhB...)
+                                        regKey: regKey, 
                                         ...runner 
                                     });
                                     
@@ -350,7 +371,6 @@
                 const isPaid = (row.status && row.status.toLowerCase() === 'paid');
                 const statusClass = isPaid ? "paid" : "pending";
                 
-                // PENTING: Guna row.regKey untuk fungsi update/delete
                 let actionBtn = "";
                 if(isPaid) {
                     actionBtn = `<button class="btn-action btn-revoke" title="Revoke Payment" onclick="togglePaymentStatus('${row.eventId}', '${row.regKey}', 'Pending Payment')"><i class="fas fa-undo"></i></button>`;
@@ -410,13 +430,11 @@
             }
         }
 
-        // --- 2. DELETE FUNCTION (USING REG KEY) ---
         window.deleteRunner = function(eventId, regKey) {
             if(!eventId || !regKey || regKey === 'undefined') {
                 alert("Cannot delete: Invalid ID. Try refreshing.");
                 return;
             }
-
             if(confirm("Delete this runner permanently?")) { 
                 remove(ref(db, `registrations/${eventId}/${regKey}`))
                 .then(() => alert("User Deleted Successfully"))
@@ -424,21 +442,15 @@
             }
         }
         
-        // --- 3. TOGGLE STATUS FUNCTION (USING REG KEY) ---
         window.togglePaymentStatus = function(eventId, regKey, newStatus) {
             if(!eventId || !regKey || regKey === 'undefined') {
                 alert("Cannot update: Invalid ID. Try refreshing.");
                 return;
             }
-
             if(confirm(`Confirm change status to '${newStatus}'?`)) { 
                 update(ref(db, `registrations/${eventId}/${regKey}`), { status: newStatus })
-                .then(() => {
-                    alert("Success! Status updated to " + newStatus);
-                })
-                .catch((err) => {
-                    alert("Error updating status: " + err.message);
-                });
+                .then(() => { alert("Success! Status updated to " + newStatus); })
+                .catch((err) => { alert("Error updating status: " + err.message); });
             }
         }
 
