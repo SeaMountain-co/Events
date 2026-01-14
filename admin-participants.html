@@ -12,7 +12,7 @@
         :root { --bg-dark: #111; --card-bg: #1a1c23; --text: #fff; --border: #333; --brand-red: #ff0000; }
         body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; padding: 30px; margin: 0; }
         
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1300px; margin: 0 auto; }
         
         /* HEADER */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
@@ -23,54 +23,114 @@
         /* TOOLBAR */
         .toolbar { 
             background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid #333; 
-            margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap;
+            margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;
         }
         .search-box { 
-            flex: 1; display: flex; align-items: center; background: #000; 
-            border: 1px solid #444; border-radius: 5px; padding: 0 15px; 
+            flex: 2; display: flex; align-items: center; background: #000; 
+            border: 1px solid #444; border-radius: 5px; padding: 0 15px; min-width: 250px;
         }
         .search-box input { 
             background: transparent; border: none; color: #fff; padding: 12px; width: 100%; outline: none; 
         }
         .search-box i { color: #666; }
 
+        .filter-select {
+            flex: 1; min-width: 180px; padding: 10px 15px; background: #000; 
+            border: 1px solid #444; color: #fff; border-radius: 5px; outline: none; font-family: 'Montserrat';
+            cursor: pointer;
+        }
+        .filter-select:focus { border-color: var(--brand-red); }
+
         /* TABLE */
         .table-container { overflow-x: auto; background: var(--card-bg); border-radius: 10px; border: 1px solid #333; }
-        table { width: 100%; border-collapse: collapse; min-width: 900px; }
-        th { text-align: left; padding: 15px; background: #222; color: #aaa; font-size: 0.8rem; border-bottom: 2px solid #333; text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        
+        th { 
+            text-align: left; padding: 15px; background: #222; color: #aaa; font-size: 0.8rem; 
+            border-bottom: 2px solid #333; text-transform: uppercase; cursor: pointer; user-select: none;
+        }
+        th:hover { color: #fff; background: #333; }
+        th i { margin-left: 5px; font-size: 0.7rem; }
+
         td { padding: 15px; border-bottom: 1px solid #2a2c35; font-size: 0.9rem; vertical-align: middle; }
         tr:hover { background: #252830; }
 
         .btn-edit { 
-            background: #3498db; color: white; border: none; padding: 8px 12px; border-radius: 5px; 
-            cursor: pointer; transition: 0.2s; 
+            background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px; 
+            cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 0.8rem;
         }
         .btn-edit:hover { background: #2980b9; }
 
-        /* MODAL EDIT */
+        /* PRIVACY IC TOGGLE */
+        .ic-wrapper { display: flex; align-items: center; gap: 10px; font-family: monospace; color: #f1c40f; }
+        .btn-eye { background: transparent; border: none; color: #666; cursor: pointer; font-size: 0.9rem; }
+        .btn-eye:hover { color: #fff; }
+
+        /* --- MODAL EDIT (DIKEMASKINI) --- */
         .modal { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; 
+            background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: flex-start; /* Ubah ke flex-start supaya boleh scroll kalau panjang */
+            overflow-y: auto; padding: 20px;
         }
-        .modal-content { 
-            background: var(--card-bg); width: 500px; max-width: 90%; padding: 30px; 
-            border-radius: 15px; border: 1px solid #444; position: relative;
-        }
-        .close-modal { position: absolute; top: 15px; right: 20px; color: #aaa; cursor: pointer; font-size: 1.5rem; }
-        .modal-title { font-family: 'Russo One'; margin-bottom: 20px; color: var(--brand-red); }
         
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; color: #888; margin-bottom: 5px; font-size: 0.8rem; }
-        .form-group input, .form-group select { 
-            width: 100%; padding: 10px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; outline: none;
+        .modal-content { 
+            background: var(--card-bg); width: 900px; max-width: 100%; padding: 40px; 
+            border-radius: 15px; border: 1px solid #444; position: relative; 
+            margin-top: 30px; margin-bottom: 30px; /* Jarak atas bawah */
+            box-shadow: 0 10px 50px rgba(0,0,0,0.7);
         }
-        .form-group input:focus { border-color: var(--brand-red); }
+        
+        .close-modal { position: absolute; top: 20px; right: 25px; color: #aaa; cursor: pointer; font-size: 2rem; transition: 0.3s; }
+        .close-modal:hover { color: #fff; transform: rotate(90deg); }
+        
+        .modal-title { font-family: 'Russo One'; margin-bottom: 30px; color: var(--brand-red); border-bottom: 1px solid #333; padding-bottom: 15px; letter-spacing: 1px; }
+        
+        /* GRID FORM YANG KEMAS */
+        .form-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* Dua Kolum */
+            gap: 30px; /* Jarak besar supaya tak melekat */
+            align-items: start;
+        }
+        .form-full { grid-column: 1 / -1; } /* Span penuh */
+
+        .form-group { margin-bottom: 5px; width: 100%; }
+        .form-group label { display: block; color: #888; margin-bottom: 8px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .form-group input, .form-group select { 
+            width: 100%; padding: 12px 15px; background: #0a0a0c; 
+            border: 1px solid #333; color: #fff; border-radius: 6px; outline: none; 
+            font-family: 'Montserrat'; transition: 0.3s;
+            box-sizing: border-box; /* Penting: Supaya padding tak kacau width */
+        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--brand-red); background: #000; }
 
         .btn-save { 
-            width: 100%; background: var(--brand-red); color: #fff; border: none; padding: 12px; 
-            border-radius: 5px; font-weight: bold; cursor: pointer; margin-top: 10px; 
+            width: 100%; background: var(--brand-red); color: #fff; border: none; padding: 15px; 
+            border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 1rem;
+            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
         }
-        .btn-save:hover { background: #cc0000; }
+        .btn-save:hover { background: #cc0000; transform: translateY(-2px); }
+
+        /* --- MOBILE RESPONSIVE FIX --- */
+        @media (max-width: 768px) {
+            body { padding: 15px; }
+            .header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            
+            /* Modal Mobile */
+            .modal { padding: 10px; align-items: flex-start; }
+            .modal-content { padding: 25px; margin-top: 10px; width: 100%; }
+            
+            /* Form jadi satu baris ke bawah */
+            .form-grid { 
+                grid-template-columns: 1fr; /* Satu kolum */
+                gap: 20px; /* Jarak menegak */
+            }
+            .form-full { grid-column: span 1; }
+            
+            .modal-title { font-size: 1.2rem; }
+        }
 
     </style>
 </head>
@@ -85,18 +145,26 @@
         <div class="toolbar">
             <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Search by Name, IC/ID, or Email...">
+                <input type="text" id="searchInput" placeholder="Search by Name, IC, Phone, or Email...">
             </div>
+            
+            <select id="filterEvent" class="filter-select">
+                <option value="all">All Events</option>
+            </select>
+
+            <select id="filterCategory" class="filter-select">
+                <option value="all">All Categories</option>
+            </select>
         </div>
 
         <div class="table-container">
             <table id="runnerTable">
                 <thead>
                     <tr>
-                        <th>Event ID</th>
-                        <th>Full Name</th>
-                        <th>IC / ID No.</th>
-                        <th>Category</th>
+                        <th onclick="sortTable(0)">Event ID <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable(1)">Full Name <i class="fas fa-sort"></i></th>
+                        <th>IC / ID No. (Privacy)</th>
+                        <th onclick="sortTable(3)">Category <i class="fas fa-sort"></i></th>
                         <th>Details</th>
                         <th>Action</th>
                     </tr>
@@ -111,37 +179,87 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h3 class="modal-title">EDIT DETAILS</h3>
+            <h3 class="modal-title">EDIT PARTICIPANT DETAILS</h3>
             
             <input type="hidden" id="editEventId">
             <input type="hidden" id="editRegKey">
 
-            <div class="form-group">
-                <label>First Name</label>
-                <input type="text" id="editFirstName">
-            </div>
-            <div class="form-group">
-                <label>Last Name</label>
-                <input type="text" id="editLastName">
-            </div>
-            <div class="form-group">
-                <label>IC / Identity Number</label>
-                <input type="text" id="editIcNo">
-            </div>
-            <div class="form-group">
-                <label>Phone Number</label>
-                <input type="text" id="editPhone">
-            </div>
-            <div class="form-group">
-                <label>T-Shirt Size</label>
-                <select id="editShirt">
-                    <option value="XS">XS</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="XL">XL</option>
-                    <option value="XXL">XXL</option>
-                </select>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="editFirstName">
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="editLastName">
+                </div>
+                <div class="form-group">
+                    <label>IC / Passport No.</label>
+                    <input type="text" id="editIcNo">
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" id="editDob">
+                </div>
+                <div class="form-group">
+                    <label>Gender</label>
+                    <select id="editGender">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>T-Shirt Size</label>
+                    <select id="editShirt">
+                        <option value="XS">XS</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                        <option value="3XL">3XL</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" id="editPhone">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="editEmail">
+                </div>
+                
+                <div class="form-group form-full">
+                    <label>Address</label>
+                    <input type="text" id="editAddress">
+                </div>
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="editCity">
+                </div>
+                <div class="form-group">
+                    <label>Postcode</label>
+                    <input type="text" id="editPostcode">
+                </div>
+                
+                <div class="form-group">
+                    <label>Emergency Name</label>
+                    <input type="text" id="editEmName">
+                </div>
+                <div class="form-group">
+                    <label>Emergency Phone</label>
+                    <input type="text" id="editEmPhone">
+                </div>
+
+                <div class="form-group">
+                    <label>Bib Number</label>
+                    <input type="text" id="editBib">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" id="editCategory">
+                </div>
             </div>
             
             <button class="btn-save" onclick="saveChanges()">SAVE CHANGES</button>
@@ -168,7 +286,6 @@
         const db = getDatabase(app);
         const ALLOWED_ADMIN = "admin@sm.com"; 
 
-        // 1. CHECK ADMIN
         onAuthStateChanged(auth, (user) => {
             if (!user || user.email !== ALLOWED_ADMIN) {
                 alert("Access Denied");
@@ -180,18 +297,14 @@
 
         let allRunnersData = [];
 
-        // 2. LOAD DATA
         function loadAllRunners() {
             const regRef = ref(db, 'registrations');
             onValue(regRef, (snapshot) => {
-                allRunnersData = []; // Reset array
+                allRunnersData = []; 
                 const data = snapshot.val();
-                
                 if (data) {
-                    // Loop Events
                     Object.keys(data).forEach(eventId => {
                         const participants = data[eventId];
-                        // Loop Participants
                         Object.keys(participants).forEach(regKey => {
                             const p = participants[regKey];
                             if(p && typeof p === 'object') {
@@ -204,11 +317,63 @@
                         });
                     });
                 }
-                renderTable(allRunnersData);
+                populateFilters(allRunnersData);
+                applyFilters();
             });
         }
 
-        // 3. RENDER TABLE
+        // POPULATE DROPDOWNS
+        function populateFilters(data) {
+            const eventSelect = document.getElementById('filterEvent');
+            const catSelect = document.getElementById('filterCategory');
+            const currentEvent = eventSelect.value;
+            const currentCat = catSelect.value;
+
+            const events = new Set();
+            const categories = new Set();
+
+            data.forEach(item => {
+                if(item.eventId) events.add(item.eventId);
+                if(item.category) categories.add(item.category);
+            });
+
+            eventSelect.innerHTML = '<option value="all">All Events</option>';
+            catSelect.innerHTML = '<option value="all">All Categories</option>';
+
+            events.forEach(ev => { eventSelect.innerHTML += `<option value="${ev}">${ev.toUpperCase()}</option>`; });
+            categories.forEach(cat => { catSelect.innerHTML += `<option value="${cat}">${cat}</option>`; });
+
+            eventSelect.value = currentEvent;
+            catSelect.value = currentCat;
+        }
+
+        // FILTER FUNCTION
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedEvent = document.getElementById('filterEvent').value;
+            const selectedCat = document.getElementById('filterCategory').value;
+
+            const filtered = allRunnersData.filter(item => {
+                const fullName = (item.first_name + " " + (item.last_name || "")).toLowerCase();
+                const ic = (item.ic || item.ic_number || "").toLowerCase();
+                const email = (item.email || "").toLowerCase();
+                const phone = (item.phone || "").toLowerCase();
+                
+                const matchesSearch = fullName.includes(searchTerm) || ic.includes(searchTerm) || email.includes(searchTerm) || phone.includes(searchTerm);
+                const matchesEvent = (selectedEvent === 'all') || (item.eventId === selectedEvent);
+                const matchesCat = (selectedCat === 'all') || (item.category === selectedCat);
+
+                return matchesSearch && matchesEvent && matchesCat;
+            });
+
+            renderTable(filtered);
+        }
+
+        document.getElementById('searchInput').addEventListener('keyup', applyFilters);
+        document.getElementById('filterEvent').addEventListener('change', applyFilters);
+        document.getElementById('filterCategory').addEventListener('change', applyFilters);
+
+        // RENDER TABLE
         function renderTable(dataArray) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = "";
@@ -219,21 +384,24 @@
             }
 
             dataArray.forEach(row => {
-                // Gunakan IC dari DB, kalau takde letak "-"
-                const ic = row.ic_number || row.identity_card || "-"; 
-                
+                const realIc = row.ic || row.ic_number || row.identity_card || "-";
                 const tr = `
                     <tr>
                         <td style="color:var(--brand-red); font-weight:bold; font-size:0.8rem;">${row.eventId.toUpperCase()}</td>
                         <td>${row.first_name} ${row.last_name || ''}</td>
-                        <td style="font-family:monospace; color:#f1c40f;">${ic}</td>
+                        <td>
+                            <div class="ic-wrapper">
+                                <span class="ic-text">******</span>
+                                <button class="btn-eye" onclick="toggleIC(this, '${realIc}')"><i class="fas fa-eye"></i></button>
+                            </div>
+                        </td>
                         <td>${row.category}</td>
                         <td style="font-size:0.8rem; color:#aaa;">
-                            <i class="fas fa-tshirt"></i> ${row.tshirt_size} <br>
-                            <i class="fas fa-phone"></i> ${row.phone}
+                            <i class="fas fa-tshirt"></i> ${row.tshirt_size || '-'} <br>
+                            <i class="fas fa-phone"></i> ${row.phone || '-'}
                         </td>
                         <td>
-                            <button class="btn-edit" onclick='openEditModal(${JSON.stringify(row)})'>
+                            <button class="btn-edit" onclick='openEditModal(${JSON.stringify(row).replace(/'/g, "&apos;")})'>
                                 <i class="fas fa-edit"></i> Edit
                             </button>
                         </td>
@@ -243,33 +411,54 @@
             });
         }
 
-        // 4. SEARCH FUNCTION
-        document.getElementById('searchInput').addEventListener('keyup', (e) => {
-            const term = e.target.value.toLowerCase();
-            
-            const filtered = allRunnersData.filter(item => {
-                const fullName = (item.first_name + " " + (item.last_name || "")).toLowerCase();
-                const ic = (item.ic_number || "").toLowerCase();
-                const email = (item.email || "").toLowerCase();
-                
-                return fullName.includes(term) || ic.includes(term) || email.includes(term);
-            });
+        window.toggleIC = function(btn, realIc) {
+            const span = btn.previousElementSibling;
+            const icon = btn.querySelector('i');
+            if (span.innerText === "******") {
+                span.innerText = realIc;
+                icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash');
+            } else {
+                span.innerText = "******";
+                icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye');
+            }
+        }
 
-            renderTable(filtered);
-        });
+        window.sortTable = function(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("runnerTable");
+            switching = true; dir = "asc"; 
+            while (switching) {
+                switching = false; rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc") { if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) { shouldSwitch = true; break; } } 
+                    else if (dir == "desc") { if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) { shouldSwitch = true; break; } }
+                }
+                if (shouldSwitch) { rows[i].parentNode.insertBefore(rows[i + 1], rows[i]); switching = true; switchcount ++; } 
+                else { if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; } }
+            }
+        }
 
-        // 5. MODAL FUNCTIONS
         window.openEditModal = function(data) {
-            // Fill Inputs
             document.getElementById('editEventId').value = data.eventId;
             document.getElementById('editRegKey').value = data.regKey;
-            
             document.getElementById('editFirstName').value = data.first_name || "";
             document.getElementById('editLastName').value = data.last_name || "";
-            document.getElementById('editIcNo').value = data.ic_number || "";
+            document.getElementById('editIcNo').value = data.ic || data.ic_number || "";
+            document.getElementById('editDob').value = data.dob || "";
+            document.getElementById('editGender').value = data.gender || "Male";
             document.getElementById('editPhone').value = data.phone || "";
-            document.getElementById('editShirt').value = data.tshirt_size || "M";
-
+            document.getElementById('editEmail').value = data.email || "";
+            document.getElementById('editAddress').value = data.address || "";
+            document.getElementById('editCity').value = data.city || "";
+            document.getElementById('editPostcode').value = data.postcode || "";
+            document.getElementById('editEmName').value = data.emergencyName || "";
+            document.getElementById('editEmPhone').value = data.emergencyPhone || "";
+            document.getElementById('editBib').value = data.bib || "";
+            document.getElementById('editCategory').value = data.category || "";
+            document.getElementById('editShirt').value = (data.tshirt_size || "M").toUpperCase();
             document.getElementById('editModal').style.display = "flex";
         }
 
@@ -277,38 +466,36 @@
             document.getElementById('editModal').style.display = "none";
         }
 
-        // 6. SAVE CHANGES TO FIREBASE
         window.saveChanges = function() {
             const eventId = document.getElementById('editEventId').value;
             const regKey = document.getElementById('editRegKey').value;
-
             const updates = {
                 first_name: document.getElementById('editFirstName').value,
                 last_name: document.getElementById('editLastName').value,
-                ic_number: document.getElementById('editIcNo').value, // Save field baru
+                ic: document.getElementById('editIcNo').value, 
+                ic_number: document.getElementById('editIcNo').value,
+                dob: document.getElementById('editDob').value,
+                gender: document.getElementById('editGender').value,
                 phone: document.getElementById('editPhone').value,
+                email: document.getElementById('editEmail').value,
+                address: document.getElementById('editAddress').value,
+                city: document.getElementById('editCity').value,
+                postcode: document.getElementById('editPostcode').value,
+                emergencyName: document.getElementById('editEmName').value,
+                emergencyPhone: document.getElementById('editEmPhone').value,
+                bib: document.getElementById('editBib').value,
+                category: document.getElementById('editCategory').value,
                 tshirt_size: document.getElementById('editShirt').value
             };
-
             update(ref(db, `registrations/${eventId}/${regKey}`), updates)
-            .then(() => {
-                alert("Details updated successfully!");
-                closeModal();
-                // Table akan auto refresh sebab 'onValue'
-            })
-            .catch((err) => {
-                alert("Error updating: " + err.message);
-            });
+            .then(() => { alert("All details updated successfully!"); closeModal(); })
+            .catch((err) => { alert("Error updating: " + err.message); });
         }
 
-        // Close modal if click outside box
         window.onclick = function(event) {
             const modal = document.getElementById('editModal');
-            if (event.target == modal) {
-                closeModal();
-            }
+            if (event.target == modal) closeModal();
         }
-
     </script>
 </body>
 </html>
