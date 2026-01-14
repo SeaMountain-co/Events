@@ -312,17 +312,14 @@
             nav.classList.toggle('active');
         }
 
-        // --- 1. VISITOR COUNTER (SAYA DISABLE DULU SEBAB INI PUNCA SANGKUT) ---
+        // --- 1. VISITOR COUNTER ---
         // Jika tuan nak aktifkan balik, kena pastikan Rules di Firebase benarkan 'write' ke path ini.
-        // Buat masa ini, kita komenkan dulu supaya event boleh loading.
-        
         const visitRef = ref(db, 'site_stats/visits');
         runTransaction(visitRef, (currentVisits) => (currentVisits || 0) + 1)
         .then((result) => {
             if (result.snapshot.exists()) document.getElementById('visitCount').innerText = result.snapshot.val().toLocaleString();
         }).catch(err => console.log("Visitor counter error ignored"));
         
-       
         // Set dummy text supaya tak nampak rosak
         const visitCountEl = document.getElementById('visitCount');
         if(visitCountEl) visitCountEl.innerText = "Active";
@@ -487,12 +484,12 @@
             }
         }
 
-        // --- 5. WHATSAPP ---
+        // --- 5. WHATSAPP (FIXED) ---
         document.getElementById('waForm').addEventListener('submit', function(e) {
             e.preventDefault();
             let name = document.getElementById('waName').value;
             let msg = document.getElementById('waMsg').value;
-            let phone = "0103639958"; 
+            let phone = "60103639958"; // KOD NEGARA DITAMBAH (PENTING!)
             let text = `Hi Sea Mountain, nama saya ${name}. ${msg}`;
             let url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
             window.open(url, '_blank');
@@ -500,6 +497,3 @@
     </script>
 </body>
 </html>
-
-
-
