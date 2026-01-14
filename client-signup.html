@@ -19,8 +19,17 @@
         .logo { font-family: 'Russo One'; font-size: 2rem; color: #fff; text-decoration: none; display: block; margin-bottom: 20px; font-style: italic; }
         .logo span { color: var(--brand-red); }
         
-        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #0a0b0e; border: 1px solid #444; color: #fff; border-radius: 8px; box-sizing: border-box; }
-        .btn-signup { width: 100%; padding: 14px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
+        .input-group { position: relative; margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; background: #0a0b0e; border: 1px solid #444; color: #fff; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--brand-red); }
+
+        .toggle-pass {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            color: #666; cursor: pointer; transition: 0.3s;
+        }
+        .toggle-pass:hover { color: #fff; }
+
+        .btn-signup { width: 100%; padding: 14px; background: #28a745; color: #fff; border: none; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 5px; }
         .btn-signup:hover { background: #218838; }
         .footer-link { margin-top: 15px; font-size: 0.85rem; color: #888; }
         .footer-link a { color: var(--brand-red); text-decoration: none; font-weight: bold; }
@@ -34,8 +43,15 @@
         <p style="font-size:0.8rem; color:#666; margin-bottom:20px;">Use the email address authorized by the Admin.</p>
         
         <form id="signupForm">
-            <input type="email" id="email" placeholder="Your Email Address" required>
-            <input type="password" id="password" placeholder="Set Password (Min 6 chars)" required minlength="6">
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Your Email Address" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Set Password (Min 6 chars)" required minlength="6">
+                <i class="fas fa-eye toggle-pass" onclick="togglePassword()"></i>
+            </div>
+
             <button type="submit" class="btn-signup" id="submitBtn">CREATE ACCOUNT</button>
         </form>
 
@@ -48,8 +64,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    // 1. IMPORT DATABASE TOOLS
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
@@ -65,42 +80,69 @@
     const auth = getAuth(app);
     const db = getDatabase(app);
 
+    // TOGGLE PASSWORD FUNCTION
+    window.togglePassword = function() {
+        const passInput = document.getElementById('password');
+        const icon = document.querySelector('.toggle-pass');
+        if (passInput.type === "password") {
+            passInput.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passInput.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
     document.getElementById('signupForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        const email = document.getElementById('email').value;
+        const email = document.getElementById('email').value.trim(); 
         const password = document.getElementById('password').value;
         const msg = document.getElementById('msg');
 
         msg.style.color = "#fff";
-        msg.innerText = "Creating account...";
+        msg.innerText = "Processing...";
 
-        // 2. CREATE USER (AUTH)
+        // 1. CREATE USER DI AUTHENTICATION
         createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
+            const safeEmail = email.replace(/\./g, ',');
 
-            // 3. SIMPAN DATA KE DATABASE (REALTIME DB)
-            // Kita simpan di folder 'users' dengan ID unik mereka
-            set(ref(db, 'users/' + user.uid), {
-                email: user.email,
-                role: 'client', // Tag sebagai client
-                createdAt: new Date().toISOString()
-            })
-            .then(() => {
-                // 4. BILA DAH SAVE BARU REDIRECT
-                alert("Account created successfully!");
-                window.location.href = "client-login.html";
-            })
-            .catch((err) => {
-                console.error("Error saving to DB: ", err);
-                // Walaupun error save DB, user tetap dah create, so boleh proceed login
-                window.location.href = "client-login.html";
+            // 2. CHECK DATABASE DULU (SAFETY CHECK)
+            // Kita guna 'update' supaya tak padam event yang Admin mungkin dah assign manual.
+            
+            const userUpdates = {
+                password: password, // Update password terkini
+                // Kita cuma set createdAt kalau belum ada (untuk kekalkan tarikh admin add jika ada)
+            };
+
+            // Cek kalau user ni dah wujud dalam DB (added by admin)
+            get(ref(db, `permissions/${safeEmail}`)).then((snapshot) => {
+                if (!snapshot.exists() || !snapshot.val().createdAt) {
+                    // Kalau tak wujud atau takde tarikh, baru letak tarikh harini
+                    userUpdates.createdAt = new Date().toISOString();
+                }
+
+                // 3. EXECUTE UPDATE (MERGE)
+                // Ini akan gabungkan password baru dengan event yang dah sedia ada (kalau ada)
+                update(ref(db, `permissions/${safeEmail}`), userUpdates)
+                .then(() => {
+                    alert("Account created successfully! Admin synced.");
+                    window.location.href = "client-login.html";
+                })
+                .catch((err) => {
+                    console.error("Database sync error:", err);
+                    // Tetap redirect sebab Auth dah lepas
+                    window.location.href = "client-login.html";
+                });
             });
         })
         .catch((error) => {
             msg.style.color = "#ff4444";
             if (error.code === 'auth/email-already-in-use') {
-                msg.innerText = "Email already registered. Please Log In.";
+                msg.innerHTML = "Email already registered.<br><a href='client-login.html' style='color:#28a745; font-weight:bold;'>Please Log In Here</a>";
             } else {
                 msg.innerText = error.message;
             }
