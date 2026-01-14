@@ -16,21 +16,32 @@
             background-image: radial-gradient(circle at 50% 10%, rgba(255, 0, 0, 0.1) 0%, transparent 50%);
         }
         .login-card { background: var(--card-bg); padding: 40px 30px; border-radius: 15px; border: 1px solid #333; width: 100%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center; }
-        .logo { font-family: 'Russo One'; font-size: 2rem; color: #fff; text-decoration: none; display: block; margin-bottom: 20px; font-style: italic; }
+        .logo { font-family: 'Russo One'; font-size: 2rem; color: #fff; text-decoration: none; display: block; margin-bottom: 10px; font-style: italic; }
         .logo span { color: var(--brand-red); }
         
+        /* EVENT INFO BOX */
+        .event-info { background: rgba(255, 0, 0, 0.1); border: 1px solid rgba(255,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        .event-info p { margin: 0; font-size: 0.75rem; color: #aaa; text-transform: uppercase; }
+        .event-info h4 { margin: 5px 0 0; font-size: 0.9rem; color: #fff; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
         /* INPUT STYLE */
-        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #0a0b0e; border: 1px solid #444; color: #fff; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        .input-group { position: relative; margin-bottom: 15px; }
+        input { width: 100%; padding: 12px; background: #0a0b0e; border: 1px solid #444; color: #fff; border-radius: 8px; box-sizing: border-box; outline: none; transition: 0.3s; }
         input:focus { border-color: var(--brand-red); }
+
+        /* PASSWORD EYE ICON */
+        .toggle-pass {
+            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
+            color: #666; cursor: pointer; transition: 0.3s;
+        }
+        .toggle-pass:hover { color: #fff; }
 
         /* BUTTON STYLE */
         .btn-login { width: 100%; padding: 14px; background: var(--brand-red); color: #fff; border: none; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 5px; }
         .btn-login:hover { background: #cc0000; }
         
-        /* STATUS MESSAGE (Dah dibetulkan supaya tak makan ruang) */
         .status-msg { margin-top: 10px; font-size: 0.85rem; min-height: 0; margin-bottom: 10px; }
 
-        /* FOOTER LINKS */
         .footer-text { margin-top: 15px; font-size: 0.85rem; color: #888; }
         .footer-text a { color: var(--brand-red); font-weight: bold; text-decoration: none; }
         .cancel-link { display: block; margin-top: 10px; color: #555; font-size: 0.8rem; text-decoration: none; transition: 0.3s; }
@@ -41,11 +52,24 @@
 
     <div class="login-card">
         <a href="client-landing.html" class="logo">SEA<span>MOUNTAIN</span></a>
-        <h3 style="margin-top:0; color:#aaa; margin-bottom: 25px;">Event Management Login</h3>
+        
+        <div id="targetEventBox" class="event-info">
+            <p>You are logging in for:</p>
+            <h4 id="targetEventTitle">Loading...</h4>
+        </div>
+
+        <h3 style="margin-top:0; color:#aaa; margin-bottom: 25px; font-size: 1rem;">Client Access Login</h3>
         
         <form id="loginForm">
-            <input type="email" id="email" placeholder="Client Email" required>
-            <input type="password" id="password" placeholder="Password" required>
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Client Email" required>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="password" placeholder="Password" required>
+                <i class="fas fa-eye toggle-pass" onclick="togglePassword()"></i>
+            </div>
+
             <button type="submit" class="btn-login" id="submitBtn">LOG IN</button>
         </form>
 
@@ -54,7 +78,7 @@
         <div class="footer-text">
             Don't have an account? <a href="client-signup.html">Sign Up Here</a>
         </div>
-        <a href="client-landing.html" class="cancel-link">Cancel</a>
+        <a href="client-landing.html" class="cancel-link">Back to Selection</a>
     </div>
 
 <script type="module">
@@ -79,19 +103,45 @@
     const statusMsg = document.getElementById('statusMsg');
     const targetEventId = sessionStorage.getItem('targetEventId');
 
-    // 1. PAKSA LOGOUT BILA PAGE LOAD (Supaya form sentiasa bersih)
-    signOut(auth).then(() => {
-        console.log("Session cleared.");
-    });
+    // 1. LOAD & SHOW EVENT NAME (NEW)
+    if(targetEventId) {
+        document.getElementById('targetEventBox').style.display = 'block';
+        // Ambil nama event dari database
+        get(ref(db, `events/${targetEventId}/title`)).then((snap) => {
+            if(snap.exists()) {
+                document.getElementById('targetEventTitle').innerText = snap.val();
+            } else {
+                document.getElementById('targetEventTitle').innerText = targetEventId;
+            }
+        });
+    }
 
-    // 2. CHECK PERMISSION LEPAS LOGIN BERJAYA
+    // 2. TOGGLE PASSWORD FUNCTION (NEW)
+    window.togglePassword = function() {
+        const passInput = document.getElementById('password');
+        const icon = document.querySelector('.toggle-pass');
+        if (passInput.type === "password") {
+            passInput.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passInput.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    // 3. PAKSA LOGOUT BILA PAGE LOAD
+    signOut(auth).then(() => { console.log("Session cleared."); });
+
+    // 4. CHECK PERMISSION
     onAuthStateChanged(auth, (user) => {
         if (user && targetEventId) {
             checkPermissionAndRedirect(user.email, targetEventId);
         }
     });
 
-    // 3. HANDLE LOGIN BUTTON
+    // 5. HANDLE LOGIN
     document.getElementById('loginForm').addEventListener('submit', (e) => {
         e.preventDefault();
         const email = document.getElementById('email').value;
@@ -114,7 +164,7 @@
         });
     });
 
-    // 4. CHECK DATABASE PERMISSION
+    // 6. CHECK DB PERMISSION
     async function checkPermissionAndRedirect(email, eventId) {
         statusMsg.style.color = "#fff";
         statusMsg.innerText = "Checking access...";
