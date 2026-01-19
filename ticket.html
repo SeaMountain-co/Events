@@ -24,7 +24,7 @@
             margin-bottom: 20px;
         }
         
-        /* Bahagian Atas (Merah) */
+        /* HEADER (MERAH) */
         .ticket-header { 
             background: #ff0000; padding: 25px; text-align: center; color: #fff; 
             border-bottom: 4px solid #aa0000;
@@ -32,7 +32,7 @@
         .logo { font-family: 'Russo One'; font-size: 1.4rem; font-style: italic; letter-spacing: 1px; }
         .event-name { font-weight: 800; font-size: 1rem; margin-top: 10px; text-transform: uppercase; line-height: 1.2; }
 
-        /* Bahagian Tengah (Info) */
+        /* BODY (PUTIH) */
         .ticket-body { 
             padding: 30px 20px; text-align: center; 
             background-image: radial-gradient(circle at 0 100%, transparent 15px, #fff 16px), radial-gradient(circle at 100% 100%, transparent 15px, #fff 16px);
@@ -50,13 +50,22 @@
             font-weight: bold; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; display: inline-block;
         }
 
-        /* Bahagian Bawah (QR) */
+        /* FOOTER (QR) */
         .ticket-footer { padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f9f9f9; }
-        #qrcode { margin-bottom: 15px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 10px; }
+        
+        #qrcode { 
+            margin-bottom: 15px; padding: 10px; background: #fff; 
+            border: 1px solid #ddd; border-radius: 10px; 
+            width: 170px; height: 170px; /* Fixed size container */
+            display: flex; justify-content: center; align-items: center;
+        }
+        /* Fix image inside QR */
+        #qrcode img { display: block; width: 100%; height: auto; }
+
         .reg-id { font-family: monospace; color: #888; font-size: 0.85rem; letter-spacing: 1px; }
         .scan-text { font-size: 0.75rem; color: #aaa; margin-top: 5px; text-transform: uppercase; font-weight: bold; }
 
-        /* Butang Action */
+        /* BUTANG */
         .action-buttons { display: flex; gap: 15px; }
         .btn-action {
             background: transparent; color: #fff; border: 2px solid #fff; padding: 12px 25px; 
@@ -79,7 +88,7 @@
     <div class="ticket-container" id="ticketContent">
         <div class="ticket-header">
             <div class="logo">SEA MOUNTAIN</div>
-            <div class="event-name" id="eventName">Loading Event...</div>
+            <div class="event-name" id="eventName">Loading...</div>
         </div>
         
         <div class="ticket-body">
@@ -99,14 +108,13 @@
 
     <div class="action-buttons">
         <a href="index.html" class="btn-action"><i class="fas fa-home"></i> Home</a>
-        <button class="btn-action btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print Ticket</button>
+        <button class="btn-action btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // --- CONFIG FIREBASE (WAJIB ADA) ---
     const firebaseConfig = {
         apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
         authDomain: "sea-mountain.firebaseapp.com",
@@ -120,29 +128,36 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // 1. Ambil ID dari URL (yang dihantar oleh payment.html)
-    // Contoh link: ticket.html?eid=night_run&uid=registration_123
     const urlParams = new URLSearchParams(window.location.search);
-    const eventId = urlParams.get('eid');
-    const userId = urlParams.get('uid');
+    const eventId = urlParams.get('eid'); // ID Event
+    const userId = urlParams.get('uid'); // Registration ID
 
     if(eventId && userId) {
-        // 2. Tarik Data Peserta dari Database
-        get(ref(db, `registrations/${eventId}/${userId}`)).then((snapshot) => {
+        // 1. Tarik Data Registration
+        get(ref(db, `registrations/${eventId}/${userId}`)).then(async (snapshot) => {
             if(snapshot.exists()) {
                 const data = snapshot.val();
                 
-                // 3. Masukkan Data ke dalam Tiket
-                document.getElementById('eventName').innerText = data.event_name;
-                document.getElementById('runnerName').innerText = data.first_name + " " + data.last_name;
-                document.getElementById('category').innerText = data.category;
-                document.getElementById('size').innerText = data.tshirt_size.toUpperCase();
-                document.getElementById('regId').innerText = "ID: " + userId;
+                // 2. Logic Nama Event (Fallback ke Database Event jika data register tak lengkap)
+                let finalEventName = data.event_name;
+                if (!finalEventName || finalEventName === "UNDEFINED") {
+                    const eventSnap = await get(ref(db, `events/${eventId}`));
+                    if (eventSnap.exists()) finalEventName = eventSnap.val().title;
+                    else finalEventName = eventId.toUpperCase();
+                }
 
-                // 4. Generate QR Code
-                // Kita masukkan userId (ID unik) ke dalam QR Code
-                new QRCode(document.getElementById("qrcode"), {
-                    text: userId, 
+                document.getElementById('eventName').innerText = finalEventName;
+                document.getElementById('runnerName').innerText = data.first_name + " " + (data.last_name || "");
+                document.getElementById('category').innerText = data.category || "General";
+                document.getElementById('size').innerText = (data.tshirt_size || "-").toUpperCase();
+                document.getElementById('regId').innerText = "REF: " + userId.substring(0,8).toUpperCase();
+
+                // 3. Generate QR (Clear div first)
+                const qrContainer = document.getElementById("qrcode");
+                qrContainer.innerHTML = ""; 
+                
+                new QRCode(qrContainer, {
+                    text: userId, // Isi QR adalah Registration ID
                     width: 150,
                     height: 150,
                     colorDark : "#000000",
@@ -151,7 +166,7 @@
                 });
 
             } else {
-                alert("Ticket not found. Please contact support.");
+                alert("Ticket not found.");
                 window.location.href = "index.html";
             }
         }).catch((error) => {
