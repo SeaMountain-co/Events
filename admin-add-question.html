@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Event Questions</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    
+    <style>
+        :root { --brand-red: #ff0000; --brand-yellow: #ffcc00; --bg-dark: #0f1014; --card-bg: #1a1c23; --input-bg: #0a0b0e; --text: #ffffff; }
+        * { box-sizing: border-box; }
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; padding: 20px; margin: 0; }
+        
+        .container { max-width: 1000px; margin: 0 auto; background: var(--card-bg); padding: 40px; border-radius: 15px; border: 1px solid #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+        .logo { font-family: 'Russo One'; color: #fff; font-size: 1.5rem; text-transform: uppercase; }
+        .logo span { color: var(--brand-red); }
+        .back-btn { color: #888; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .back-btn:hover { color: #fff; }
+
+        .form-section { margin-bottom: 30px; border: 1px solid #333; padding: 25px; border-radius: 12px; background: rgba(0,0,0,0.2); }
+        .section-title { color: var(--brand-red); font-weight: 800; text-transform: uppercase; margin-bottom: 20px; display: block; border-bottom: 1px solid #333; padding-bottom: 10px; }
+
+        .form-input, select { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #444; border-radius: 6px; color: #fff; outline: none; font-family: 'Montserrat'; transition: 0.3s; font-size: 0.9rem; }
+        .form-input:focus { border-color: var(--brand-red); }
+
+        /* ROW STYLE */
+        .question-builder-row { 
+            display: grid; 
+            grid-template-columns: 30px 30px 2fr 1fr 2fr 50px 40px; 
+            gap: 15px; 
+            margin-bottom: 10px; 
+            align-items: end;
+            background: #15161a; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 1px solid #333;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .question-builder-row.is-header {
+            background: rgba(255, 0, 0, 0.1); 
+            border: 1px solid var(--brand-red);
+            margin-top: 25px; 
+            margin-bottom: 15px;
+            z-index: 2;
+        }
+        
+        .question-builder-row.is-header .q-text {
+            font-weight: 800; text-transform: uppercase; color: var(--brand-red); letter-spacing: 1px;
+        }
+
+        .question-builder-row.is-child { margin-left: 30px; border-left: 3px solid #444; }
+        .drag-handle { cursor: grab; color: #555; text-align: center; align-self: center; padding: 10px 0; }
+        .drag-handle:active { cursor: grabbing; color: var(--brand-yellow); }
+        
+        .btn-toggle-row {
+            background: none; border: 1px solid #444; color: #888;
+            width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            align-self: center; transition: 0.3s;
+        }
+        .btn-toggle-row:hover { color: #fff; border-color: #fff; }
+        .is-header .btn-toggle-row { color: var(--brand-red); border-color: var(--brand-red); }
+
+        .input-label { font-size: 0.65rem; color: #888; display: block; margin-bottom: 5px; text-transform: uppercase; font-weight: 700; }
+
+        .question-builder-row.minimized { background: #0f1014; border-color: #222; align-items: center; padding: 10px 15px; }
+        .question-builder-row.minimized .col-type, .question-builder-row.minimized .col-options, .question-builder-row.minimized .col-req { display: none; }
+        .question-builder-row.minimized .col-label { grid-column: 3 / 7; }
+        .question-builder-row.minimized .form-input { background: transparent; border: none; font-weight: bold; font-size: 1rem; padding: 0; color: #aaa; }
+        .question-builder-row.minimized .btn-toggle-row i { transform: rotate(-90deg); }
+        .question-builder-row.header-collapsed .btn-toggle-row i { transform: rotate(-90deg); }
+        .sortable-ghost { opacity: 0.4; background: #333; border: 2px dashed #666; }
+
+        .btn-add-question { background: #007bff; color: #fff; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; margin-right: 10px;}
+        .btn-template { background: #28a745; color: #fff; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn-remove-cat { background: #d9534f; color: #fff; border: none; width: 35px; height: 35px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; align-self: center; }
+        
+        .btn-submit { width: 100%; padding: 20px; background: var(--brand-red); color: #fff; border: none; border-radius: 50px; font-weight: 800; text-transform: uppercase; cursor: pointer; margin-top: 30px; font-size: 1.1rem; letter-spacing: 1px;}
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        @media (max-width: 900px) {
+            .question-builder-row { grid-template-columns: 1fr; gap: 15px; position: relative; padding-top: 50px; }
+            .drag-handle { position: absolute; top: 10px; right: 50px; } 
+            .btn-toggle-row { position: absolute; top: 10px; left: 10px; }
+            .btn-remove-cat { position: absolute; top: 10px; right: 10px; }
+            .question-builder-row.minimized .col-label { grid-column: auto; }
+            .question-builder-row.is-child { margin-left: 15px; border-left: 2px solid #444; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">MANAGE <span>QUESTIONS</span></div>
+            <a href="admin-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        </div>
+
+        <div class="form-section">
+            <span class="section-title">Step 1: Select Event</span>
+            <select id="eventSelect" class="form-input" onchange="loadQuestions()">
+                <option value="" disabled selected>Loading Events from Database...</option>
+            </select>
+        </div>
+
+        <div class="form-section" id="builderSection" style="display:none;">
+            <span class="section-title">Step 2: Build Questions Structure</span>
+            <p style="color:#aaa; font-size:0.9rem; margin-bottom:20px;">
+                <i class="fas fa-arrows-alt"></i> <strong>Drag the 6-dots handle</strong> to reorder.<br>
+                Use "Section Header" to create a new PAGE/STEP in the registration form.
+            </p>
+            
+            <div id="questionBuilderContainer"></div>
+            
+            <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
+                <button type="button" class="btn-add-question" onclick="addQuestionRow()">+ Add Empty Question</button>
+                <button type="button" class="btn-template" onclick="loadSeaMountainTemplate()"><i class="fas fa-magic"></i> Load Sea Mountain Template</button>
+            </div>
+            
+            <button type="button" onclick="saveQuestions()" class="btn-submit">SAVE ALL QUESTIONS</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+            authDomain: "sea-mountain.firebaseapp.com",
+            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sea-mountain",
+            storageBucket: "sea-mountain.firebasestorage.app",
+            messagingSenderId: "812228825024",
+            appId: "1:812228825024:web:717049c1a64b39c8a60225"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const ALLOWED_ADMIN = "admin@sm.com"; 
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email !== ALLOWED_ADMIN) {
+                alert("Please login as Admin.");
+                window.location.href = "admin-login.html";
+            } else {
+                loadEventList();
+                initSortable();
+            }
+        });
+
+        function initSortable() {
+            const el = document.getElementById('questionBuilderContainer');
+            Sortable.create(el, {
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                onEnd: function (evt) { refreshGroupStyling(); },
+            });
+        }
+
+        function loadEventList() {
+            const select = document.getElementById('eventSelect');
+            get(ref(db, 'events')).then((snapshot) => {
+                if(snapshot.exists()) {
+                    const data = snapshot.val();
+                    select.innerHTML = '<option value="" disabled selected>Select an Event to Edit...</option>';
+                    Object.keys(data).forEach(key => {
+                        const evt = data[key];
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.text = `${evt.title} (${key})`;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option>No events found</option>';
+                }
+            });
+        }
+
+        window.loadQuestions = function() {
+            const eventId = document.getElementById('eventSelect').value;
+            const container = document.getElementById('questionBuilderContainer');
+            const section = document.getElementById('builderSection');
+            
+            if(!eventId) return;
+
+            section.style.display = 'block';
+            container.innerHTML = '<p style="color:#aaa; text-align:center;">Fetching data...</p>';
+
+            get(ref(db, `events/${eventId}/custom_questions`)).then((snapshot) => {
+                container.innerHTML = "";
+                if(snapshot.exists()) {
+                    const qs = snapshot.val();
+                    if(Array.isArray(qs)) {
+                        qs.forEach(q => {
+                            const opts = Array.isArray(q.options) ? q.options.join(',') : "";
+                            const isMin = q.type !== 'header'; 
+                            addQuestionRow(q.question_text, q.type, opts, q.required, isMin);
+                        });
+                        refreshGroupStyling();
+                    }
+                } else {
+                    container.innerHTML = '<p style="color:#555; text-align:center; padding:20px;">No custom questions yet.</p>';
+                }
+            });
+        }
+
+        window.addQuestionRow = function(qText="", qType="text", qOptions="", qReq=true, minimized=false) {
+            const container = document.getElementById('questionBuilderContainer');
+            if(container.innerHTML.includes('<p')) container.innerHTML = "";
+
+            const div = document.createElement('div');
+            let className = 'question-builder-row';
+            if(minimized) className += ' minimized';
+            if(qType === 'header') className += ' is-header';
+
+            div.className = className;
+            
+            const isSelect = qType === 'select';
+            const isHeader = qType === 'header';
+            
+            div.innerHTML = `
+                <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                <button type="button" class="btn-toggle-row" onclick="toggleRow(this)"><i class="fas fa-chevron-down"></i></button>
+
+                <div class="col-label">
+                    <label class="input-label">QUESTION / HEADER LABEL</label>
+                    <input type="text" class="form-input q-text" placeholder="e.g. Bike Info" value="${qText}">
+                </div>
+
+                <div class="col-type">
+                    <label class="input-label">TYPE</label>
+                    <select class="form-input q-type" onchange="handleTypeChange(this)">
+                        <option value="text" ${qType === 'text' ? 'selected' : ''}>Text Box</option>
+                        <option value="select" ${qType === 'select' ? 'selected' : ''}>Dropdown</option>
+                        <option value="checkbox" ${qType === 'checkbox' ? 'selected' : ''}>Checkbox</option>
+                        <option value="datetime" ${qType === 'datetime' ? 'selected' : ''}>Date & Time Picker</option> <option value="header" ${qType === 'header' ? 'selected' : ''}>-- SECTION HEADER --</option>
+                    </select>
+                </div>
+
+                <div class="col-options">
+                    <label class="input-label">OPTIONS (Comma split)</label>
+                    <input type="text" class="form-input q-options" placeholder="e.g. Yes, No" value="${qOptions}" 
+                        ${isSelect ? '' : 'disabled'} style="${isSelect ? '' : 'opacity:0.3; visibility:' + (isHeader ? 'hidden' : 'visible')}">
+                </div>
+
+                <div class="col-req" style="text-align:center; visibility:${isHeader ? 'hidden' : 'visible'}">
+                    <label class="input-label">REQ?</label>
+                    <input type="checkbox" class="q-req" ${qReq ? 'checked' : ''} style="width:20px; height:20px; cursor:pointer; margin-top:5px;">
+                </div>
+
+                <button type="button" class="btn-remove-cat" onclick="deleteRow(this)" title="Delete"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+            refreshGroupStyling();
+        }
+
+        window.deleteRow = function(btn) {
+            if(confirm("Remove this row?")) {
+                btn.parentElement.remove();
+                refreshGroupStyling();
+            }
+        }
+
+        window.toggleRow = function(btn) {
+            const currentRow = btn.parentElement;
+            if (currentRow.querySelector('.q-type').value === 'header') {
+                currentRow.classList.toggle('header-collapsed');
+                const isCollapsed = currentRow.classList.contains('header-collapsed');
+                let nextRow = currentRow.nextElementSibling;
+                while(nextRow) {
+                    if (nextRow.querySelector('.q-type').value === 'header') break;
+                    if (isCollapsed) nextRow.style.display = 'none'; 
+                    else nextRow.style.display = 'grid';
+                    nextRow = nextRow.nextElementSibling;
+                }
+            } else {
+                currentRow.classList.toggle('minimized');
+            }
+        }
+
+        function refreshGroupStyling() {
+            const rows = document.querySelectorAll('.question-builder-row');
+            let insideGroup = false;
+            rows.forEach(row => {
+                const type = row.querySelector('.q-type').value;
+                if (type === 'header') {
+                    row.classList.add('is-header');
+                    row.classList.remove('is-child');
+                    insideGroup = true;
+                } else {
+                    row.classList.remove('is-header');
+                    if (insideGroup) row.classList.add('is-child');
+                    else row.classList.remove('is-child');
+                }
+            });
+        }
+
+        window.handleTypeChange = function(selectElem) {
+            const row = selectElem.parentElement.parentElement;
+            const optionInput = row.querySelector('.q-options');
+            const reqDiv = row.querySelector('.col-req');
+            
+            if(selectElem.value === 'header') {
+                optionInput.style.visibility = 'hidden';
+                reqDiv.style.visibility = 'hidden';
+            } else {
+                reqDiv.style.visibility = 'visible';
+                optionInput.style.visibility = 'visible';
+                if(selectElem.value === 'select') {
+                    optionInput.disabled = false;
+                    optionInput.style.opacity = "1";
+                    optionInput.placeholder = "e.g. Option A, Option B";
+                } else {
+                    optionInput.disabled = true;
+                    optionInput.style.opacity = "0.3";
+                    optionInput.placeholder = "N/A";
+                }
+            }
+            refreshGroupStyling();
+        }
+
+        window.loadSeaMountainTemplate = function() {
+            if(confirm("Add Sea Mountain Grouped Template?")) {
+                const container = document.getElementById('questionBuilderContainer');
+                if(container.innerHTML.includes('<p')) container.innerHTML = "";
+
+                addQuestionRow("DOCUMENT DECLARATIONS (MANDATORY)", "header", "", false, false);
+                addQuestionRow("I agree to sign Waiver / Indemnity Form", "checkbox", "", true, true);
+                addQuestionRow("I agree to sign Medical Declaration", "checkbox", "", true, true);
+                addQuestionRow("I understand checking-in is mandatory", "checkbox", "", true, true);
+                addQuestionRow("I understand racer briefing is mandatory", "checkbox", "", true, true);
+
+                addQuestionRow("BIKE INFORMATION", "header", "", false, false);
+                addQuestionRow("Bike Transport Required?", "select", "Yes - Airport Transfer, No", true, true);
+                addQuestionRow("Ack: I must pack my own bike", "checkbox", "", true, true);
+                addQuestionRow("Ack: Bike box must match wristband", "checkbox", "", true, true);
+
+                addQuestionRow("WATER LEG DECLARATIONS", "header", "", false, false);
+                addQuestionRow("PFD: I will bring my own PFD", "checkbox", "", true, true);
+                addQuestionRow("PFD: I agree to wear PFD at all times on water", "checkbox", "", true, true);
+                addQuestionRow("Roping: I will bring my own gear", "checkbox", "", true, true);
+                addQuestionRow("Roping: I agree to use gear at all times", "checkbox", "", true, true);
+
+                addQuestionRow("HOMESTAY / ACCOMMODATION", "header", "", false, false);
+                addQuestionRow("Homestay Participation", "select", "Yes - Official Longhouse, No - Own Arrangement", true, true);
+
+                addQuestionRow("TRANSPORT REQUIREMENTS (Bintulu Airport)", "header", "", false, false);
+                addQuestionRow("Arrival Flight Number", "text", "", false, true);
+                addQuestionRow("Arrival Date & Time", "datetime", "", false, true); // USING DATETIME
+                addQuestionRow("Ack: Responsible for bike during transfers", "checkbox", "", true, true);
+                addQuestionRow("Transfer: Briefing to Homestay", "checkbox", "", false, true);
+                addQuestionRow("Transfer: Finish Line to Homestay", "checkbox", "", false, true);
+
+                refreshGroupStyling();
+                alert("Template loaded!");
+            }
+        }
+
+        window.saveQuestions = function() {
+            const eventId = document.getElementById('eventSelect').value;
+            const qRows = document.querySelectorAll('.question-builder-row');
+            let questionsData = [];
+
+            qRows.forEach(row => {
+                const qText = row.querySelector('.q-text').value.trim();
+                const qType = row.querySelector('.q-type').value;
+                const qOptionsStr = row.querySelector('.q-options').value.trim();
+                const qReq = row.querySelector('.q-req').checked;
+
+                if(qText) {
+                    let optsArray = [];
+                    if(qType === 'select' && qOptionsStr) {
+                        optsArray = qOptionsStr.split(',').map(s => s.trim());
+                    }
+                    questionsData.push({
+                        question_text: qText,
+                        type: qType,
+                        options: optsArray,
+                        required: qReq
+                    });
+                }
+            });
+
+            update(ref(db, `events/${eventId}`), {
+                custom_questions: questionsData
+            }).then(() => {
+                alert("Questions Saved Successfully!");
+            }).catch(err => {
+                alert("Error saving: " + err.message);
+            });
+        }
+    </script>
+</body>
+</html>
