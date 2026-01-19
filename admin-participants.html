@@ -9,129 +9,45 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
     
     <style>
-        :root { --bg-dark: #111; --card-bg: #1a1c23; --text: #fff; --border: #333; --brand-red: #ff0000; }
+        :root { --bg-dark: #111; --card-bg: #1a1c23; --text: #fff; --border: #333; --brand-red: #ff0000; --brand-green: #2ecc71; --brand-blue: #3498db; }
         body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; padding: 30px; margin: 0; }
         
-        .container { max-width: 1300px; margin: 0 auto; }
-        
-        /* HEADER */
+        .container { max-width: 1400px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
         .logo { font-family: 'Russo One'; color: var(--brand-red); font-size: 1.5rem; text-decoration: none;}
         .btn-back { color: #888; text-decoration: none; font-weight: bold; }
-        .btn-back:hover { color: #fff; }
+        
+        .toolbar { background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid #333; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+        .search-box { flex: 2; display: flex; align-items: center; background: #000; border: 1px solid #444; border-radius: 5px; padding: 0 15px; min-width: 250px; }
+        .search-box input { background: transparent; border: none; color: #fff; padding: 12px; width: 100%; outline: none; }
+        .filter-select { flex: 1; min-width: 180px; padding: 10px 15px; background: #000; border: 1px solid #444; color: #fff; border-radius: 5px; cursor: pointer; }
+        .btn-csv { background: var(--brand-green); color: #000; border: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
 
-        /* TOOLBAR */
-        .toolbar { 
-            background: var(--card-bg); padding: 20px; border-radius: 10px; border: 1px solid #333; 
-            margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center;
-        }
-        .search-box { 
-            flex: 2; display: flex; align-items: center; background: #000; 
-            border: 1px solid #444; border-radius: 5px; padding: 0 15px; min-width: 250px;
-        }
-        .search-box input { 
-            background: transparent; border: none; color: #fff; padding: 12px; width: 100%; outline: none; 
-        }
-        .search-box i { color: #666; }
-
-        .filter-select {
-            flex: 1; min-width: 180px; padding: 10px 15px; background: #000; 
-            border: 1px solid #444; color: #fff; border-radius: 5px; outline: none; font-family: 'Montserrat';
-            cursor: pointer;
-        }
-        .filter-select:focus { border-color: var(--brand-red); }
-
-        /* TABLE */
         .table-container { overflow-x: auto; background: var(--card-bg); border-radius: 10px; border: 1px solid #333; }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        
-        th { 
-            text-align: left; padding: 15px; background: #222; color: #aaa; font-size: 0.8rem; 
-            border-bottom: 2px solid #333; text-transform: uppercase; cursor: pointer; user-select: none;
-        }
-        th:hover { color: #fff; background: #333; }
-        th i { margin-left: 5px; font-size: 0.7rem; }
-
+        th { text-align: left; padding: 15px; background: #222; color: #aaa; font-size: 0.8rem; border-bottom: 2px solid #333; text-transform: uppercase; cursor: pointer; }
         td { padding: 15px; border-bottom: 1px solid #2a2c35; font-size: 0.9rem; vertical-align: middle; }
-        tr:hover { background: #252830; }
+        .btn-edit { background: var(--brand-blue); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
 
-        .btn-edit { 
-            background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px; 
-            cursor: pointer; transition: 0.2s; font-weight: bold; font-size: 0.8rem;
-        }
-        .btn-edit:hover { background: #2980b9; }
-
-        /* PRIVACY IC TOGGLE */
-        .ic-wrapper { display: flex; align-items: center; gap: 10px; font-family: monospace; color: #f1c40f; }
-        .btn-eye { background: transparent; border: none; color: #666; cursor: pointer; font-size: 0.9rem; }
-        .btn-eye:hover { color: #fff; }
-
-        /* --- MODAL EDIT (DIKEMASKINI) --- */
-        .modal { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: flex-start; /* Ubah ke flex-start supaya boleh scroll kalau panjang */
-            overflow-y: auto; padding: 20px;
-        }
+        /* MODAL */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: flex-start; overflow-y: auto; padding: 20px; }
+        .modal-content { background: var(--card-bg); width: 900px; max-width: 100%; padding: 40px; border-radius: 15px; border: 1px solid #444; position: relative; margin-top: 30px; margin-bottom: 30px; }
+        .close-modal { position: absolute; top: 20px; right: 25px; color: #aaa; cursor: pointer; font-size: 2rem; }
+        .modal-title { font-family: 'Russo One'; margin-bottom: 30px; color: var(--brand-red); border-bottom: 1px solid #333; padding-bottom: 15px; }
         
-        .modal-content { 
-            background: var(--card-bg); width: 900px; max-width: 100%; padding: 40px; 
-            border-radius: 15px; border: 1px solid #444; position: relative; 
-            margin-top: 30px; margin-bottom: 30px; /* Jarak atas bawah */
-            box-shadow: 0 10px 50px rgba(0,0,0,0.7);
-        }
-        
-        .close-modal { position: absolute; top: 20px; right: 25px; color: #aaa; cursor: pointer; font-size: 2rem; transition: 0.3s; }
-        .close-modal:hover { color: #fff; transform: rotate(90deg); }
-        
-        .modal-title { font-family: 'Russo One'; margin-bottom: 30px; color: var(--brand-red); border-bottom: 1px solid #333; padding-bottom: 15px; letter-spacing: 1px; }
-        
-        /* GRID FORM YANG KEMAS */
-        .form-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; /* Dua Kolum */
-            gap: 30px; /* Jarak besar supaya tak melekat */
-            align-items: start;
-        }
-        .form-full { grid-column: 1 / -1; } /* Span penuh */
+        .form-section-title { color: var(--brand-blue); font-weight: 800; text-transform: uppercase; margin-top: 30px; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 1px dashed #444; font-size: 0.9rem; letter-spacing: 1px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+        .form-full { grid-column: 1 / -1; }
+        .form-group label { display: block; color: #888; margin-bottom: 5px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; }
+        .form-control { width: 100%; padding: 12px 15px; background: #0a0a0c; border: 1px solid #333; color: #fff; border-radius: 6px; outline: none; transition: 0.3s; box-sizing: border-box; }
+        .form-control:focus { border-color: var(--brand-red); }
 
-        .form-group { margin-bottom: 5px; width: 100%; }
-        .form-group label { display: block; color: #888; margin-bottom: 8px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .racer-card { background: #111; padding: 20px; border-radius: 8px; border: 1px solid #333; margin-bottom: 15px; }
+        .racer-header { color: #f1c40f; font-weight: bold; margin-bottom: 15px; font-size: 0.9rem; border-bottom: 1px solid #444; padding-bottom: 5px; }
+
+        .btn-save { width: 100%; background: var(--brand-red); color: #fff; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 1rem; text-transform: uppercase; }
         
-        .form-group input, .form-group select { 
-            width: 100%; padding: 12px 15px; background: #0a0a0c; 
-            border: 1px solid #333; color: #fff; border-radius: 6px; outline: none; 
-            font-family: 'Montserrat'; transition: 0.3s;
-            box-sizing: border-box; /* Penting: Supaya padding tak kacau width */
-        }
-        .form-group input:focus, .form-group select:focus { border-color: var(--brand-red); background: #000; }
-
-        .btn-save { 
-            width: 100%; background: var(--brand-red); color: #fff; border: none; padding: 15px; 
-            border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 30px; font-size: 1rem;
-            text-transform: uppercase; letter-spacing: 1px; transition: 0.3s;
-        }
-        .btn-save:hover { background: #cc0000; transform: translateY(-2px); }
-
-        /* --- MOBILE RESPONSIVE FIX --- */
-        @media (max-width: 768px) {
-            body { padding: 15px; }
-            .header { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .toolbar { flex-direction: column; align-items: stretch; }
-            
-            /* Modal Mobile */
-            .modal { padding: 10px; align-items: flex-start; }
-            .modal-content { padding: 25px; margin-top: 10px; width: 100%; }
-            
-            /* Form jadi satu baris ke bawah */
-            .form-grid { 
-                grid-template-columns: 1fr; /* Satu kolum */
-                gap: 20px; /* Jarak menegak */
-            }
-            .form-full { grid-column: span 1; }
-            
-            .modal-title { font-size: 1.2rem; }
-        }
-
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -139,39 +55,29 @@
     <div class="container">
         <div class="header">
             <a href="admin-dashboard.html" class="logo">PARTICIPANT MANAGER</a>
-            <a href="admin-dashboard.html" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+            <a href="admin-dashboard.html" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
         </div>
 
         <div class="toolbar">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Search by Name, IC, Phone, or Email...">
-            </div>
-            
-            <select id="filterEvent" class="filter-select">
-                <option value="all">All Events</option>
-            </select>
-
-            <select id="filterCategory" class="filter-select">
-                <option value="all">All Categories</option>
-            </select>
+            <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Search..."></div>
+            <select id="filterEvent" class="filter-select"><option value="all">All Events</option></select>
+            <select id="filterCategory" class="filter-select"><option value="all">All Categories</option></select>
+            <button onclick="downloadCSV()" class="btn-csv"><i class="fas fa-file-csv"></i> EXPORT CSV</button>
         </div>
 
         <div class="table-container">
             <table id="runnerTable">
                 <thead>
                     <tr>
-                        <th onclick="sortTable(0)">Event ID <i class="fas fa-sort"></i></th>
-                        <th onclick="sortTable(1)">Full Name <i class="fas fa-sort"></i></th>
-                        <th>IC / ID No. (Privacy)</th>
-                        <th onclick="sortTable(3)">Category <i class="fas fa-sort"></i></th>
-                        <th>Details</th>
+                        <th onclick="sortTable(0)">Reg ID</th>
+                        <th onclick="sortTable(1)">Team Name</th>
+                        <th onclick="sortTable(2)">Captain</th>
+                        <th onclick="sortTable(3)">Category</th>
+                        <th>Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="6" style="text-align:center; padding:20px;">Loading Data...</td></tr>
-                </tbody>
+                <tbody id="tableBody"><tr><td colspan="6" style="text-align:center; padding:20px;">Loading...</td></tr></tbody>
             </table>
         </div>
     </div>
@@ -179,88 +85,44 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h3 class="modal-title">EDIT PARTICIPANT DETAILS</h3>
+            <h3 class="modal-title">EDIT REGISTRATION</h3>
             
             <input type="hidden" id="editEventId">
             <input type="hidden" id="editRegKey">
 
+            <div class="form-section-title">GENERAL INFORMATION</div>
             <div class="form-grid">
-                <div class="form-group">
-                    <label>First Name</label>
-                    <input type="text" id="editFirstName">
-                </div>
-                <div class="form-group">
-                    <label>Last Name</label>
-                    <input type="text" id="editLastName">
-                </div>
-                <div class="form-group">
-                    <label>IC / Passport No.</label>
-                    <input type="text" id="editIcNo">
-                </div>
-                <div class="form-group">
-                    <label>Date of Birth</label>
-                    <input type="date" id="editDob">
-                </div>
-                <div class="form-group">
-                    <label>Gender</label>
-                    <select id="editGender">
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
+                <div class="form-group"><label>Team Name</label><input type="text" id="editTeamName" class="form-control"></div>
+                <div class="form-group"><label>Team Country</label><input type="text" id="editTeamCountry" class="form-control"></div>
+                <div class="form-group"><label>Captain Name</label><input type="text" id="editCaptainName" class="form-control"></div>
+                <div class="form-group"><label>Captain Mobile</label><input type="text" id="editCaptainMobile" class="form-control"></div>
+                <div class="form-group"><label>Captain Email</label><input type="text" id="editCaptainEmail" class="form-control"></div>
+                <div class="form-group"><label>Emergency Contact</label><input type="text" id="editEmName" class="form-control"></div>
+                <div class="form-group"><label>Category</label><input type="text" id="editCategory" class="form-control" disabled></div>
+                <div class="form-group"><label>Status</label>
+                    <select id="editStatus" class="form-control">
+                        <option value="Pending Payment">Pending Payment</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Checked In">Checked In</option>
+                        <option value="DNS">DNS</option>
                     </select>
-                </div>
-                <div class="form-group">
-                    <label>T-Shirt Size</label>
-                    <select id="editShirt">
-                        <option value="XS">XS</option>
-                        <option value="S">S</option>
-                        <option value="M">M</option>
-                        <option value="L">L</option>
-                        <option value="XL">XL</option>
-                        <option value="XXL">XXL</option>
-                        <option value="3XL">3XL</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="text" id="editPhone">
-                </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="editEmail">
-                </div>
-                
-                <div class="form-group form-full">
-                    <label>Address</label>
-                    <input type="text" id="editAddress">
-                </div>
-                <div class="form-group">
-                    <label>City</label>
-                    <input type="text" id="editCity">
-                </div>
-                <div class="form-group">
-                    <label>Postcode</label>
-                    <input type="text" id="editPostcode">
-                </div>
-                
-                <div class="form-group">
-                    <label>Emergency Name</label>
-                    <input type="text" id="editEmName">
-                </div>
-                <div class="form-group">
-                    <label>Emergency Phone</label>
-                    <input type="text" id="editEmPhone">
-                </div>
-
-                <div class="form-group">
-                    <label>Bib Number</label>
-                    <input type="text" id="editBib">
-                </div>
-                <div class="form-group">
-                    <label>Category</label>
-                    <input type="text" id="editCategory">
                 </div>
             </div>
+
+            <div class="form-section-title">RACERS LIST</div>
+            <div id="racersListContainer"></div>
+
+            <div class="form-section-title">MEDICAL INFORMATION</div>
+            <div class="form-grid">
+                <div class="form-group"><label>Blood Group</label><input type="text" id="editMedBlood" class="form-control"></div>
+                <div class="form-group"><label>Conditions</label><input type="text" id="editMedCondition" class="form-control"></div>
+                <div class="form-group"><label>Medications</label><input type="text" id="editMedMeds" class="form-control"></div>
+                <div class="form-group"><label>Allergies</label><input type="text" id="editMedAllergy" class="form-control"></div>
+                <div class="form-group form-full"><label>Notes</label><textarea id="editMedNotes" class="form-control" rows="2"></textarea></div>
+            </div>
+
+            <div class="form-section-title">ADDITIONAL INFO (CUSTOM ANSWERS)</div>
+            <div id="customAnswersContainer" class="form-grid"></div>
             
             <button class="btn-save" onclick="saveChanges()">SAVE CHANGES</button>
         </div>
@@ -286,123 +148,102 @@
         const db = getDatabase(app);
         const ALLOWED_ADMIN = "admin@sm.com"; 
 
+        let allData = [];
+        let filteredData = [];
+
         onAuthStateChanged(auth, (user) => {
             if (!user || user.email !== ALLOWED_ADMIN) {
                 alert("Access Denied");
                 window.location.href = "admin-login.html";
             } else {
-                loadAllRunners();
+                loadRegistrations();
             }
         });
 
-        let allRunnersData = [];
-
-        function loadAllRunners() {
+        function loadRegistrations() {
             const regRef = ref(db, 'registrations');
             onValue(regRef, (snapshot) => {
-                allRunnersData = []; 
+                allData = [];
                 const data = snapshot.val();
+                
                 if (data) {
                     Object.keys(data).forEach(eventId => {
-                        const participants = data[eventId];
-                        Object.keys(participants).forEach(regKey => {
-                            const p = participants[regKey];
-                            if(p && typeof p === 'object') {
-                                allRunnersData.push({
+                        const eventRegs = data[eventId];
+                        if (typeof eventRegs === 'object') {
+                            Object.keys(eventRegs).forEach(key => {
+                                const r = eventRegs[key];
+                                allData.push({
                                     eventId: eventId,
-                                    regKey: regKey,
-                                    ...p
+                                    regKey: key,
+                                    ...r
                                 });
-                            }
-                        });
+                            });
+                        }
                     });
                 }
-                populateFilters(allRunnersData);
-                applyFilters();
-            });
-        }
-
-        // POPULATE DROPDOWNS
-        function populateFilters(data) {
-            const eventSelect = document.getElementById('filterEvent');
-            const catSelect = document.getElementById('filterCategory');
-            const currentEvent = eventSelect.value;
-            const currentCat = catSelect.value;
-
-            const events = new Set();
-            const categories = new Set();
-
-            data.forEach(item => {
-                if(item.eventId) events.add(item.eventId);
-                if(item.category) categories.add(item.category);
-            });
-
-            eventSelect.innerHTML = '<option value="all">All Events</option>';
-            catSelect.innerHTML = '<option value="all">All Categories</option>';
-
-            events.forEach(ev => { eventSelect.innerHTML += `<option value="${ev}">${ev.toUpperCase()}</option>`; });
-            categories.forEach(cat => { catSelect.innerHTML += `<option value="${cat}">${cat}</option>`; });
-
-            eventSelect.value = currentEvent;
-            catSelect.value = currentCat;
-        }
-
-        // FILTER FUNCTION
-        function applyFilters() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const selectedEvent = document.getElementById('filterEvent').value;
-            const selectedCat = document.getElementById('filterCategory').value;
-
-            const filtered = allRunnersData.filter(item => {
-                const fullName = (item.first_name + " " + (item.last_name || "")).toLowerCase();
-                const ic = (item.ic || item.ic_number || "").toLowerCase();
-                const email = (item.email || "").toLowerCase();
-                const phone = (item.phone || "").toLowerCase();
                 
-                const matchesSearch = fullName.includes(searchTerm) || ic.includes(searchTerm) || email.includes(searchTerm) || phone.includes(searchTerm);
-                const matchesEvent = (selectedEvent === 'all') || (item.eventId === selectedEvent);
-                const matchesCat = (selectedCat === 'all') || (item.category === selectedCat);
-
-                return matchesSearch && matchesEvent && matchesCat;
+                populateFilters();
+                filterData(); 
             });
-
-            renderTable(filtered);
         }
 
-        document.getElementById('searchInput').addEventListener('keyup', applyFilters);
-        document.getElementById('filterEvent').addEventListener('change', applyFilters);
-        document.getElementById('filterCategory').addEventListener('change', applyFilters);
+        function populateFilters() {
+            const evSelect = document.getElementById('filterEvent');
+            const catSelect = document.getElementById('filterCategory');
+            if(evSelect.options.length === 1) {
+                const events = [...new Set(allData.map(i => i.eventId))];
+                events.forEach(e => evSelect.innerHTML += `<option value="${e}">${e.toUpperCase()}</option>`);
+            }
+            if(catSelect.options.length === 1) {
+                const cats = [...new Set(allData.map(i => i.category))];
+                cats.forEach(c => catSelect.innerHTML += `<option value="${c}">${c}</option>`);
+            }
+        }
 
-        // RENDER TABLE
-        function renderTable(dataArray) {
+        // FILTER
+        window.filterData = function() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const ev = document.getElementById('filterEvent').value;
+            const cat = document.getElementById('filterCategory').value;
+
+            filteredData = allData.filter(i => {
+                // FIXED: Handle undefined
+                const team = (i.teamName || i.first_name || "").toLowerCase();
+                const capt = (i.captainName || i.first_name || "").toLowerCase();
+                const id = (i.regKey || "").toLowerCase();
+                
+                const matchSearch = team.includes(term) || capt.includes(term) || id.includes(term);
+                const matchEv = ev === 'all' || i.eventId === ev;
+                const matchCat = cat === 'all' || i.category === cat;
+                return matchSearch && matchEv && matchCat;
+            });
+            renderTable(filteredData);
+        }
+        
+        document.getElementById('searchInput').addEventListener('keyup', filterData);
+        document.getElementById('filterEvent').addEventListener('change', filterData);
+        document.getElementById('filterCategory').addEventListener('change', filterData);
+
+        function renderTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = "";
+            if(data.length === 0) { tbody.innerHTML = "<tr><td colspan='6' style='text-align:center; padding:20px;'>No data found.</td></tr>"; return; }
 
-            if (dataArray.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">No participants found.</td></tr>`;
-                return;
-            }
+            data.forEach(item => {
+                // Display logic: prioritize Team Name, else First Name
+                const displayName = item.teamName || item.first_name || '-';
+                const displayCapt = item.captainName || (item.first_name + ' ' + (item.last_name||'')) || '-';
 
-            dataArray.forEach(row => {
-                const realIc = row.ic || row.ic_number || row.identity_card || "-";
                 const tr = `
                     <tr>
-                        <td style="color:var(--brand-red); font-weight:bold; font-size:0.8rem;">${row.eventId.toUpperCase()}</td>
-                        <td>${row.first_name} ${row.last_name || ''}</td>
+                        <td style="color:#aaa; font-size:0.75rem;">${item.regKey.substring(0,8)}...</td>
+                        <td style="font-weight:bold; color:#fff;">${displayName}</td>
+                        <td>${displayCapt}</td>
+                        <td><span style="background:#222; padding:2px 6px; border-radius:4px; font-size:0.7rem;">${item.category || '-'}</span></td>
+                        <td><span style="color:${item.status === 'Paid' ? '#2ecc71' : '#f1c40f'}">${item.status || 'Pending'}</span></td>
                         <td>
-                            <div class="ic-wrapper">
-                                <span class="ic-text">******</span>
-                                <button class="btn-eye" onclick="toggleIC(this, '${realIc}')"><i class="fas fa-eye"></i></button>
-                            </div>
-                        </td>
-                        <td>${row.category}</td>
-                        <td style="font-size:0.8rem; color:#aaa;">
-                            <i class="fas fa-tshirt"></i> ${row.tshirt_size || '-'} <br>
-                            <i class="fas fa-phone"></i> ${row.phone || '-'}
-                        </td>
-                        <td>
-                            <button class="btn-edit" onclick='openEditModal(${JSON.stringify(row).replace(/'/g, "&apos;")})'>
-                                <i class="fas fa-edit"></i> Edit
+                            <button class="btn-edit" onclick='openModal(${JSON.stringify(item).replace(/'/g, "&apos;")})'>
+                                <i class="fas fa-edit"></i> Edit / View
                             </button>
                         </td>
                     </tr>
@@ -411,85 +252,173 @@
             });
         }
 
-        window.toggleIC = function(btn, realIc) {
-            const span = btn.previousElementSibling;
-            const icon = btn.querySelector('i');
-            if (span.innerText === "******") {
-                span.innerText = realIc;
-                icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash');
-            } else {
-                span.innerText = "******";
-                icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye');
-            }
-        }
+        // CSV EXPORT
+        window.downloadCSV = function() {
+            if (!filteredData || filteredData.length === 0) { alert("No data to export!"); return; }
 
-        window.sortTable = function(n) {
-            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-            table = document.getElementById("runnerTable");
-            switching = true; dir = "asc"; 
-            while (switching) {
-                switching = false; rows = table.rows;
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("TD")[n];
-                    y = rows[i + 1].getElementsByTagName("TD")[n];
-                    if (dir == "asc") { if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) { shouldSwitch = true; break; } } 
-                    else if (dir == "desc") { if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) { shouldSwitch = true; break; } }
+            let csv = "data:text/csv;charset=utf-8,";
+            csv += "Event,Reg ID,Team Name,Captain,Category,Status,Racers Info\n";
+
+            filteredData.forEach(row => {
+                let racersStr = "";
+                if(row.racers && Array.isArray(row.racers)) {
+                    racersStr = row.racers.map(r => `${r.name} (${r.id})`).join(" | ");
+                } else {
+                    // Fallback for old single racer structure
+                    racersStr = `${row.first_name} ${row.last_name || ''} (${row.ic || ''})`;
                 }
-                if (shouldSwitch) { rows[i].parentNode.insertBefore(rows[i + 1], rows[i]); switching = true; switchcount ++; } 
-                else { if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; } }
-            }
+
+                const esc = (val) => val ? `"${val.toString().replace(/"/g, '""')}"` : "";
+
+                csv += [
+                    esc(row.eventId), esc(row.regKey), esc(row.teamName || row.first_name), 
+                    esc(row.captainName || row.first_name), esc(row.category), esc(row.status), esc(racersStr)
+                ].join(",") + "\n";
+            });
+
+            const link = document.createElement("a");
+            link.href = encodeURI(csv);
+            link.download = "participants_export.csv";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        window.openEditModal = function(data) {
+        // OPEN MODAL (FIXED MAPPING)
+        window.openModal = function(data) {
             document.getElementById('editEventId').value = data.eventId;
             document.getElementById('editRegKey').value = data.regKey;
-            document.getElementById('editFirstName').value = data.first_name || "";
-            document.getElementById('editLastName').value = data.last_name || "";
-            document.getElementById('editIcNo').value = data.ic || data.ic_number || "";
-            document.getElementById('editDob').value = data.dob || "";
-            document.getElementById('editGender').value = data.gender || "Male";
-            document.getElementById('editPhone').value = data.phone || "";
-            document.getElementById('editEmail').value = data.email || "";
-            document.getElementById('editAddress').value = data.address || "";
-            document.getElementById('editCity').value = data.city || "";
-            document.getElementById('editPostcode').value = data.postcode || "";
+
+            // 1. General (With Fallbacks for old data)
+            document.getElementById('editTeamName').value = data.teamName || data.first_name || "";
+            document.getElementById('editTeamCountry').value = data.teamCountry || data.address || ""; // Fallback address if country missing
+            document.getElementById('editCaptainName').value = data.captainName || (data.first_name + " " + (data.last_name||"")) || "";
+            document.getElementById('editCaptainMobile').value = data.captainMobile || data.phone || "";
+            document.getElementById('editCaptainEmail').value = data.captainEmail || data.email || "";
             document.getElementById('editEmName').value = data.emergencyName || "";
-            document.getElementById('editEmPhone').value = data.emergencyPhone || "";
-            document.getElementById('editBib').value = data.bib || "";
             document.getElementById('editCategory').value = data.category || "";
-            document.getElementById('editShirt').value = (data.tshirt_size || "M").toUpperCase();
-            document.getElementById('editModal').style.display = "flex";
+            document.getElementById('editStatus').value = data.status || "Pending Payment";
+
+            // 2. Racers List (Dynamic Render)
+            const racerDiv = document.getElementById('racersListContainer');
+            racerDiv.innerHTML = "";
+            
+            if(data.racers && Array.isArray(data.racers)) {
+                // NEW STRUCTURE (Array of Racers)
+                data.racers.forEach((r, idx) => {
+                    racerDiv.innerHTML += `
+                        <div class="racer-card">
+                            <div class="racer-header">RACER ${idx + 1}</div>
+                            <div class="form-grid">
+                                <div class="form-group"><label>Name</label><input type="text" class="form-control r-name" value="${r.name || ''}" data-idx="${idx}"></div>
+                                <div class="form-group"><label>ID/Passport</label><input type="text" class="form-control r-id" value="${r.id || ''}" data-idx="${idx}"></div>
+                                <div class="form-group"><label>Gender</label><input type="text" class="form-control r-gender" value="${r.gender || ''}" data-idx="${idx}"></div>
+                                <div class="form-group"><label>Nationality</label><input type="text" class="form-control r-nation" value="${r.nation || ''}" data-idx="${idx}"></div>
+                                <div class="form-group"><label>Email</label><input type="text" class="form-control r-email" value="${r.email || ''}" data-idx="${idx}"></div>
+                                <div class="form-group"><label>Shirt Size</label><input type="text" class="form-control r-shirt" value="${r.shirt || ''}" data-idx="${idx}"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                // OLD STRUCTURE (Single Racer Fallback)
+                racerDiv.innerHTML += `
+                    <div class="racer-card">
+                        <div class="racer-header">SINGLE RACER (LEGACY DATA)</div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Name</label><input type="text" class="form-control legacy-name" value="${data.first_name || ''} ${data.last_name || ''}"></div>
+                            <div class="form-group"><label>IC</label><input type="text" class="form-control legacy-ic" value="${data.ic || ''}"></div>
+                            <div class="form-group"><label>Phone</label><input type="text" class="form-control legacy-phone" value="${data.phone || ''}"></div>
+                            <div class="form-group"><label>Email</label><input type="text" class="form-control legacy-email" value="${data.email || ''}"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 3. Medical Data
+            const med = data.medical || {};
+            document.getElementById('editMedBlood').value = med.blood || "";
+            document.getElementById('editMedCondition').value = med.condition || "";
+            document.getElementById('editMedMeds').value = med.meds || "";
+            document.getElementById('editMedAllergy').value = med.allergy || "";
+            document.getElementById('editMedNotes').value = med.notes || "";
+
+            // 4. Custom Answers
+            const customDiv = document.getElementById('customAnswersContainer');
+            customDiv.innerHTML = "";
+            if(data.custom_answers && Array.isArray(data.custom_answers)) {
+                data.custom_answers.forEach((ans, idx) => {
+                    customDiv.innerHTML += `
+                        <div class="form-group form-full">
+                            <label style="color:var(--brand-blue);">${ans.question}</label>
+                            <input type="text" class="form-control custom-ans-input" value="${ans.answer || ''}" data-idx="${idx}">
+                        </div>
+                    `;
+                });
+            } else {
+                customDiv.innerHTML = "<p style='color:#666; font-size:0.8rem;'>No extra questions answered.</p>";
+            }
+
+            document.getElementById('editModal').style.display = 'flex';
         }
 
         window.closeModal = function() {
-            document.getElementById('editModal').style.display = "none";
+            document.getElementById('editModal').style.display = 'none';
         }
 
         window.saveChanges = function() {
             const eventId = document.getElementById('editEventId').value;
             const regKey = document.getElementById('editRegKey').value;
+
+            // Rebuild Racers Array (Only if new structure exists)
+            let updatedRacers = [];
+            const racerInputs = document.querySelectorAll('.r-name');
+            if(racerInputs.length > 0) {
+                racerInputs.forEach((el) => {
+                    const idx = el.dataset.idx;
+                    updatedRacers.push({
+                        name: el.value,
+                        id: document.querySelector(`.r-id[data-idx="${idx}"]`).value,
+                        gender: document.querySelector(`.r-gender[data-idx="${idx}"]`).value,
+                        nation: document.querySelector(`.r-nation[data-idx="${idx}"]`).value,
+                        email: document.querySelector(`.r-email[data-idx="${idx}"]`).value,
+                        shirt: document.querySelector(`.r-shirt[data-idx="${idx}"]`).value
+                    });
+                });
+            }
+
+            // Rebuild Custom Answers
+            let updatedCustom = [];
+            document.querySelectorAll('.custom-ans-input').forEach((el) => {
+                const qLabel = el.previousElementSibling.innerText; 
+                updatedCustom.push({ question: qLabel, answer: el.value });
+            });
+
             const updates = {
-                first_name: document.getElementById('editFirstName').value,
-                last_name: document.getElementById('editLastName').value,
-                ic: document.getElementById('editIcNo').value, 
-                ic_number: document.getElementById('editIcNo').value,
-                dob: document.getElementById('editDob').value,
-                gender: document.getElementById('editGender').value,
-                phone: document.getElementById('editPhone').value,
-                email: document.getElementById('editEmail').value,
-                address: document.getElementById('editAddress').value,
-                city: document.getElementById('editCity').value,
-                postcode: document.getElementById('editPostcode').value,
+                teamName: document.getElementById('editTeamName').value,
+                teamCountry: document.getElementById('editTeamCountry').value,
+                captainName: document.getElementById('editCaptainName').value,
+                captainMobile: document.getElementById('editCaptainMobile').value,
+                captainEmail: document.getElementById('editCaptainEmail').value,
                 emergencyName: document.getElementById('editEmName').value,
-                emergencyPhone: document.getElementById('editEmPhone').value,
-                bib: document.getElementById('editBib').value,
-                category: document.getElementById('editCategory').value,
-                tshirt_size: document.getElementById('editShirt').value
+                status: document.getElementById('editStatus').value,
+                
+                // Only update if we have new racer data
+                ...(updatedRacers.length > 0 && { racers: updatedRacers }),
+
+                medical: {
+                    blood: document.getElementById('editMedBlood').value,
+                    condition: document.getElementById('editMedCondition').value,
+                    meds: document.getElementById('editMedMeds').value,
+                    allergy: document.getElementById('editMedAllergy').value,
+                    notes: document.getElementById('editMedNotes').value
+                },
+                custom_answers: updatedCustom.length > 0 ? updatedCustom : null
             };
+
             update(ref(db, `registrations/${eventId}/${regKey}`), updates)
-            .then(() => { alert("All details updated successfully!"); closeModal(); })
-            .catch((err) => { alert("Error updating: " + err.message); });
+            .then(() => { alert("Updated Successfully!"); closeModal(); })
+            .catch(e => alert("Error: " + e.message));
         }
 
         window.onclick = function(event) {
