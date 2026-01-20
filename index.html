@@ -20,7 +20,7 @@
             padding: 15px 5%; background: rgba(15, 16, 20, 0.95); 
             backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; 
             border-bottom: 1px solid rgba(255,255,255,0.1); 
-            height: 70px; /* Default height desktop */
+            height: 70px; 
         }
         .logo { display: flex; align-items: center; gap: 10px; font-family: 'Montserrat', sans-serif; font-weight: 900; font-style: italic; font-size: 1.2rem; color: #fff; text-transform: uppercase; letter-spacing: -1px; z-index: 1002; }
         .logo img { height: 35px; width: auto; }
@@ -32,7 +32,6 @@
         .header-right { display: flex; align-items: center; gap: 15px; z-index: 1002; }
         .auth-group { display: flex; align-items: center; gap: 10px; }
 
-        /* LOGIN BUTTON */
         .login-btn { 
             background: linear-gradient(45deg, var(--brand-orange), #ff7b00); 
             padding: 8px 20px; border-radius: 30px; font-weight: 800; text-transform: uppercase; 
@@ -41,19 +40,11 @@
         }
         .login-btn:hover { transform: translateY(-2px); }
 
-        /* NEW: Profile Icon Style (Bulat) */
         .login-btn.profile-mode {
-            padding: 0; 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; /* Jadi bulat */
-            font-size: 1.5rem; 
-            background: #28a745; 
-            color: #fff; 
+            padding: 0; width: 40px; height: 40px; border-radius: 50%; 
+            font-size: 1.5rem; background: #28a745; color: #fff; 
             box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
         }
 
         .qr-btn { width: 35px; height: 35px; background: #222; border: 1px solid #444; border-radius: 50%; display: none; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
@@ -61,12 +52,84 @@
 
         .menu-toggle { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
 
+        /* --- PREMIUM TICKER (FIXED LOGIC) --- */
+        .ticker-wrap {
+            width: 100%;
+            background-color: #050505;
+            height: 40px;
+            overflow: hidden; /* Sorok teks yang terkeluar */
+            position: relative; /* Penting untuk absolute children */
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            z-index: 900;
+            display: flex; /* Untuk hide/show via JS */
+        }
+
+        /* Tajuk Kekal di Kiri */
+        .ticker-heading {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: var(--brand-orange);
+            color: #000;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            font-family: 'Russo One', sans-serif;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            z-index: 20; /* Duduk atas teks berjalan */
+            box-shadow: 5px 0 15px rgba(0,0,0,0.8);
+        }
+        
+        .ticker-heading::after {
+            content: '';
+            position: absolute;
+            top: 0; right: -15px; /* Adjust shape */
+            width: 0; height: 0;
+            border-top: 40px solid var(--brand-orange);
+            border-right: 15px solid transparent;
+        }
+
+        /* Teks Berjalan */
+        .ticker-move {
+            display: inline-block;
+            white-space: nowrap;
+            /* Trik supaya mula dari luar skrin kanan */
+            padding-left: 100%; 
+            box-sizing: content-box;
+            /* Animasi */
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+            animation-name: ticker;
+            /* Duration set by JS */
+        }
+
+        .ticker-content {
+            display: inline-block;
+            padding: 0 10px;
+            font-size: 0.9rem;
+            color: #ccc;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+            line-height: 40px; /* Center text vertically */
+        }
+        
+        .ticker-content i { color: var(--brand-orange); margin: 0 10px; font-size: 0.7rem; }
+
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
+        }
+        /* ------------------------------------------- */
+
         /* HERO SECTION */
         .hero { position: relative; min-height: 500px; display: flex; align-items: center; justify-content: center; padding: 40px 5%; overflow: hidden; margin-bottom: 40px; }
         .hero-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #222; background-size: cover; background-position: center; filter: brightness(0.4); z-index: 1; transition: 0.5s; }
         .hero-content { position: relative; z-index: 2; width: 100%; max-width: 1200px; display: flex; align-items: center; justify-content: space-between; gap: 50px; }
         .hero-text { flex: 1; max-width: 600px; }
-        .badge-featured { background-color: var(--sport-blue); color: #ffffff; padding: 5px 15px; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; display: inline-block; margin-bottom: 15px; border-radius: 4px; transform: skew(-10deg); }
+        .badge-featured { background-color: var(--sport-blue); color: #000; padding: 5px 15px; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; display: inline-block; margin-bottom: 15px; border-radius: 4px; transform: skew(-10deg); }
         .hero h1 { font-family: 'Russo One', sans-serif; font-size: 3.5rem; line-height: 1.1; margin-bottom: 15px; text-transform: uppercase; font-style: italic; }
         .hero p { font-size: 1.1rem; color: #ddd; margin-bottom: 25px; border-left: 4px solid var(--brand-orange); padding-left: 15px; }
         .cta-btn { background: linear-gradient(45deg, var(--brand-orange), #ff7b00); color: #000; padding: 15px 40px; font-weight: 900; text-transform: uppercase; border: none; cursor: pointer; font-size: 1rem; clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%); transition: 0.3s; display: inline-block; }
@@ -134,29 +197,21 @@
         .float-wa { position: fixed; width: 60px; height: 60px; bottom: 30px; right: 30px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; transition: 0.3s; text-decoration: none; }
         .float-wa:hover { transform: scale(1.1); background-color: #128c7e; }
 
-        /* --- MOBILE TWEAKS (HEADER COMPACT) --- */
+        /* --- MOBILE TWEAKS --- */
         @media (max-width: 900px) {
-            header { padding: 10px 5%; height: 60px; } /* Header nipis */
+            header { padding: 10px 5%; height: 60px; }
             .logo { font-size: 1rem; }
             .logo img { height: 28px; }
             .menu-toggle { display: block; margin-left: 15px; font-size: 1.2rem; }
-            .nav-links {
-                position: absolute; top: 60px; /* Ikut tinggi header */
-                left: 0; width: 100%;
-                background: rgba(15, 16, 20, 0.98); 
-                flex-direction: column; 
-                align-items: center;
-                padding: 20px 0; 
-                display: none; 
-                border-bottom: 1px solid rgba(255,255,255,0.1);
-            }
+            .nav-links { position: absolute; top: 60px; left: 0; width: 100%; background: rgba(15, 16, 20, 0.98); flex-direction: column; align-items: center; padding: 20px 0; display: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
             .nav-links.active { display: flex; }
             .auth-group { margin-left: auto; gap: 8px; }
-            
-            /* Saiz butang login mobile */
             .login-btn { padding: 6px 15px; font-size: 0.75rem; }
             .qr-btn { width: 32px; height: 32px; font-size: 1rem; }
-
+            
+            /* Ticker Mobile */
+            .ticker-heading { font-size: 0.7rem; padding: 0 10px; }
+            
             .hero { padding: 60px 5%; }
             .hero h1 { font-size: 2.2rem; }
             .hero-content { flex-direction: column; text-align: center; gap: 30px; }
@@ -200,6 +255,13 @@
             </button>
         </div>
     </header>
+
+    <div class="ticker-wrap" id="marqueeContainer">
+        <div class="ticker-heading">LATEST UPDATES</div>
+        <div class="ticker-move" id="marqueeText">
+            <div class="ticker-content">Loading Updates...</div>
+        </div>
+    </div>
 
     <section class="hero">
         <div class="hero-bg" id="heroBg"></div> 
@@ -246,7 +308,7 @@
                     <p>Have questions about the race? Interested in sponsorship? Or just want to say hi?</p>
                     <div class="contact-item"><i class="fas fa-map-marker-alt"></i> <span>Sea Mountain HQ</span></div>
                     <div class="contact-item"><i class="fas fa-envelope"></i> <span>info@seamountain.com</span></div>
-                    <div class="contact-item"><i class="fas fa-phone-alt"></i> <span>+6010-363-9958</span></div>
+                    <div class="contact-item"><i class="fas fa-phone-alt"></i> <span>+60 12-345 6789</span></div>
                 </div>
                 <div class="contact-form">
                     <form id="waForm">
@@ -283,7 +345,7 @@
         </div>
     </div>
 
-    <a href="https://wa.me/60103639958" class="float-wa" target="_blank" title="Chat with us"><i class="fab fa-whatsapp"></i></a>
+    <a href="https://wa.me/601158042310" class="float-wa" target="_blank" title="Chat with us"><i class="fab fa-whatsapp"></i></a>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -313,14 +375,12 @@
         }
 
         // --- 1. VISITOR COUNTER ---
-        // Jika tuan nak aktifkan balik, kena pastikan Rules di Firebase benarkan 'write' ke path ini.
         const visitRef = ref(db, 'site_stats/visits');
         runTransaction(visitRef, (currentVisits) => (currentVisits || 0) + 1)
         .then((result) => {
             if (result.snapshot.exists()) document.getElementById('visitCount').innerText = result.snapshot.val().toLocaleString();
         }).catch(err => console.log("Visitor counter error ignored"));
         
-        // Set dummy text supaya tak nampak rosak
         const visitCountEl = document.getElementById('visitCount');
         if(visitCountEl) visitCountEl.innerText = "Active";
 
@@ -330,26 +390,19 @@
 
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // --- 1. CEK ADA GAMBAR KE TAK? ---
             if (user.photoURL) {
-                // Kalau ada gambar (Google/FB), guna gambar tu
                 loginBtn.innerHTML = `<img src="${user.photoURL}" alt="Profile" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-                // Reset background color supaya tak ganggu gambar
                 loginBtn.style.background = "transparent";
                 loginBtn.style.boxShadow = "none";
-                loginBtn.style.border = "2px solid #28a745"; // Bagi border hijau sikit
+                loginBtn.style.border = "2px solid #28a745"; 
             } else {
-                // Kalau tak ada gambar, guna IKON DEFAULT
                 loginBtn.innerHTML = `<i class="fas fa-user-circle"></i>`;
-                // Kekalkan style hijau asal
                 loginBtn.style.background = "#28a745";
                 loginBtn.style.boxShadow = "0 0 10px rgba(40, 167, 69, 0.5)";
             }
 
             loginBtn.title = `Logged in as ${user.displayName || 'User'}`; 
             loginBtn.href = "#"; 
-
-            // Tambah class bulat
             loginBtn.classList.add('profile-mode'); 
 
             if(typeof qrBtn !== 'undefined' && qrBtn) qrBtn.style.display = "flex";
@@ -361,29 +414,21 @@
                 }
             };
         } else {
-            // --- USER LOGGED OUT ---
             loginBtn.innerHTML = "Log In";
             loginBtn.classList.remove('profile-mode');
             loginBtn.href = "login.html";
-
-            // Reset style asal butang login
             loginBtn.style.background = ""; 
             loginBtn.style.border = "";
             loginBtn.style.boxShadow = "";
-
             loginBtn.onclick = null;
-
             if(typeof qrBtn !== 'undefined' && qrBtn) qrBtn.style.display = "none";
         }
     });
 
-        // --- 3. FETCH EVENTS (INI PALING PENTING) ---
+        // --- 3. FETCH EVENTS ---
         const eventsRef = ref(db, 'events');
 
         onValue(eventsRef, (snapshot) => {
-            // DEBUG: Check data masuk ke tak
-            console.log("Data loaded:", snapshot.val());
-
             const data = snapshot.val();
             const latestContainer = document.getElementById('latest-events-container');
             const upcomingContainer = document.getElementById('upcoming-events-container');
@@ -396,12 +441,8 @@
             if (data) {
                 Object.keys(data).forEach(key => {
                     const event = data[key];
-
-                    // --- PENAPIS ARCHIVE ---
                     if (event.isArchived === true) return; 
-                    // -----------------------
 
-                    // FEATURED
                     if (event.isFeatured === true) {
                         hasFeatured = true;
                         document.getElementById('heroTitle').innerHTML = event.title;
@@ -413,7 +454,6 @@
                         }
                     }
 
-                    // CARDS
                     const registered = parseInt(event.registered) || 0;
                     const quota = parseInt(event.quota) || 99999;
                     const isSoldOut = registered >= quota;
@@ -422,7 +462,6 @@
                         ? `<a href="#" class="card-btn disabled">SOLD OUT</a>` 
                         : `<a href="event-details.html?id=${key}" class="card-btn">Register Race <i class="fas fa-arrow-right"></i></a>`;
 
-                    // Guna gambar fallback local kalau tak ada URL, supaya tak loading lama
                     const imgUrl = event.image_url || 'https://via.placeholder.com/400x200?text=No+Image';
 
                     const cardHTML = `
@@ -443,12 +482,8 @@
                     if (event.category === 'latest') latestContainer.innerHTML += cardHTML;
                     else upcomingContainer.innerHTML += cardHTML;
                 });
-            } else {
-                console.log("No data found in 'events' node.");
-                latestContainer.innerHTML = "<p>No events found.</p>";
             }
 
-            // Fallback Featured
             if (!hasFeatured && data) {
                 const firstKey = Object.keys(data).find(k => !data[k].isArchived);
                 if(firstKey) {
@@ -460,12 +495,9 @@
                     if (event.image_url) document.getElementById('heroImage').src = event.image_url;
                 }
             }
-
             setupSearch();
         }, (error) => {
-            // Kalau ada error permission, dia akan keluar di sini
             console.error("Firebase Read Error:", error);
-            alert("Gagal membaca database: " + error.message);
         });
 
         // --- 4. SEARCH ---
@@ -484,12 +516,44 @@
             }
         }
 
-        // --- 5. WHATSAPP (FIXED) ---
+        // --- 5. MARQUEE (LOGIC TAPIS ACTIVE) ---
+        onValue(ref(db, 'site_settings/marquee'), (snapshot) => {
+            const container = document.getElementById('marqueeContainer');
+            const textDiv = document.getElementById('marqueeText');
+            if(snapshot.exists()) {
+                const data = snapshot.val();
+                
+                // Cek suis Global
+                container.style.display = data.isActive ? 'flex' : 'none';
+                
+                if(data.isActive) {
+                    textDiv.innerHTML = ''; // Reset
+                    
+                    if (data.items && Array.isArray(data.items)) {
+                         data.items.forEach(item => {
+                            // Cek suis Individual (item.active)
+                            // Jika 'item.active' tak wujud (data lama), anggap true (backward compatible)
+                            if (item.active !== false) {
+                                const gapStyle = data.gap ? `margin-right: ${data.gap};` : 'margin-right: 50px;';
+                                textDiv.innerHTML += `<div class="ticker-content" style="${gapStyle}"><i class="${item.icon}"></i> ${item.text}</div>`;
+                            }
+                         });
+                    } else if (data.text) {
+                         // Fallback data lama
+                         textDiv.innerHTML = `<div class="ticker-content">${data.text}</div>`;
+                    }
+                    
+                    textDiv.style.animationDuration = data.speed || '30s';
+                }
+            } else { container.style.display = 'none'; }
+        });
+
+        // --- 6. WHATSAPP ---
         document.getElementById('waForm').addEventListener('submit', function(e) {
             e.preventDefault();
             let name = document.getElementById('waName').value;
             let msg = document.getElementById('waMsg').value;
-            let phone = "60103639958"; // KOD NEGARA DITAMBAH (PENTING!)
+            let phone = "601158042310"; 
             let text = `Hi Sea Mountain, nama saya ${name}. ${msg}`;
             let url = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
             window.open(url, '_blank');
