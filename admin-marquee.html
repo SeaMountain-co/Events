@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Marquee</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --brand-red: #ff0000; --brand-yellow: #ffcc00; --bg-dark: #0f1014; --card-bg: #1a1c23; --input-bg: #0a0b0e; --text: #ffffff; }
+        * { box-sizing: border-box; }
+        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; padding: 20px; margin: 0; }
+        
+        .container { max-width: 900px; margin: 0 auto; background: var(--card-bg); padding: 40px; border-radius: 15px; border: 1px solid #333; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+        .logo { font-family: 'Russo One'; color: #fff; font-size: 1.5rem; text-transform: uppercase; }
+        .logo span { color: var(--brand-red); }
+        .back-btn { color: #888; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .back-btn:hover { color: #fff; }
+
+        .form-group { margin-bottom: 25px; }
+        .form-label { display: block; margin-bottom: 10px; font-size: 0.8rem; color: #aaa; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .form-input, textarea, select { width: 100%; padding: 15px; background: var(--input-bg); border: 1px solid #444; border-radius: 8px; color: #fff; outline: none; font-family: 'Montserrat'; font-size: 1rem; transition: 0.3s; }
+        .form-input:focus { border-color: var(--brand-red); }
+
+        /* PREVIEW SECTION */
+        .preview-wrapper { border: 1px solid #444; border-radius: 8px; overflow: hidden; margin-bottom: 30px; background: #000; }
+        .ticker-wrap { width: 100%; background-color: #050505; height: 50px; overflow: hidden; display: flex; align-items: center; position: relative; }
+        .ticker-heading { background: var(--brand-red); color: #fff; padding: 0 20px; height: 100%; display: flex; align-items: center; font-family: 'Russo One', sans-serif; font-size: 0.85rem; text-transform: uppercase; position: relative; z-index: 20; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        .ticker-heading::after { content: ''; position: absolute; top: 0; right: -15px; width: 0; height: 0; border-top: 50px solid var(--brand-red); border-right: 15px solid transparent; }
+        .ticker-move { display: inline-block; white-space: nowrap; padding-left: 100%; box-sizing: content-box; animation-iteration-count: infinite; animation-timing-function: linear; animation-name: ticker; }
+        .ticker-content { display: inline-block; padding: 0 10px; font-size: 0.9rem; color: #ccc; text-transform: uppercase; font-weight: 600; letter-spacing: 1px; line-height: 50px; }
+        .ticker-content i { color: var(--brand-yellow); margin: 0 10px; font-size: 0.9rem; }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
+
+        /* MARQUEE LIST ITEM */
+        .marquee-list-item {
+            background: #15161a; border: 1px solid #333; padding: 15px; margin-bottom: 10px; border-radius: 8px;
+            display: flex; gap: 10px; align-items: center;
+        }
+        .marquee-list-item .icon-select { width: 150px; }
+        .marquee-list-item .text-input { flex: 1; }
+        
+        /* ITEM TOGGLE SWITCH (Small) */
+        .item-toggle-wrapper { display: flex; flex-direction: column; align-items: center; margin-right: 5px; }
+        .item-switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .item-switch input { opacity: 0; width: 0; height: 0; }
+        .item-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: .4s; border-radius: 20px; }
+        .item-slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .item-slider { background-color: #2ecc71; } /* Green for individual items */
+        input:checked + .item-slider:before { transform: translateX(20px); }
+        .toggle-label { font-size: 0.6rem; color: #888; margin-bottom: 3px; text-transform: uppercase; }
+
+        .btn-remove { background: #d9534f; color: #fff; border: none; width: 40px; height: 40px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-add { background: #007bff; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-bottom: 20px; }
+        
+        .btn-save { width: 100%; padding: 20px; background: var(--brand-red); color: #fff; border: none; border-radius: 50px; font-weight: 800; text-transform: uppercase; cursor: pointer; font-size: 1.1rem; letter-spacing: 1px; transition: 0.3s; margin-top: 20px; }
+        .btn-save:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* MAIN TOGGLE SWITCH (Big) */
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--brand-red); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">MANAGE <span>TICKER</span></div>
+            <a href="admin-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" style="color:var(--brand-yellow);">Live Preview (What users see)</label>
+            <div class="preview-wrapper">
+                <div class="ticker-wrap" id="previewContainer">
+                    <div class="ticker-heading">LATEST UPDATES</div>
+                    <div class="ticker-move" id="previewMarquee"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Show Ticker on Homepage (Global)?</label>
+            <label class="switch">
+                <input type="checkbox" id="tickerActive" onchange="updatePreview()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Animation Duration (Speed)</label>
+            <select id="tickerSpeed" class="form-input" onchange="updatePreview()">
+                <option value="15s">Fast (15s)</option>
+                <option value="20s">Normal (20s)</option>
+                <option value="30s">Slow (30s)</option>
+                <option value="45s">Very Slow (45s)</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Gap Between Items (Space)</label>
+             <select id="tickerGap" class="form-input" onchange="updatePreview()">
+                <option value="20px">Small (20px)</option>
+                <option value="50px">Medium (50px)</option>
+                <option value="100px">Large (100px)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Marquee Items List</label>
+            <div id="marqueeListContainer"></div>
+            <button onclick="addMarqueeItem()" class="btn-add">+ Add Item</button>
+        </div>
+
+        <button onclick="saveTicker()" class="btn-save">UPDATE WEBSITE</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+            authDomain: "sea-mountain.firebaseapp.com",
+            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sea-mountain",
+            storageBucket: "sea-mountain.firebasestorage.app",
+            messagingSenderId: "812228825024",
+            appId: "1:812228825024:web:717049c1a64b39c8a60225"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const ALLOWED_ADMIN = "admin@sm.com"; 
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email !== ALLOWED_ADMIN) {
+                alert("Please login as Admin.");
+                window.location.href = "admin-login.html";
+            } else {
+                loadSettings();
+            }
+        });
+
+        // LOAD CURRENT SETTINGS
+        function loadSettings() {
+            get(ref(db, 'site_settings/marquee')).then((snapshot) => {
+                if(snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('tickerSpeed').value = data.speed || "30s";
+                    document.getElementById('tickerActive').checked = data.isActive;
+                    document.getElementById('tickerGap').value = data.gap || "50px";
+                    
+                    const container = document.getElementById('marqueeListContainer');
+                    container.innerHTML = "";
+                    
+                    if (data.items && Array.isArray(data.items)) {
+                        data.items.forEach(item => {
+                            // Load dengan status active asal, default true jika tak ada
+                            const isActive = item.active !== undefined ? item.active : true;
+                            addMarqueeItem(item.text, item.icon, isActive);
+                        });
+                    } else {
+                         // Fallback jika database kosong
+                         addMarqueeItem();
+                    }
+                    updatePreview();
+                } else {
+                    addMarqueeItem(); 
+                    updatePreview();
+                }
+            });
+        }
+
+        // ADD ITEM ROW (Dengan Toggle Individual)
+        window.addMarqueeItem = function(text = "", icon = "fas fa-bullhorn", isActive = true) {
+            const container = document.getElementById('marqueeListContainer');
+            const div = document.createElement('div');
+            div.className = 'marquee-list-item';
+            div.innerHTML = `
+                <div class="item-toggle-wrapper">
+                    <span class="toggle-label">${isActive ? 'SHOWN' : 'HIDDEN'}</span>
+                    <label class="item-switch">
+                        <input type="checkbox" class="item-active-check" ${isActive ? 'checked' : ''} onchange="toggleLabel(this); updatePreview();">
+                        <span class="item-slider"></span>
+                    </label>
+                </div>
+
+                <select class="form-input icon-select" onchange="updatePreview()">
+                    <option value="fas fa-bullhorn" ${icon === 'fas fa-bullhorn' ? 'selected' : ''}>📣 Bullhorn</option>
+                    <option value="fas fa-flag-checkered" ${icon === 'fas fa-flag-checkered' ? 'selected' : ''}>🏁 Flag</option>
+                    <option value="fas fa-medal" ${icon === 'fas fa-medal' ? 'selected' : ''}>🥇 Medal</option>
+                    <option value="fas fa-calendar-alt" ${icon === 'fas fa-calendar-alt' ? 'selected' : ''}>📅 Calendar</option>
+                    <option value="fas fa-running" ${icon === 'fas fa-running' ? 'selected' : ''}>🏃 Running</option>
+                    <option value="fas fa-star" ${icon === 'fas fa-star' ? 'selected' : ''}>⭐ Star</option>
+                     <option value="fas fa-exclamation-circle" ${icon === 'fas fa-exclamation-circle' ? 'selected' : ''}>❗ Alert</option>
+                </select>
+                <input type="text" class="form-input text-input" placeholder="Enter text here..." value="${text}" oninput="updatePreview()">
+                <button class="btn-remove" onclick="removeRow(this)"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+            updatePreview(); 
+        }
+
+        window.toggleLabel = function(checkbox) {
+            const label = checkbox.parentElement.previousElementSibling;
+            label.innerText = checkbox.checked ? 'SHOWN' : 'HIDDEN';
+            // Kalau hidden, gelapkan sikit input supaya admin perasan
+            const row = checkbox.closest('.marquee-list-item');
+            if(checkbox.checked) {
+                row.style.opacity = "1";
+            } else {
+                row.style.opacity = "0.5";
+            }
+        }
+
+        window.removeRow = function(btn) {
+            btn.parentElement.remove();
+            updatePreview(); 
+        }
+
+        // --- PREVIEW LOGIC (Tapis yang Active Sahaja) ---
+        window.updatePreview = function() {
+            const previewMarquee = document.getElementById('previewMarquee');
+            const previewContainer = document.getElementById('previewContainer');
+            const gap = document.getElementById('tickerGap').value;
+            const speed = document.getElementById('tickerSpeed').value;
+            const isGlobalActive = document.getElementById('tickerActive').checked;
+
+            if(!isGlobalActive) {
+                previewContainer.style.opacity = "0.3";
+            } else {
+                previewContainer.style.opacity = "1";
+            }
+
+            let html = "";
+            document.querySelectorAll('.marquee-list-item').forEach(row => {
+                const text = row.querySelector('.text-input').value;
+                const icon = row.querySelector('.icon-select').value;
+                const isItemActive = row.querySelector('.item-active-check').checked; // Cek suis individual
+
+                // Hanya tunjuk dalam preview kalau item tu ON
+                if(text.trim() !== "" && isItemActive) {
+                    html += `<div class="ticker-content" style="margin-right: ${gap}"><i class="${icon}"></i> ${text}</div>`;
+                }
+            });
+
+            if(html === "") html = `<div class="ticker-content">... No active items ...</div>`;
+
+            previewMarquee.innerHTML = html;
+            previewMarquee.style.animationDuration = speed;
+        }
+
+        // SAVE TO FIREBASE
+        window.saveTicker = function() {
+            const speed = document.getElementById('tickerSpeed').value;
+            const isActive = document.getElementById('tickerActive').checked;
+            const gap = document.getElementById('tickerGap').value;
+
+            const items = [];
+            document.querySelectorAll('.marquee-list-item').forEach(row => {
+                const text = row.querySelector('.text-input').value;
+                const icon = row.querySelector('.icon-select').value;
+                const itemActive = row.querySelector('.item-active-check').checked; // Simpan status ON/OFF
+
+                // Simpan text walaupun OFF (supaya tak hilang)
+                if(text.trim() !== "") {
+                    items.push({ text, icon, active: itemActive });
+                }
+            });
+
+            set(ref(db, 'site_settings/marquee'), {
+                items: items,
+                speed: speed,
+                isActive: isActive,
+                gap: gap
+            }).then(() => {
+                alert("Website Updated Successfully!");
+            }).catch((err) => {
+                alert("Error: " + err.message);
+            });
+        }
+    </script>
+</body>
+</html>
