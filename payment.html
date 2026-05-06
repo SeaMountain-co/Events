@@ -11,7 +11,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script type="text/javascript">
         (function() {
-            // GANTIKAN DENGAN PUBLIC KEY ANDA
             emailjs.init("service_434zj9s"); 
         })();
     </script>
@@ -22,199 +21,414 @@
         body { background-color: var(--bg-dark); color: var(--text-white); min-height: 100vh; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05) 0%, transparent 60%); padding: 20px; }
         .payment-container { display: flex; max-width: 900px; width: 100%; background: var(--card-bg); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap; }
         
+        /* === ORDER SUMMARY (UNCHANGED) === */
         .order-summary { flex: 1; padding: 40px; background: rgba(0,0,0,0.2); border-right: 1px solid rgba(255,255,255,0.05); min-width: 300px; }
         .order-summary h2 { font-family: 'Russo One'; margin-bottom: 20px; color: var(--brand-red); text-transform: uppercase; font-style: italic; }
         .summary-item { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--text-gray); font-size: 0.9rem; }
         .summary-item.total { border-top: 1px solid #333; padding-top: 15px; margin-top: 20px; color: #fff; font-weight: bold; font-size: 1.2rem; }
         
+        /* === PAYMENT SIDE === */
         .payment-details { flex: 1.5; padding: 40px; min-width: 300px; }
-        .payment-header { margin-bottom: 30px; }
+        .payment-header { margin-bottom: 25px; }
         .payment-header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 5px; }
         
-        .bank-info-box { background: #252830; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
+        .bank-info-box { background: #252830; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #333; }
         .bank-name { font-weight: bold; color: var(--brand-red); margin-bottom: 5px; display: block; }
         .bank-details { font-size: 0.9rem; color: #ccc; line-height: 1.6; }
-        
+
+        /* === STEP INDICATOR (NEW) === */
+        .steps-wrapper { display: flex; align-items: center; margin-bottom: 25px; gap: 0; }
+        .step { display: flex; align-items: center; gap: 8px; flex: 1; }
+        .step-circle {
+            width: 28px; height: 28px; border-radius: 50%;
+            background: #2a2d36; border: 2px solid #444;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; color: #666;
+            flex-shrink: 0; transition: all 0.3s;
+        }
+        .step-label { font-size: 0.7rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.3s; }
+        .step-line { flex: 1; height: 2px; background: #333; margin: 0 6px; transition: background 0.3s; }
+
+        /* Step states */
+        .step.active .step-circle { border-color: var(--brand-red); color: var(--brand-red); background: rgba(255,0,0,0.1); }
+        .step.active .step-label { color: var(--brand-red); }
+        .step.done .step-circle { border-color: #00cc66; color: #fff; background: #00cc66; }
+        .step.done .step-label { color: #00cc66; }
+        .step-line.done { background: #00cc66; }
+
+        /* === STEP PANELS (NEW) === */
+        .step-panel { display: none; }
+        .step-panel.active { display: block; }
+
+        /* === STEP 1: UPLOAD RECEIPT === */
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-gray); font-weight: 600; }
         
-        .file-upload-wrapper { border: 2px dashed #444; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; transition: 0.3s; }
-        .file-upload-wrapper:hover { border-color: var(--brand-red); background: rgba(255,0,0,0.05); }
-        
-        .pay-btn { width: 100%; padding: 15px; background: linear-gradient(45deg, var(--brand-red), #aa0000); border: none; border-radius: 8px; color: #fff; font-weight: 800; text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
-        .pay-btn:disabled { background: #555; cursor: not-allowed; }
+        .file-upload-wrapper {
+            border: 2px dashed #444; padding: 25px 20px; text-align: center;
+            border-radius: 10px; cursor: pointer; transition: 0.3s;
+            background: rgba(255,255,255,0.02);
+        }
+        .file-upload-wrapper:hover { border-color: var(--brand-red); background: rgba(255,0,0,0.04); }
+        .file-upload-wrapper.has-file { border-color: #00cc66; border-style: solid; background: rgba(0,204,102,0.05); }
+        #receiptPreview { max-width: 100%; max-height: 150px; border-radius: 8px; margin-top: 12px; display: none; }
 
-        @media (max-width: 768px) { .payment-container { flex-direction: column; } .order-summary { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); } }
+        .next-btn {
+            width: 100%; padding: 14px; background: linear-gradient(45deg, var(--brand-red), #aa0000);
+            border: none; border-radius: 8px; color: #fff; font-weight: 800;
+            text-transform: uppercase; cursor: pointer; transition: 0.3s; margin-top: 5px;
+            letter-spacing: 1px;
+        }
+        .next-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
+        .next-btn:disabled { background: #333; color: #555; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* === STEP 2: WHATSAPP === */
+        .wa-instruction {
+            background: #1a2a1e; border: 1px solid #1f4a2a; border-radius: 10px;
+            padding: 20px; margin-bottom: 18px;
+        }
+        .wa-instruction p { font-size: 0.85rem; color: #aaa; line-height: 1.6; }
+        .wa-instruction strong { color: #fff; }
+
+        .wa-btn {
+            width: 100%; padding: 15px; background: #128C7E;
+            border: none; border-radius: 8px; color: #fff; font-weight: 800;
+            text-transform: uppercase; cursor: pointer; display: flex;
+            justify-content: center; align-items: center; gap: 10px;
+            font-size: 0.95rem; letter-spacing: 1px; text-decoration: none;
+            transition: all 0.3s; margin-bottom: 12px;
+        }
+        .wa-btn:hover { background: #075E54; transform: translateY(-2px); box-shadow: 0 5px 20px rgba(18,140,126,0.4); }
+        .wa-btn.sent { background: #00cc66; cursor: default; transform: none; pointer-events: none; }
+
+        .wa-confirm-note {
+            font-size: 0.78rem; color: #555; text-align: center; margin-bottom: 15px;
+        }
+        .wa-confirm-note span { color: #00cc66; }
+
+        /* === STEP 3: SUBMIT === */
+        .confirm-summary {
+            background: #252830; border-radius: 10px; padding: 18px;
+            margin-bottom: 20px; border: 1px solid #333;
+        }
+        .confirm-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #2a2d36; font-size: 0.85rem; }
+        .confirm-row:last-child { border-bottom: none; }
+        .confirm-row .label { color: #777; }
+        .confirm-row .value { color: #fff; font-weight: 600; }
+        .confirm-row.highlight .value { color: var(--brand-red); font-size: 1rem; }
+
+        .status-badge {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(0,204,102,0.1); border: 1px solid rgba(0,204,102,0.3);
+            border-radius: 8px; padding: 10px 15px; margin-bottom: 18px; font-size: 0.82rem; color: #00cc66;
+        }
+
+        .pay-btn {
+            width: 100%; padding: 15px; background: linear-gradient(45deg, var(--brand-red), #aa0000);
+            border: none; border-radius: 8px; color: #fff; font-weight: 800;
+            text-transform: uppercase; cursor: pointer; transition: 0.3s;
+            letter-spacing: 1px; font-size: 0.95rem;
+        }
+        .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
+        .pay-btn:disabled { background: #555; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        @media (max-width: 768px) {
+            .payment-container { flex-direction: column; }
+            .order-summary { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+            .step-label { display: none; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="payment-container">
-        <div class="order-summary">
-            <h2>Order Summary</h2>
-            <div class="summary-item"><span>Runner Name</span><span id="display-name" style="color:white; font-weight:bold;">Loading...</span></div>
-            <div class="summary-item"><span>Event</span><span id="display-event">Loading...</span></div>
-            <div class="summary-item"><span>Category</span><span id="display-cat" style="color:var(--brand-red);">Loading...</span></div>
-            <div class="summary-item"><span>Voucher Used</span><span id="display-voucher">-</span></div>
-            
-            <div class="summary-item total"><span>TOTAL TO PAY</span><span id="total-display" style="color:var(--brand-red);">RM 0.00</span></div>
-        </div>
+<div class="payment-container">
 
-        <div class="payment-details">
-            <div class="payment-header">
-                <h1>Bank Transfer</h1>
-                <p style="color:var(--text-gray); font-size:0.9rem;">Please transfer the total amount to the account below and upload your receipt.</p>
-            </div>
-
-            <div class="bank-info-box">
-                <span class="bank-name">MAYBANK</span>
-                <div class="bank-details">
-                    Account Name: <strong>SEA MOUNTAIN.CO.</strong><br>
-                    Account No: <strong>561172160546</strong><br>
-                    Reference: <span id="ref-code" style="color:yellow; font-weight:bold;">...</span>
-                </div>
-            </div>
-
-            <form id="paymentForm">
-                <div class="form-group">
-                    <label class="form-label">Upload Receipt / Proof of Payment (Image)</label>
-                    <div class="file-upload-wrapper" onclick="document.getElementById('receiptFile').click()">
-                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #666; margin-bottom: 10px;"></i>
-                        <p style="color:#aaa; font-size:0.9rem;">Click to upload receipt image</p>
-                        <input type="file" id="receiptFile" style="display:none" accept="image/*" required>
-                        <p id="fileName" style="color:var(--brand-red); font-size:0.8rem; margin-top:5px;"></p>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Or Share via WhatsApp</label>
-                    <a href="#" id="whatsappBtn" class="pay-btn" style="background:#25D366; display:flex; justify-content:center; align-items:center; gap:10px; text-decoration:none;">
-                        <i class="fab fa-whatsapp"></i> Send Receipt via WhatsApp
-                    </a>
-                </div>
-
-                <button type="submit" id="confirmBtn" class="pay-btn">SUBMIT PAYMENT</button>
-            </form>
-        </div>
+    <!-- ===== ORDER SUMMARY (UNCHANGED) ===== -->
+    <div class="order-summary">
+        <h2>Order Summary</h2>
+        <div class="summary-item"><span>Runner Name</span><span id="display-name" style="color:white; font-weight:bold;">Loading...</span></div>
+        <div class="summary-item"><span>Event</span><span id="display-event">Loading...</span></div>
+        <div class="summary-item"><span>Category</span><span id="display-cat" style="color:var(--brand-red);">Loading...</span></div>
+        <div class="summary-item"><span>Voucher Used</span><span id="display-voucher">-</span></div>
+        <div class="summary-item total"><span>TOTAL TO PAY</span><span id="total-display" style="color:var(--brand-red);">RM 0.00</span></div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    <!-- ===== PAYMENT DETAILS ===== -->
+    <div class="payment-details">
+        <div class="payment-header">
+            <h1>Bank Transfer</h1>
+            <p style="color:var(--text-gray); font-size:0.85rem; margin-top:4px;">Transfer & share your receipt to complete registration.</p>
+        </div>
 
-        // CONFIG FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
-            authDomain: "sea-mountain.firebaseapp.com",
-            databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "sea-mountain",
-            storageBucket: "sea-mountain.firebasestorage.app",
-            messagingSenderId: "812228825024",
-            appId: "1:812228825024:web:717049c1a64b39c8a60225"
-        };
+        <!-- Bank Info (always visible) -->
+        <div class="bank-info-box">
+            <span class="bank-name">MAYBANK</span>
+            <div class="bank-details">
+                Account Name: <strong>SEA MOUNTAIN.CO.</strong><br>
+                Account No: <strong>561172160546</strong><br>
+                Reference: <span id="ref-code" style="color:yellow; font-weight:bold;">...</span>
+            </div>
+        </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        <!-- ===== STEP INDICATOR ===== -->
+        <div class="steps-wrapper">
+            <div class="step active" id="step-indicator-1">
+                <div class="step-circle" id="circle-1">1</div>
+                <div class="step-label">Upload</div>
+            </div>
+            <div class="step-line" id="line-1"></div>
+            <div class="step" id="step-indicator-2">
+                <div class="step-circle" id="circle-2">2</div>
+                <div class="step-label">WhatsApp</div>
+            </div>
+            <div class="step-line" id="line-2"></div>
+            <div class="step" id="step-indicator-3">
+                <div class="step-circle" id="circle-3">3</div>
+                <div class="step-label">Confirm</div>
+            </div>
+        </div>
 
-        // --- SETUP EMAILJS ANDA ---
-        const EMAILJS_SERVICE_ID = "service_434zj9s"; 
-        const EMAILJS_TEMPLATE_ID = "template_rmyuzua";
+        <!-- ===== STEP 1: UPLOAD RECEIPT ===== -->
+        <div class="step-panel active" id="panel-1">
+            <div class="form-group">
+                <label class="form-label">📎 Upload Resit / Proof of Payment</label>
+                <div class="file-upload-wrapper" id="uploadWrapper" onclick="document.getElementById('receiptFile').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #666; margin-bottom: 10px;"></i>
+                    <p style="color:#aaa; font-size:0.85rem;">Klik untuk upload gambar resit</p>
+                    <p style="color:#555; font-size:0.75rem; margin-top:4px;">JPG, PNG, JPEG sahaja</p>
+                    <input type="file" id="receiptFile" style="display:none" accept="image/*">
+                    <p id="fileName" style="color:#00cc66; font-size:0.8rem; margin-top:8px; font-weight:600;"></p>
+                    <img id="receiptPreview" alt="Receipt Preview">
+                </div>
+            </div>
+            <button class="next-btn" id="nextToStep2" disabled onclick="goToStep(2)">
+                NEXT: SHARE VIA WHATSAPP &rarr;
+            </button>
+        </div>
 
-        // 1. AMBIL DATA DARI SESSION STORAGE
-        const storedData = sessionStorage.getItem('tempRegistration');
-        
-        if (!storedData) {
-            alert("No registration data found. Redirecting to home.");
-            window.location.href = "index.html";
+        <!-- ===== STEP 2: WHATSAPP ===== -->
+        <div class="step-panel" id="panel-2">
+            <div class="wa-instruction">
+                <p>Hantar resit anda kepada kami melalui WhatsApp. Ini <strong>wajib</strong> untuk pengesahan pembayaran sebelum boleh meneruskan.</p>
+            </div>
+
+            <a href="#" id="whatsappBtn" class="wa-btn" target="_blank" onclick="markWhatsappSent()">
+                <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Hantar Resit via WhatsApp
+            </a>
+
+            <p class="wa-confirm-note" id="waSentNote" style="display:none;">
+                <span>✓ WhatsApp dibuka.</span> Setelah hantar, klik butang di bawah.
+            </p>
+
+            <button class="next-btn" id="nextToStep3" disabled onclick="goToStep(3)">
+                SAYA TELAH HANTAR &rarr;
+            </button>
+            <button onclick="goToStep(1)" style="width:100%; padding:10px; background:none; border:none; color:#555; font-size:0.8rem; cursor:pointer; margin-top:8px;">
+                &larr; Kembali
+            </button>
+        </div>
+
+        <!-- ===== STEP 3: CONFIRM & SUBMIT ===== -->
+        <div class="step-panel" id="panel-3">
+            <div class="status-badge">
+                <i class="fas fa-check-circle"></i>
+                Resit diupload &amp; telah dihantar ke WhatsApp
+            </div>
+
+            <div class="confirm-summary">
+                <div class="confirm-row"><span class="label">Nama</span><span class="value" id="confirm-name">-</span></div>
+                <div class="confirm-row"><span class="label">Kategori</span><span class="value" id="confirm-cat">-</span></div>
+                <div class="confirm-row"><span class="label">Ref No.</span><span class="value" id="confirm-ref" style="color:yellow;">-</span></div>
+                <div class="confirm-row highlight"><span class="label">Total</span><span class="value" id="confirm-total">-</span></div>
+            </div>
+
+            <button id="confirmBtn" class="pay-btn" onclick="submitPayment()">
+                ✓ CONFIRM &amp; SUBMIT PAYMENT
+            </button>
+            <button onclick="goToStep(2)" style="width:100%; padding:10px; background:none; border:none; color:#555; font-size:0.8rem; cursor:pointer; margin-top:8px;">
+                &larr; Kembali
+            </button>
+        </div>
+
+    </div><!-- end payment-details -->
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const EMAILJS_SERVICE_ID = "service_434zj9s"; 
+    const EMAILJS_TEMPLATE_ID = "template_rmyuzua";
+
+    // ===== AMBIL DATA DARI SESSION STORAGE (UNCHANGED) =====
+    const storedData = sessionStorage.getItem('tempRegistration');
+    if (!storedData) {
+        alert("No registration data found. Redirecting to home.");
+        window.location.href = "index.html";
+    }
+    const regData = JSON.parse(storedData);
+
+    // ===== PAPARKAN DATA (UNCHANGED) =====
+    document.getElementById("display-name").textContent = regData.first_name + " " + regData.last_name;
+    document.getElementById("display-event").textContent = regData.event_name;
+    document.getElementById("display-cat").textContent = regData.category;
+    document.getElementById("display-voucher").textContent = regData.voucherUsed !== "NONE" ? regData.voucherUsed : "-";
+    document.getElementById("total-display").textContent = "RM " + regData.amountPaid;
+
+    const refCode = "SM-" + Math.floor(10000 + Math.random() * 90000);
+    document.getElementById("ref-code").textContent = refCode;
+
+    // ===== SETUP WHATSAPP LINK (UNCHANGED LOGIC) =====
+    const whatsappMsg = `Hi Sea Mountain, I have made payment of RM${regData.amountPaid} for ${regData.event_name}. Ref: ${refCode}. Name: ${regData.first_name}.`;
+    document.getElementById("whatsappBtn").href = `https://wa.me/60179832739?text=${encodeURIComponent(whatsappMsg)}`;
+
+    // ===== STEP NAVIGATION =====
+    window.goToStep = function(step) {
+        // Hide all panels
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById('panel-' + step).classList.add('active');
+
+        // Update step indicators
+        for (let i = 1; i <= 3; i++) {
+            const ind = document.getElementById('step-indicator-' + i);
+            const circle = document.getElementById('circle-' + i);
+            ind.classList.remove('active', 'done');
+            if (i < step) {
+                ind.classList.add('done');
+                circle.innerHTML = '<i class="fas fa-check" style="font-size:0.7rem;"></i>';
+            } else if (i === step) {
+                ind.classList.add('active');
+                circle.textContent = i;
+            } else {
+                circle.textContent = i;
+            }
+            if (i < 3) {
+                const line = document.getElementById('line-' + i);
+                line.classList.toggle('done', i < step);
+            }
         }
 
-        const regData = JSON.parse(storedData);
+        // Populate confirm summary on step 3
+        if (step === 3) {
+            document.getElementById('confirm-name').textContent = regData.first_name + " " + regData.last_name;
+            document.getElementById('confirm-cat').textContent = regData.category;
+            document.getElementById('confirm-ref').textContent = refCode;
+            document.getElementById('confirm-total').textContent = "RM " + regData.amountPaid;
+        }
+    };
 
-        // 2. PAPARKAN DATA DI UI
-        document.getElementById("display-name").textContent = regData.first_name + " " + regData.last_name;
-        document.getElementById("display-event").textContent = regData.event_name;
-        document.getElementById("display-cat").textContent = regData.category;
-        document.getElementById("display-voucher").textContent = regData.voucherUsed !== "NONE" ? regData.voucherUsed : "-";
-        document.getElementById("total-display").textContent = "RM " + regData.amountPaid;
+    // ===== STEP 1: FILE UPLOAD =====
+    let receiptBase64 = null;
 
-        // Generate Ref Code Unik (cth: SM-12345)
-        const refCode = "SM-" + Math.floor(10000 + Math.random() * 90000);
-        document.getElementById("ref-code").textContent = refCode;
+    document.getElementById('receiptFile').addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
 
-        // Setup WhatsApp Link
-        const whatsappMsg = `Hi Sea Mountain, I have made payment of RM${regData.amountPaid} for ${regData.event_name}. Ref: ${refCode}. Name: ${regData.first_name}.`;
-        document.getElementById("whatsappBtn").href = `https://wa.me/60179832739?text=${encodeURIComponent(whatsappMsg)}`;
+        document.getElementById('fileName').textContent = "✓ " + file.name;
+        document.getElementById('uploadWrapper').classList.add('has-file');
 
-        // File Upload Name Display
-        document.getElementById('receiptFile').addEventListener('change', function(){
-            const fileName = this.files[0] ? this.files[0].name : "";
-            document.getElementById('fileName').textContent = fileName;
+        // Show preview
+        const preview = document.getElementById('receiptPreview');
+        preview.style.display = 'block';
+        preview.src = URL.createObjectURL(file);
+
+        // Convert to base64 for Firebase storage
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            receiptBase64 = e.target.result; // full base64 string
+            document.getElementById('nextToStep2').disabled = false;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ===== STEP 2: WHATSAPP =====
+    let whatsappSent = false;
+
+    window.markWhatsappSent = function() {
+        whatsappSent = true;
+        const waBtn = document.getElementById('whatsappBtn');
+        waBtn.classList.add('sent');
+        waBtn.innerHTML = '<i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Dihantar ✓';
+
+        document.getElementById('waSentNote').style.display = 'block';
+        document.getElementById('nextToStep3').disabled = false;
+    };
+
+    // ===== STEP 3: SUBMIT (UNCHANGED CORE LOGIC + RECEIPT ADDED) =====
+    window.submitPayment = function() {
+        const btn = document.getElementById('confirmBtn');
+        btn.innerText = "PROCESSING...";
+        btn.disabled = true;
+
+        // Tambah info tambahan (UNCHANGED)
+        regData.paymentRef = refCode;
+        regData.status = "Paid";
+        regData.paymentMethod = "Bank Transfer";
+        regData.whatsappSent = true; // NEW: log that WA was sent
+
+        // NEW: Simpan base64 resit dalam data (compress jika perlu)
+        if (receiptBase64) {
+            regData.receiptImage = receiptBase64;
+        }
+
+        // A. SIMPAN KE FIREBASE (UNCHANGED)
+        const regRef = push(ref(db, 'registrations/' + regData.event_code));
+        const newRegKey = regRef.key;
+
+        set(regRef, regData).then(() => {
+
+            // B. UPDATE COUNTER (UNCHANGED)
+            const eventCountRef = ref(db, 'events/' + regData.event_code + '/registered');
+            runTransaction(eventCountRef, (current) => (current || 0) + 1);
+
+            // C. UPDATE VOUCHER (UNCHANGED)
+            if (regData.voucherUsed && regData.voucherUsed !== "NONE") {
+                const voucherRef = ref(db, 'vouchers/' + regData.voucherUsed + '/used');
+                runTransaction(voucherRef, (current) => (current || 0) + 1);
+            }
+
+            // D. HANTAR EMAIL (UNCHANGED)
+            const emailParams = {
+                to_name: regData.first_name + " " + regData.last_name,
+                to_email: regData.email,
+                event_name: regData.event_name,
+                amount: regData.amountPaid,
+                date: regData.registration_time,
+                category: regData.category,
+                tshirt: regData.tshirt_size,
+                voucher: regData.voucherUsed,
+                reg_id: newRegKey,
+                reply_to: "support@seamountain.com" 
+            };
+
+            emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams)
+            .then(() => { console.log("Email sent"); });
+
+            // E. BERSIHKAN SESSION & REDIRECT (UNCHANGED)
+            sessionStorage.removeItem('tempRegistration');
+            alert("Payment Submitted! Please check your email for the receipt and QR Code.");
+            window.location.href = `ticket.html?eid=${regData.event_code}&uid=${newRegKey}`;
+
+        }).catch((error) => {
+            alert("Error saving data: " + error.message);
+            btn.innerText = "✓ CONFIRM & SUBMIT PAYMENT";
+            btn.disabled = false;
         });
-
-        // 3. HANDLE SUBMIT (SIMPAN KE DB & HANTAR EMAIL)
-        document.getElementById("paymentForm").addEventListener("submit", function(e){
-            e.preventDefault();
-
-            const btn = document.getElementById('confirmBtn');
-            btn.innerText = "PROCESSING...";
-            btn.disabled = true;
-
-            // Tambah info tambahan sebelum save
-            regData.paymentRef = refCode;
-            regData.status = "Paid"; // Terus set Paid sebab dah upload resit (atau boleh set 'Pending Verification')
-            regData.paymentMethod = "Bank Transfer";
-
-            // A. SIMPAN KE FIREBASE
-            const regRef = push(ref(db, 'registrations/' + regData.event_code));
-            const newRegKey = regRef.key; // ID Unik
-
-            set(regRef, regData).then(() => {
-                
-                // B. UPDATE COUNTER PESERTA
-                const eventCountRef = ref(db, 'events/' + regData.event_code + '/registered');
-                runTransaction(eventCountRef, (current) => (current || 0) + 1);
-
-                // C. UPDATE VOUCHER (JIKA ADA)
-                if (regData.voucherUsed && regData.voucherUsed !== "NONE") {
-                    const voucherRef = ref(db, 'vouchers/' + regData.voucherUsed + '/used');
-                    runTransaction(voucherRef, (current) => (current || 0) + 1);
-                }
-
-                // D. HANTAR EMAIL (RESIT)
-                const emailParams = {
-                    to_name: regData.first_name + " " + regData.last_name,
-                    to_email: regData.email,
-                    event_name: regData.event_name,
-                    amount: regData.amountPaid,
-                    date: regData.registration_time,
-                    category: regData.category,
-                    tshirt: regData.tshirt_size,
-                    voucher: regData.voucherUsed,
-                    reg_id: newRegKey, // QR Code ID
-                    reply_to: "support@seamountain.com" 
-                };
-
-                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams)
-                .then(() => {
-                    console.log("Email sent");
-                });
-
-                // E. BERSIHKAN SESSION & SELESAI
-                sessionStorage.removeItem('tempRegistration');
-                
-                alert("Payment Submitted! Please check your email for the receipt and QR Code.");
-                
-                // Redirect ke Ticket Page (Bawa ID sekali)
-                window.location.href = `ticket.html?eid=${regData.event_code}&uid=${newRegKey}`;
-
-            }).catch((error) => {
-                alert("Error saving data: " + error.message);
-                btn.innerText = "SUBMIT PAYMENT";
-                btn.disabled = false;
-            });
-        });
-    </script>
+    };
+</script>
 
 </body>
 </html>
