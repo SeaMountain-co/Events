@@ -278,7 +278,14 @@
                     const participants = allRegistrations[eventId];
                     Object.keys(participants).forEach(regId => {
                         const data = participants[regId];
-                        if (data.userId === user.uid || data.email === user.email) {
+
+                        // ===== CHANGE: Only render tickets that BELONG to this user
+                        // AND have status === "Paid". Pending tickets stay hidden
+                        // here; admin can still see them in the admin panel.
+                        const isOwner = data.userId === user.uid || data.email === user.email;
+                        const isPaid  = data.status && data.status.toLowerCase() === 'paid';
+
+                        if (isOwner && isPaid) {
                             hasTickets = true;
                             renderTicket(regId, eventId, data, eventDetails);
                         }
