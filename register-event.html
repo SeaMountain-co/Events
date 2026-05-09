@@ -403,6 +403,42 @@
         }
     }
 
+    // =====================================================
+    // CHANGE 3: Detect team size from category name.
+    // Priority order:
+    //   1. "Team of N" / "N-Person" / "N-Pax" patterns
+    //   2. Named groups: Solo, Duo, Trio, Quad
+    //   3. Legacy duration codes: 24H → 4, 12H → 2
+    //   4. Default: 1
+    //
+    // Why: previously "Team of 3 - 12H" wrongly matched
+    // "12H" first and gave 2 racers instead of 3.
+    // =====================================================
+    function getTeamSize(catName) {
+        if (!catName) return 1;
+
+        // 1. Explicit "Team of N"
+        const teamOfMatch = catName.match(/Team\s*of\s*(\d+)/i);
+        if (teamOfMatch) return parseInt(teamOfMatch[1]);
+
+        // 2. "N-Person", "N Person", "N-Pax", "N Pax", etc.
+        const personMatch = catName.match(/(\d+)[-\s]*(Person|Pax|People|Member|Racer)/i);
+        if (personMatch) return parseInt(personMatch[1]);
+
+        // 3. Named team-size groups (check BEFORE duration codes)
+        if (/\bSolo\b|\bIndividual\b|\bSingle\b/i.test(catName)) return 1;
+        if (/\bDuo\b/i.test(catName))  return 2;
+        if (/\bTrio\b/i.test(catName)) return 3;
+        if (/\bQuad\b|\bQuartet\b/i.test(catName)) return 4;
+
+        // 4. Legacy fallback — only if no team indicator found
+        if (/24H/i.test(catName)) return 4;
+        if (/12H/i.test(catName)) return 2;
+
+        // 5. Default
+        return 1;
+    }
+
     function buildDynamicUI(questions) {
         const dynContainer = document.getElementById('dynamicStepsContainer');
         dynContainer.innerHTML = "";
@@ -525,8 +561,8 @@
         const container = document.getElementById('racersContainer');
         container.innerHTML = "";
 
-        // Determine racer count — UNCHANGED
-        let count = catName.includes('24H') ? 4 : (catName.includes('12H') ? 2 : 1);
+        // Determine racer count from category name (smart detection)
+        let count = getTeamSize(catName);
 
         for (let i = 1; i <= count; i++) {
             container.innerHTML += `
@@ -625,7 +661,7 @@
 
         let racers = [];
         const cat = document.getElementById('raceCategory').value;
-        let count = cat.includes('24H') ? 4 : (cat.includes('12H') ? 2 : 1);
+        let count = getTeamSize(cat);
 
         for (let i = 1; i <= count; i++) {
             racers.push({
