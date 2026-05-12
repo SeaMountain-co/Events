@@ -54,6 +54,145 @@
         .checkbox-item { display: flex; align-items: flex-start; gap: 12px; font-size: 0.95rem; color: #ddd; cursor: pointer; line-height: 1.4; }
         .checkbox-item input { margin-top: 4px; accent-color: var(--brand-yellow); width: 18px; height: 18px; flex-shrink: 0; }
 
+        /* =====================================================
+           NEW: Checkbox + PDF Link layout
+        ===================================================== */
+        .checkbox-with-pdf {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .checkbox-with-pdf .checkbox-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* PDF Link Badge */
+        .pdf-link-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(74, 138, 204, 0.15);
+            color: #6ba6dd;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            border: 1px solid rgba(74, 138, 204, 0.35);
+            transition: all 0.2s ease;
+            position: relative;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            align-self: flex-start;
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .pdf-link-badge i { font-size: 0.85rem; }
+        .pdf-link-badge:hover {
+            background: rgba(74, 138, 204, 0.3);
+            border-color: #6ba6dd;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(74, 138, 204, 0.3);
+        }
+
+        /* Folder variant — orange tone to distinguish from PDF */
+        .pdf-link-badge.is-folder {
+            background: rgba(255, 165, 60, 0.15);
+            color: #ffaa55;
+            border-color: rgba(255, 165, 60, 0.35);
+        }
+        .pdf-link-badge.is-folder:hover {
+            background: rgba(255, 165, 60, 0.3);
+            border-color: #ffaa55;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(255, 165, 60, 0.3);
+        }
+        .pdf-link-badge.is-folder .preview-hint i { color: #ffaa55; }
+
+        /* PDF Preview Tooltip (hover) */
+        .pdf-preview-tooltip {
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            width: 420px;
+            height: 520px;
+            max-width: 90vw;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.1);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+            z-index: 1000;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .pdf-link-badge:hover .pdf-preview-tooltip,
+        .pdf-link-badge:focus .pdf-preview-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+        .pdf-preview-tooltip iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+            position: relative;
+            z-index: 1;
+        }
+        /* Loading indicator behind iframe */
+        .pdf-preview-tooltip::before {
+            content: '\f1c1';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ccc; font-size: 2.5rem; z-index: 0;
+        }
+        /* Arrow pointing down to badge */
+        .pdf-preview-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 9px solid transparent;
+            border-right: 9px solid transparent;
+            border-top: 9px solid #fff;
+            z-index: 2;
+        }
+        /* "Click to open" hint at top of preview */
+        .pdf-preview-tooltip .preview-hint {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 6px 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            z-index: 3;
+            pointer-events: none;
+        }
+        .pdf-preview-tooltip .preview-hint i { margin-right: 5px; color: #6ba6dd; }
+
+        /* Mobile: hide hover preview entirely, badge still works as link */
+        @media (max-width: 768px) {
+            .pdf-preview-tooltip { display: none !important; }
+        }
+
         .nav-buttons { display: flex; justify-content: space-between; margin-top: 40px; }
         .btn-nav { padding: 15px 35px; border-radius: 8px; font-weight: 800; text-transform: uppercase; cursor: pointer; border: none; transition: all 0.3s; font-size: 0.9rem; }
         .btn-prev { background: #333; color: #fff; } .btn-prev:hover { background: #444; }
@@ -439,6 +578,55 @@
         return 1;
     }
 
+    // =====================================================
+    // CHANGE 4: Auto-detect link type (file vs folder) and
+    // convert common share links into embeddable preview URLs.
+    //
+    // Supported:
+    //   - Google Drive file:   /file/d/ID/view   →  /file/d/ID/preview
+    //   - Google Drive folder: /drive/folders/ID →  /embeddedfolderview?id=ID#grid
+    //   - Dropbox file:        ?dl=0             →  ?raw=1
+    //   - Dropbox folder:      /sh/  or  /scl/fo/  →  treated as folder
+    //
+    // Plain URLs (e.g. direct .pdf hosted anywhere) returned unchanged.
+    // =====================================================
+    function getAttachmentType(url) {
+        if (!url) return 'none';
+
+        // Google Drive folder
+        if (/drive\.google\.com\/drive\/folders\//i.test(url)) return 'folder';
+
+        // Dropbox folder (legacy /sh/ and new /scl/fo/)
+        if (/dropbox\.com\/(sh|scl\/fo)\//i.test(url)) return 'folder';
+
+        // Anything else → treat as single file (PDF, doc, image, etc.)
+        return 'file';
+    }
+
+    function toEmbeddableUrl(url) {
+        if (!url) return url;
+
+        // Google Drive FOLDER → embedded folder view (file browser)
+        const gdriveFolder = url.match(/drive\.google\.com\/drive\/folders\/([^\/\?#]+)/i);
+        if (gdriveFolder) {
+            return `https://drive.google.com/embeddedfolderview?id=${gdriveFolder[1]}#grid`;
+        }
+
+        // Google Drive FILE → /preview (embeddable)
+        const gdriveFile = url.match(/drive\.google\.com\/file\/d\/([^\/\?#]+)/i);
+        if (gdriveFile) {
+            return `https://drive.google.com/file/d/${gdriveFile[1]}/preview`;
+        }
+
+        // Dropbox file: ?dl=0|1 → ?raw=1
+        if (/dropbox\.com/i.test(url)) {
+            return url.replace(/\?dl=[01]/, '?raw=1');
+        }
+
+        // Default: return as-is (direct hosted PDFs, etc.)
+        return url;
+    }
+
     function buildDynamicUI(questions) {
         const dynContainer = document.getElementById('dynamicStepsContainer');
         dynContainer.innerHTML = "";
@@ -477,7 +665,44 @@
                     q.options.forEach(opt => { html += `<option value="${opt}">${opt}</option>`; });
                     html += `</select>`;
                 } else if (q.type === 'checkbox') {
-                    html += `<div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" id="customQ_${index}" ${q.required ? 'required' : ''}> ${q.question_text}</label></div>`;
+                    // =====================================================
+                    // CHANGE 5: Checkbox can carry an optional pdf_link.
+                    // The link can be EITHER a single PDF/file URL OR
+                    // a folder URL (e.g. Google Drive folder). The type
+                    // is auto-detected — folder shows orange "View Folder"
+                    // badge, file shows blue "View PDF" badge.
+                    // =====================================================
+                    if (q.pdf_link) {
+                        const attachType = getAttachmentType(q.pdf_link);
+                        const isFolder   = attachType === 'folder';
+                        const embedUrl   = toEmbeddableUrl(q.pdf_link);
+                        const badgeIcon  = isFolder ? 'fa-folder-open' : 'fa-file-pdf';
+                        const badgeLabel = isFolder ? 'View Folder'    : 'View PDF';
+                        const hintText   = isFolder ? 'Click to browse all files' : 'Click to open full document';
+                        const badgeClass = isFolder ? 'pdf-link-badge is-folder'  : 'pdf-link-badge';
+
+                        html += `
+                            <div class="checkbox-group">
+                                <div class="checkbox-with-pdf">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" id="customQ_${index}" ${q.required ? 'required' : ''}>
+                                        ${q.question_text}
+                                    </label>
+                                    <a href="${q.pdf_link}" target="_blank" rel="noopener noreferrer"
+                                       class="${badgeClass}"
+                                       title="Click to open in new tab — hover to preview">
+                                        <i class="fas ${badgeIcon}"></i> ${badgeLabel}
+                                        <span class="pdf-preview-tooltip">
+                                            <span class="preview-hint"><i class="fas fa-external-link-alt"></i> ${hintText}</span>
+                                            <iframe src="${embedUrl}" loading="lazy" title="Attachment preview"></iframe>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>`;
+                    } else {
+                        // Original (no attachment) — unchanged
+                        html += `<div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" id="customQ_${index}" ${q.required ? 'required' : ''}> ${q.question_text}</label></div>`;
+                    }
                 }
                 html += `</div>`;
                 currentCardBody.insertAdjacentHTML('beforeend', html);
