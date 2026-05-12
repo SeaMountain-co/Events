@@ -27,6 +27,11 @@
         .form-input, select { width: 100%; padding: 12px; background: var(--input-bg); border: 1px solid #444; border-radius: 6px; color: #fff; outline: none; font-family: 'Montserrat'; transition: 0.3s; font-size: 0.9rem; }
         .form-input:focus { border-color: var(--brand-red); }
 
+        /* PDF Link special styling */
+        .form-input.q-pdf-link { border-color: #2a4a6a; }
+        .form-input.q-pdf-link:focus { border-color: #4a8acc; box-shadow: 0 0 0 2px rgba(74, 138, 204, 0.2); }
+        .form-input.q-pdf-link::placeholder { color: #557; font-style: italic; }
+
         /* ROW STYLE */
         .question-builder-row { 
             display: grid; 
@@ -68,6 +73,8 @@
         .is-header .btn-toggle-row { color: var(--brand-red); border-color: var(--brand-red); }
 
         .input-label { font-size: 0.65rem; color: #888; display: block; margin-bottom: 5px; text-transform: uppercase; font-weight: 700; }
+        .input-label.is-pdf { color: #4a8acc; }
+        .input-label.is-pdf i { margin-right: 4px; }
 
         .question-builder-row.minimized { background: #0f1014; border-color: #222; align-items: center; padding: 10px 15px; }
         .question-builder-row.minimized .col-type, .question-builder-row.minimized .col-options, .question-builder-row.minimized .col-req { display: none; }
@@ -76,6 +83,16 @@
         .question-builder-row.minimized .btn-toggle-row i { transform: rotate(-90deg); }
         .question-builder-row.header-collapsed .btn-toggle-row i { transform: rotate(-90deg); }
         .sortable-ghost { opacity: 0.4; background: #333; border: 2px dashed #666; }
+
+        /* PDF badge (shown next to question text in minimized mode) */
+        .pdf-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: rgba(74, 138, 204, 0.15);
+            color: #4a8acc; font-size: 0.65rem; font-weight: 700;
+            padding: 2px 8px; border-radius: 10px;
+            margin-left: 8px; border: 1px solid rgba(74, 138, 204, 0.3);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
 
         .btn-add-question { background: #007bff; color: #fff; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; margin-right: 10px;}
         .btn-template { background: #28a745; color: #fff; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 10px; }
@@ -113,7 +130,8 @@
             <span class="section-title">Step 2: Build Questions Structure</span>
             <p style="color:#aaa; font-size:0.9rem; margin-bottom:20px;">
                 <i class="fas fa-arrows-alt"></i> <strong>Drag the 6-dots handle</strong> to reorder.<br>
-                Use "Section Header" to create a new PAGE/STEP in the registration form.
+                Use "Section Header" to create a new PAGE/STEP in the registration form.<br>
+                <i class="fas fa-paperclip" style="color:#4a8acc;"></i> <strong>Checkbox type</strong> can attach a <strong>PDF link</strong> OR a <strong>folder link</strong> (e.g. Google Drive folder with Waiver + Medical Declaration + T&amp;C). System will auto-detect — user can review before agreeing.
             </p>
             
             <div id="questionBuilderContainer"></div>
@@ -203,8 +221,9 @@
                     if(Array.isArray(qs)) {
                         qs.forEach(q => {
                             const opts = Array.isArray(q.options) ? q.options.join(',') : "";
+                            const pdfLink = q.pdf_link || ""; // NEW: read pdf_link if present
                             const isMin = q.type !== 'header'; 
-                            addQuestionRow(q.question_text, q.type, opts, q.required, isMin);
+                            addQuestionRow(q.question_text, q.type, opts, q.required, isMin, pdfLink);
                         });
                         refreshGroupStyling();
                     }
@@ -214,7 +233,8 @@
             });
         }
 
-        window.addQuestionRow = function(qText="", qType="text", qOptions="", qReq=true, minimized=false) {
+        // ===== addQuestionRow now accepts qPdfLink param =====
+        window.addQuestionRow = function(qText="", qType="text", qOptions="", qReq=true, minimized=false, qPdfLink="") {
             const container = document.getElementById('questionBuilderContainer');
             if(container.innerHTML.includes('<p')) container.innerHTML = "";
 
@@ -225,8 +245,38 @@
 
             div.className = className;
             
-            const isSelect = qType === 'select';
-            const isHeader = qType === 'header';
+            const isSelect   = qType === 'select';
+            const isCheckbox = qType === 'checkbox';
+            const isHeader   = qType === 'header';
+
+            // Build options/pdf column based on type
+            let colLabelHtml, optionsStyle, pdfStyle, optionsDisabled, optionsOpacity, optionsPlaceholder;
+
+            if (isCheckbox) {
+                colLabelHtml      = '<i class="fas fa-paperclip"></i> PDF / FOLDER LINK (OPTIONAL)';
+                optionsStyle      = 'display:none;';
+                pdfStyle          = 'display:block;';
+                optionsDisabled   = 'disabled';
+                optionsOpacity    = '0.3';
+                optionsPlaceholder = 'N/A';
+            } else if (isSelect) {
+                colLabelHtml      = 'OPTIONS (Comma split)';
+                optionsStyle      = 'display:block; opacity:1;';
+                pdfStyle          = 'display:none;';
+                optionsDisabled   = '';
+                optionsOpacity    = '1';
+                optionsPlaceholder = 'e.g. Yes, No';
+            } else {
+                colLabelHtml      = 'OPTIONS (Comma split)';
+                optionsStyle      = 'display:block; opacity:0.3;';
+                pdfStyle          = 'display:none;';
+                optionsDisabled   = 'disabled';
+                optionsOpacity    = '0.3';
+                optionsPlaceholder = 'N/A';
+            }
+
+            const colVisibility = isHeader ? 'hidden' : 'visible';
+            const labelClass    = isCheckbox ? 'input-label q-col-label is-pdf' : 'input-label q-col-label';
             
             div.innerHTML = `
                 <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
@@ -240,17 +290,29 @@
                 <div class="col-type">
                     <label class="input-label">TYPE</label>
                     <select class="form-input q-type" onchange="handleTypeChange(this)">
-                        <option value="text" ${qType === 'text' ? 'selected' : ''}>Text Box</option>
-                        <option value="select" ${qType === 'select' ? 'selected' : ''}>Dropdown</option>
+                        <option value="text"     ${qType === 'text'     ? 'selected' : ''}>Text Box</option>
+                        <option value="select"   ${qType === 'select'   ? 'selected' : ''}>Dropdown</option>
                         <option value="checkbox" ${qType === 'checkbox' ? 'selected' : ''}>Checkbox</option>
-                        <option value="datetime" ${qType === 'datetime' ? 'selected' : ''}>Date & Time Picker</option> <option value="header" ${qType === 'header' ? 'selected' : ''}>-- SECTION HEADER --</option>
+                        <option value="datetime" ${qType === 'datetime' ? 'selected' : ''}>Date &amp; Time Picker</option>
+                        <option value="header"   ${qType === 'header'   ? 'selected' : ''}>-- SECTION HEADER --</option>
                     </select>
                 </div>
 
-                <div class="col-options">
-                    <label class="input-label">OPTIONS (Comma split)</label>
-                    <input type="text" class="form-input q-options" placeholder="e.g. Yes, No" value="${qOptions}" 
-                        ${isSelect ? '' : 'disabled'} style="${isSelect ? '' : 'opacity:0.3; visibility:' + (isHeader ? 'hidden' : 'visible')}">
+                <div class="col-options" style="visibility:${colVisibility}">
+                    <label class="${labelClass}">${colLabelHtml}</label>
+
+                    <!-- Options input (for select / others) -->
+                    <input type="text" class="form-input q-options"
+                        placeholder="${optionsPlaceholder}"
+                        value="${qOptions}"
+                        style="${optionsStyle}"
+                        ${optionsDisabled}>
+
+                    <!-- PDF link input (for checkbox only) -->
+                    <input type="url" class="form-input q-pdf-link"
+                        placeholder="PDF: https://...waiver.pdf  •  Folder: https://drive.google.com/drive/folders/..."
+                        value="${qPdfLink}"
+                        style="${pdfStyle}">
                 </div>
 
                 <div class="col-req" style="text-align:center; visibility:${isHeader ? 'hidden' : 'visible'}">
@@ -305,25 +367,46 @@
             });
         }
 
+        // ===== Updated to toggle PDF link input visibility =====
         window.handleTypeChange = function(selectElem) {
-            const row = selectElem.parentElement.parentElement;
+            const row         = selectElem.parentElement.parentElement;
             const optionInput = row.querySelector('.q-options');
-            const reqDiv = row.querySelector('.col-req');
-            
-            if(selectElem.value === 'header') {
-                optionInput.style.visibility = 'hidden';
-                reqDiv.style.visibility = 'hidden';
+            const pdfInput    = row.querySelector('.q-pdf-link');
+            const colLabel    = row.querySelector('.q-col-label');
+            const colOptions  = row.querySelector('.col-options');
+            const reqDiv      = row.querySelector('.col-req');
+
+            const newType = selectElem.value;
+
+            if (newType === 'header') {
+                colOptions.style.visibility = 'hidden';
+                reqDiv.style.visibility     = 'hidden';
             } else {
-                reqDiv.style.visibility = 'visible';
-                optionInput.style.visibility = 'visible';
-                if(selectElem.value === 'select') {
-                    optionInput.disabled = false;
-                    optionInput.style.opacity = "1";
-                    optionInput.placeholder = "e.g. Option A, Option B";
+                colOptions.style.visibility = 'visible';
+                reqDiv.style.visibility     = 'visible';
+
+                if (newType === 'checkbox') {
+                    // Switch column to PDF link mode
+                    colLabel.innerHTML        = '<i class="fas fa-paperclip"></i> PDF / FOLDER LINK (OPTIONAL)';
+                    colLabel.classList.add('is-pdf');
+                    optionInput.style.display = 'none';
+                    pdfInput.style.display    = 'block';
+                } else if (newType === 'select') {
+                    colLabel.textContent      = 'OPTIONS (Comma split)';
+                    colLabel.classList.remove('is-pdf');
+                    optionInput.style.display = 'block';
+                    optionInput.disabled      = false;
+                    optionInput.style.opacity = '1';
+                    optionInput.placeholder   = 'e.g. Option A, Option B';
+                    pdfInput.style.display    = 'none';
                 } else {
-                    optionInput.disabled = true;
-                    optionInput.style.opacity = "0.3";
-                    optionInput.placeholder = "N/A";
+                    colLabel.textContent      = 'OPTIONS (Comma split)';
+                    colLabel.classList.remove('is-pdf');
+                    optionInput.style.display = 'block';
+                    optionInput.disabled      = true;
+                    optionInput.style.opacity = '0.3';
+                    optionInput.placeholder   = 'N/A';
+                    pdfInput.style.display    = 'none';
                 }
             }
             refreshGroupStyling();
@@ -334,60 +417,72 @@
                 const container = document.getElementById('questionBuilderContainer');
                 if(container.innerHTML.includes('<p')) container.innerHTML = "";
 
+                // Signature: (qText, qType, qOptions, qReq, minimized, qPdfLink)
+                // PDF links can be filled in later by admin per item.
                 addQuestionRow("DOCUMENT DECLARATIONS (MANDATORY)", "header", "", false, false);
-                addQuestionRow("I agree to sign Waiver / Indemnity Form", "checkbox", "", true, true);
-                addQuestionRow("I agree to sign Medical Declaration", "checkbox", "", true, true);
-                addQuestionRow("I understand checking-in is mandatory", "checkbox", "", true, true);
-                addQuestionRow("I understand racer briefing is mandatory", "checkbox", "", true, true);
+                addQuestionRow("I agree to sign Waiver / Indemnity Form", "checkbox", "", true, true, "");
+                addQuestionRow("I agree to sign Medical Declaration", "checkbox", "", true, true, "");
+                addQuestionRow("I understand checking-in is mandatory", "checkbox", "", true, true, "");
+                addQuestionRow("I understand racer briefing is mandatory", "checkbox", "", true, true, "");
 
                 addQuestionRow("BIKE INFORMATION", "header", "", false, false);
                 addQuestionRow("Bike Transport Required?", "select", "Yes - Airport Transfer, No", true, true);
-                addQuestionRow("Ack: I must pack my own bike", "checkbox", "", true, true);
-                addQuestionRow("Ack: Bike box must match wristband", "checkbox", "", true, true);
+                addQuestionRow("Ack: I must pack my own bike", "checkbox", "", true, true, "");
+                addQuestionRow("Ack: Bike box must match wristband", "checkbox", "", true, true, "");
 
                 addQuestionRow("WATER LEG DECLARATIONS", "header", "", false, false);
-                addQuestionRow("PFD: I will bring my own PFD", "checkbox", "", true, true);
-                addQuestionRow("PFD: I agree to wear PFD at all times on water", "checkbox", "", true, true);
-                addQuestionRow("Roping: I will bring my own gear", "checkbox", "", true, true);
-                addQuestionRow("Roping: I agree to use gear at all times", "checkbox", "", true, true);
+                addQuestionRow("PFD: I will bring my own PFD", "checkbox", "", true, true, "");
+                addQuestionRow("PFD: I agree to wear PFD at all times on water", "checkbox", "", true, true, "");
+                addQuestionRow("Roping: I will bring my own gear", "checkbox", "", true, true, "");
+                addQuestionRow("Roping: I agree to use gear at all times", "checkbox", "", true, true, "");
 
                 addQuestionRow("HOMESTAY / ACCOMMODATION", "header", "", false, false);
                 addQuestionRow("Homestay Participation", "select", "Yes - Official Longhouse, No - Own Arrangement", true, true);
 
                 addQuestionRow("TRANSPORT REQUIREMENTS (Bintulu Airport)", "header", "", false, false);
                 addQuestionRow("Arrival Flight Number", "text", "", false, true);
-                addQuestionRow("Arrival Date & Time", "datetime", "", false, true); // USING DATETIME
-                addQuestionRow("Ack: Responsible for bike during transfers", "checkbox", "", true, true);
-                addQuestionRow("Transfer: Briefing to Homestay", "checkbox", "", false, true);
-                addQuestionRow("Transfer: Finish Line to Homestay", "checkbox", "", false, true);
+                addQuestionRow("Arrival Date & Time", "datetime", "", false, true);
+                addQuestionRow("Ack: Responsible for bike during transfers", "checkbox", "", true, true, "");
+                addQuestionRow("Transfer: Briefing to Homestay", "checkbox", "", false, true, "");
+                addQuestionRow("Transfer: Finish Line to Homestay", "checkbox", "", false, true, "");
 
                 refreshGroupStyling();
-                alert("Template loaded!");
+                alert("Template loaded! Tip: For Waiver / Medical Declaration items, expand the row and add the PDF link.");
             }
         }
 
+        // ===== Save now includes pdf_link for checkbox type =====
         window.saveQuestions = function() {
             const eventId = document.getElementById('eventSelect').value;
             const qRows = document.querySelectorAll('.question-builder-row');
             let questionsData = [];
 
             qRows.forEach(row => {
-                const qText = row.querySelector('.q-text').value.trim();
-                const qType = row.querySelector('.q-type').value;
+                const qText       = row.querySelector('.q-text').value.trim();
+                const qType       = row.querySelector('.q-type').value;
                 const qOptionsStr = row.querySelector('.q-options').value.trim();
-                const qReq = row.querySelector('.q-req').checked;
+                const qPdfLink    = row.querySelector('.q-pdf-link').value.trim();
+                const qReq        = row.querySelector('.q-req').checked;
 
                 if(qText) {
                     let optsArray = [];
                     if(qType === 'select' && qOptionsStr) {
                         optsArray = qOptionsStr.split(',').map(s => s.trim());
                     }
-                    questionsData.push({
+
+                    const questionObj = {
                         question_text: qText,
                         type: qType,
                         options: optsArray,
                         required: qReq
-                    });
+                    };
+
+                    // Only attach pdf_link for checkbox type, and only if non-empty
+                    if (qType === 'checkbox' && qPdfLink) {
+                        questionObj.pdf_link = qPdfLink;
+                    }
+
+                    questionsData.push(questionObj);
                 }
             });
 
