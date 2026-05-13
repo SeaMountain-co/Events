@@ -29,16 +29,12 @@
             background-image: radial-gradient(circle at 50% 50%, rgba(255,0,0,0.05) 0%, transparent 60%);
             padding: 20px;
         }
-
-        /* MAIN CONTAINER */
         .payment-container {
             display: flex; max-width: 900px; width: 100%;
             background: var(--card-bg); border-radius: 20px; overflow: hidden;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             border: 1px solid rgba(255,255,255,0.05); flex-wrap: wrap;
         }
-
-        /* ORDER SUMMARY — UNCHANGED */
         .order-summary {
             flex: 1; padding: 40px; background: rgba(0,0,0,0.2);
             border-right: 1px solid rgba(255,255,255,0.05); min-width: 300px;
@@ -49,17 +45,9 @@
         }
         .summary-item { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--text-gray); font-size: 0.9rem; }
         .summary-item.total { border-top: 1px solid #333; padding-top: 15px; margin-top: 20px; color: #fff; font-weight: bold; font-size: 1.2rem; }
-
-        /* PAYMENT SIDE */
         .payment-details { flex: 1.5; padding: 40px; min-width: 300px; }
-
-        /* SCREENS */
         .screen { display: none; }
         .screen.active { display: block; }
-
-        /* ============================
-           SCREEN 0 — METHOD SELECTION
-        ============================ */
         .method-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 5px; }
         .method-subtitle { color: var(--text-gray); font-size: 0.85rem; margin-bottom: 25px; }
         .method-cards { display: flex; gap: 14px; flex-direction: column; }
@@ -87,30 +75,13 @@
         .method-arrow { color: #444; font-size: 1rem; opacity: 0; transform: translateX(-5px); transition: all 0.2s; }
         .method-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
         .method-tag { font-size: 0.65rem; background: #2a2d36; color: #888; padding: 2px 8px; border-radius: 20px; border: 1px solid #333; }
-
-        /* ============================
-           SHARED COMPONENTS
-        ============================ */
         .bank-info-box { background: #252830; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
         .bank-name { font-weight: bold; color: var(--brand-red); margin-bottom: 5px; display: block; }
         .bank-details { font-size: 0.9rem; color: #ccc; line-height: 1.6; }
-
-        /* SWIFT block for overseas participants (NEW) */
-        .swift-block {
-            border-top: 1px dashed #444;
-            margin-top: 12px;
-            padding-top: 10px;
-            font-size: 0.82rem;
-            color: #999;
-            line-height: 1.6;
-        }
-        .swift-block .swift-label {
-            display: flex; align-items: center; gap: 6px;
-            color: #ccc; font-weight: 600; margin-bottom: 3px;
-        }
+        .swift-block { border-top: 1px dashed #444; margin-top: 12px; padding-top: 10px; font-size: 0.82rem; color: #999; line-height: 1.6; }
+        .swift-block .swift-label { display: flex; align-items: center; gap: 6px; color: #ccc; font-weight: 600; margin-bottom: 3px; }
         .swift-block .swift-label i { color: var(--brand-red); font-size: 0.85rem; }
         .swift-block strong { color: #fff; letter-spacing: 0.5px; }
-
         .steps-wrapper { display: flex; align-items: center; margin-bottom: 22px; }
         .step { display: flex; align-items: center; gap: 7px; flex: 1; }
         .step-circle {
@@ -126,13 +97,10 @@
         .step.done .step-circle { border-color: var(--green); color: #fff; background: var(--green); }
         .step.done .step-label { color: var(--green); }
         .step-line.done { background: var(--green); }
-
         .step-panel { display: none; }
         .step-panel.active { display: block; }
-
         .form-group { margin-bottom: 18px; }
         .form-label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-gray); font-weight: 600; }
-
         .file-upload-wrapper {
             border: 2px dashed #444; padding: 25px 20px; text-align: center;
             border-radius: 10px; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.02);
@@ -140,7 +108,6 @@
         .file-upload-wrapper:hover { border-color: var(--brand-red); background: rgba(255,0,0,0.04); }
         .file-upload-wrapper.has-file { border-color: var(--green); border-style: solid; background: rgba(0,204,102,0.05); }
         #receiptPreview { max-width: 100%; max-height: 140px; border-radius: 8px; margin-top: 12px; display: none; }
-
         .next-btn, .pay-btn {
             width: 100%; padding: 14px; background: linear-gradient(45deg, var(--brand-red), #aa0000);
             border: none; border-radius: 8px; color: #fff; font-weight: 800;
@@ -149,17 +116,14 @@
         }
         .next-btn:hover, .pay-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,0,0,0.4); }
         .next-btn:disabled, .pay-btn:disabled { background: #333; color: #555; cursor: not-allowed; transform: none; box-shadow: none; }
-
         .back-link {
             width: 100%; padding: 10px; background: none; border: none;
             color: #555; font-size: 0.8rem; cursor: pointer; margin-top: 8px;
             font-family: 'Montserrat', sans-serif;
         }
         .back-link:hover { color: #888; }
-
         .wa-instruction { background: #1a2a1e; border: 1px solid #1f4a2a; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
         .wa-instruction p { font-size: 0.85rem; color: #aaa; line-height: 1.6; }
-
         .wa-btn {
             width: 100%; padding: 15px; background: #128C7E; border: none;
             border-radius: 8px; color: #fff; font-weight: 800; text-transform: uppercase;
@@ -169,29 +133,21 @@
         }
         .wa-btn:hover { background: #075E54; transform: translateY(-2px); box-shadow: 0 5px 20px rgba(18,140,126,0.4); }
         .wa-btn.sent { background: var(--green); cursor: default; transform: none; pointer-events: none; }
-
         .wa-confirm-note { font-size: 0.78rem; color: #555; text-align: center; margin-bottom: 14px; }
         .wa-confirm-note span { color: var(--green); }
-
         .confirm-summary { background: #252830; border-radius: 10px; padding: 18px; margin-bottom: 18px; border: 1px solid #333; }
         .confirm-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #2a2d36; font-size: 0.85rem; }
         .confirm-row:last-child { border-bottom: none; }
         .confirm-row .label { color: #777; }
         .confirm-row .value { color: #fff; font-weight: 600; }
-
         .status-badge {
             display: flex; align-items: center; gap: 8px;
             background: rgba(0,204,102,0.1); border: 1px solid rgba(0,204,102,0.3);
             border-radius: 8px; padding: 10px 15px; margin-bottom: 16px; font-size: 0.82rem; color: var(--green);
         }
-
-        /* ============================
-           SCREEN 2 — TOYYIBPAY
-        ============================ */
         .tp-screen-header { margin-bottom: 20px; }
         .tp-screen-header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 5px; }
         .tp-screen-header p { color: var(--text-gray); font-size: 0.85rem; }
-
         .tp-summary-box { background: #22242e; border: 1px solid #2e3040; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
         .tp-summary-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 0.85rem; border-bottom: 1px solid #2a2d36; }
         .tp-summary-row:last-child { border-bottom: none; }
@@ -199,7 +155,6 @@
         .tp-summary-row .value { color: #fff; font-weight: 600; }
         .tp-amount-row .label { color: #aaa; font-weight: 700; }
         .tp-amount-row .value { color: var(--brand-red); font-size: 1.1rem; font-weight: 800; }
-
         .tp-methods { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
         .tp-method-chip {
             display: flex; align-items: center; gap: 6px;
@@ -207,7 +162,6 @@
             padding: 5px 12px; font-size: 0.75rem; color: #aaa;
         }
         .tp-method-chip i { color: #00cc88; font-size: 0.8rem; }
-
         .tp-pay-btn {
             width: 100%; padding: 16px; border: none; border-radius: 10px;
             background: linear-gradient(135deg, #00b478, #007a50);
@@ -219,17 +173,12 @@
         .tp-pay-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,180,120,0.4); }
         .tp-pay-btn:disabled { background: #333; color: #555; cursor: not-allowed; transform: none; box-shadow: none; }
         .tp-note { font-size: 0.75rem; color: #555; text-align: center; margin-top: 12px; line-height: 1.5; }
-
-        /* ============================
-           SCREEN 3 — TP RETURN
-        ============================ */
         .return-screen { text-align: center; padding: 30px 0; }
         .return-icon { font-size: 3.5rem; margin-bottom: 16px; }
         .return-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
         .return-msg { color: var(--text-gray); font-size: 0.88rem; line-height: 1.6; margin-bottom: 20px; }
         .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.15); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
         @media (max-width: 768px) {
             .payment-container { flex-direction: column; }
             .order-summary { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
@@ -241,7 +190,6 @@
 
 <div class="payment-container">
 
-    <!-- ORDER SUMMARY -->
     <div class="order-summary">
         <h2>Order Summary</h2>
         <div class="summary-item"><span>Runner Name</span><span id="display-name" style="color:white; font-weight:bold;">Loading...</span></div>
@@ -253,12 +201,10 @@
 
     <div class="payment-details">
 
-        <!-- ===== SCREEN 0: CHOOSE PAYMENT METHOD ===== -->
         <div class="screen active" id="screen-method">
             <p class="method-title">Choose Payment Method</p>
             <p class="method-subtitle">Select the payment method that suits you best.</p>
             <div class="method-cards">
-
                 <div class="method-card" onclick="selectMethod('bank')">
                     <div class="method-icon bank"><i class="fas fa-university"></i></div>
                     <div class="method-info">
@@ -275,7 +221,6 @@
                     </div>
                     <i class="fas fa-chevron-right method-arrow"></i>
                 </div>
-
                 <div class="method-card" onclick="selectMethod('toyyibpay')">
                     <div class="method-icon tp"><i class="fas fa-bolt"></i></div>
                     <div class="method-info">
@@ -292,11 +237,9 @@
                     </div>
                     <i class="fas fa-chevron-right method-arrow"></i>
                 </div>
-
             </div>
         </div>
 
-        <!-- ===== SCREEN 1: BANK TRANSFER (3-STEP — EXISTING LOGIC) ===== -->
         <div class="screen" id="screen-bank">
             <div style="margin-bottom:25px;">
                 <h1 style="font-size:1.5rem; font-weight:700; margin-bottom:5px;">Bank Transfer</h1>
@@ -310,12 +253,8 @@
                     Account No: <strong>561172160546</strong><br>
                     Reference: <span id="ref-code" style="color:yellow; font-weight:bold;">...</span>
                 </div>
-
-                <!-- ===== SWIFT INFO FOR OVERSEAS PARTICIPANTS (NEW) ===== -->
                 <div class="swift-block">
-                    <div class="swift-label">
-                        <i class="fas fa-globe"></i> For overseas participants
-                    </div>
+                    <div class="swift-label"><i class="fas fa-globe"></i> For overseas participants</div>
                     SWIFT Code: <strong>MBBEMYKL</strong>
                 </div>
             </div>
@@ -348,11 +287,19 @@
             <!-- Step 2: WhatsApp -->
             <div class="step-panel" id="panel-2">
                 <div class="wa-instruction">
-                    <p>Send your receipt to us via WhatsApp. This is <strong>required</strong> before you can proceed.</p>
+                    <!-- CHANGE 4: Updated instruction text to reflect image will be shared -->
+                    <p>Tap the button below to share your <strong>receipt image + payment details</strong> via WhatsApp. This is <strong>required</strong> before you can proceed.</p>
+                    <p style="margin-top:8px; font-size:0.8rem; color:#666;">
+                        <i class="fas fa-mobile-alt"></i> <em>On mobile: receipt image will be auto-attached.<br>
+                        On desktop: image will be downloaded — please attach it in WhatsApp.</em>
+                    </p>
                 </div>
-                <a href="#" id="whatsappBtn" class="wa-btn" target="_blank" onclick="markWhatsappSent()">
+
+                <!-- CHANGE 3: removed target="_blank", pass event to onclick -->
+                <button id="whatsappBtn" class="wa-btn" onclick="markWhatsappSent(event)">
                     <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Send Receipt via WhatsApp
-                </a>
+                </button>
+
                 <p class="wa-confirm-note" id="waSentNote" style="display:none;">
                     <span>✓ WhatsApp opened.</span> After sending, click the button below.
                 </p>
@@ -371,18 +318,16 @@
                     <div class="confirm-row"><span class="label">Ref No.</span><span class="value" id="confirm-ref" style="color:yellow;">-</span></div>
                     <div class="confirm-row"><span class="label">Total</span><span class="value" id="confirm-total" style="color:var(--brand-red); font-size:1rem;">-</span></div>
                 </div>
-                <button id="confirmBtn" class="pay-btn" onclick="submitBankTransfer()">✓ CONFIRM &amp; SUBMIT PAYMENT</button>
+                <button id="confirmBtn" class="pay-btn" onclick="submitBankTransfer()">&#10003; CONFIRM &amp; SUBMIT PAYMENT</button>
                 <button class="back-link" onclick="goToStep(2)">&larr; Back</button>
             </div>
         </div>
 
-        <!-- ===== SCREEN 2: TOYYIBPAY ===== -->
         <div class="screen" id="screen-toyyibpay">
             <div class="tp-screen-header">
                 <h1>Pay Online</h1>
                 <p>You will be redirected to ToyyibPay's secure payment page.</p>
             </div>
-
             <div class="tp-summary-box">
                 <div class="tp-summary-row"><span class="label">Name</span><span class="value" id="tp-name">-</span></div>
                 <div class="tp-summary-row"><span class="label">Event</span><span class="value" id="tp-event">-</span></div>
@@ -390,14 +335,12 @@
                 <div class="tp-summary-row"><span class="label">Ref No.</span><span class="value" id="tp-ref" style="color:yellow;">-</span></div>
                 <div class="tp-summary-row tp-amount-row"><span class="label">TOTAL</span><span class="value" id="tp-total">-</span></div>
             </div>
-
             <p style="font-size:0.78rem; color:#777; margin-bottom:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Accepted Payment Methods:</p>
             <div class="tp-methods">
                 <div class="tp-method-chip"><i class="fas fa-check-circle"></i> FPX (Online Banking)</div>
                 <div class="tp-method-chip"><i class="fas fa-check-circle"></i> Credit / Debit Card</div>
                 <div class="tp-method-chip"><i class="fas fa-check-circle"></i> E-Wallet</div>
             </div>
-
             <button class="tp-pay-btn" id="tpPayBtn" onclick="proceedToToyyibPay()">
                 <i class="fas fa-lock" style="font-size:0.9rem;"></i> PAY NOW
             </button>
@@ -408,10 +351,9 @@
             <button class="back-link" onclick="showScreen('method')">&larr; Change Payment Method</button>
         </div>
 
-        <!-- ===== SCREEN 3: TP RETURN PROCESSING ===== -->
         <div class="screen" id="screen-tp-return">
             <div class="return-screen">
-                <div class="return-icon" id="returnIcon">⏳</div>
+                <div class="return-icon" id="returnIcon">&#9203;</div>
                 <div class="return-title" id="returnTitle">Verifying Payment...</div>
                 <div class="return-msg" id="returnMsg"><span class="spinner"></span> Please wait a moment...</div>
             </div>
@@ -424,9 +366,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // ==========================================
-    // FIREBASE CONFIG — UNCHANGED
-    // ==========================================
     const firebaseConfig = {
         apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
         authDomain: "sea-mountain.firebaseapp.com",
@@ -442,28 +381,21 @@
     const EMAILJS_SERVICE_ID  = "service_434zj9s";
     const EMAILJS_TEMPLATE_ID = "template_rmyuzua";
 
-    // ==========================================
-    // !! TOYYIBPAY CONFIG — REPLACE THESE VALUES !!
-    // Get from: https://toyyibpay.com > Settings
-    // ==========================================
-    const TP_SECRET_KEY       = "REPLACE_WITH_YOUR_SECRET_KEY";    // User Secret Key
-    const TP_CATEGORY_CODE    = "REPLACE_WITH_YOUR_CATEGORY_CODE"; // Category Code
+    const TP_SECRET_KEY       = "REPLACE_WITH_YOUR_SECRET_KEY";
+    const TP_CATEGORY_CODE    = "REPLACE_WITH_YOUR_CATEGORY_CODE";
     const TP_RETURN_URL       = window.location.origin + window.location.pathname + "?tp_return=1";
-    const TP_CALLBACK_URL     = ""; // Optional: leave blank if no server callback
-    const TP_CHARGE_CUSTOMER  = 1;  // 1 = fee charged to customer, 0 = seller pays the fee
+    const TP_CALLBACK_URL     = "";
+    const TP_CHARGE_CUSTOMER  = 1;
 
-    // ==========================================
-    // DATA SETUP
-    // ==========================================
-    const urlParams        = new URLSearchParams(window.location.search);
+    const urlParams         = new URLSearchParams(window.location.search);
     const isToyyibPayReturn = urlParams.get('tp_return') === '1';
 
     let regData, refCode;
     let receiptBase64 = null;
+    let receiptFile   = null;   // CHANGE 1: store File object for Web Share API
     let whatsappSent  = false;
 
     if (isToyyibPayReturn) {
-        // Read from localStorage — survives cross-domain redirect
         regData = JSON.parse(localStorage.getItem('pendingTP_regData') || 'null');
         refCode = localStorage.getItem('pendingTP_refCode') || '';
     } else {
@@ -476,7 +408,6 @@
         refCode = "SM-" + Math.floor(10000 + Math.random() * 90000);
     }
 
-    // Populate order summary — UNCHANGED
     document.getElementById("display-name").textContent    = regData.first_name + " " + regData.last_name;
     document.getElementById("display-event").textContent   = regData.event_name;
     document.getElementById("display-cat").textContent     = regData.category;
@@ -484,16 +415,13 @@
     document.getElementById("total-display").textContent   = "RM " + regData.amountPaid;
     document.getElementById("ref-code").textContent        = refCode;
 
-    // WhatsApp link — UNCHANGED LOGIC
+    // WhatsApp message — kept for fallback path
+    const waPhone   = '60179832739';
     const whatsappMsg = `Hi Sea Mountain, I have made payment of RM${regData.amountPaid} for ${regData.event_name}. Ref: ${refCode}. Name: ${regData.first_name}.`;
-    document.getElementById("whatsappBtn").href = `https://wa.me/60179832739?text=${encodeURIComponent(whatsappMsg)}`;
 
-    // ==========================================
-    // HANDLE TOYYIBPAY RETURN
-    // ==========================================
     if (isToyyibPayReturn) {
         showScreen('tp-return');
-        const statusId   = urlParams.get('status_id');  // 1=success, 2=pending, 3=fail
+        const statusId   = urlParams.get('status_id');
         const tpBillCode = urlParams.get('billcode');
         const tpOrderId  = urlParams.get('order_id');
         const tpMsg      = urlParams.get('msg') || '';
@@ -501,15 +429,12 @@
         if (statusId === '1') {
             handleToyyibPaySuccess(tpBillCode, tpOrderId);
         } else if (statusId === '2') {
-            setReturnUI('⏳', 'Payment Not Completed', 'Your payment is still being processed. Please check back in a few minutes.');
+            setReturnUI('&#9203;', 'Payment Not Completed', 'Your payment is still being processed. Please check back in a few minutes.');
         } else {
-            setReturnUI('❌', 'Payment Failed', `Your payment was unsuccessful. ${tpMsg ? '(' + tpMsg + ')' : ''} Please try again.`, true);
+            setReturnUI('&#10060;', 'Payment Failed', `Your payment was unsuccessful. ${tpMsg ? '(' + tpMsg + ')' : ''} Please try again.`, true);
         }
     }
 
-    // ==========================================
-    // SCREEN NAVIGATION
-    // ==========================================
     window.showScreen = function(screen) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('screen-' + screen).classList.add('active');
@@ -526,9 +451,6 @@
         showScreen(method === 'bank' ? 'bank' : 'toyyibpay');
     };
 
-    // ==========================================
-    // BANK: STEP NAVIGATION
-    // ==========================================
     window.goToStep = function(step) {
         document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
         document.getElementById('panel-' + step).classList.add('active');
@@ -536,7 +458,7 @@
             const ind    = document.getElementById('step-indicator-' + i);
             const circle = document.getElementById('circle-' + i);
             ind.classList.remove('active', 'done');
-            if (i < step)       { ind.classList.add('done');   circle.innerHTML = '<i class="fas fa-check" style="font-size:0.7rem;"></i>'; }
+            if (i < step)        { ind.classList.add('done');   circle.innerHTML = '<i class="fas fa-check" style="font-size:0.7rem;"></i>'; }
             else if (i === step) { ind.classList.add('active'); circle.textContent = i; }
             else                 { circle.textContent = i; }
             if (i < 3) document.getElementById('line-' + i).classList.toggle('done', i < step);
@@ -549,13 +471,12 @@
         }
     };
 
-    // ==========================================
-    // BANK: RECEIPT UPLOAD
-    // ==========================================
+    // CHANGE 2: Also store File reference (for Web Share API later)
     document.getElementById('receiptFile').addEventListener('change', function() {
         const file = this.files[0];
         if (!file) return;
-        document.getElementById('fileName').textContent = "✓ " + file.name;
+        receiptFile = file;                                   // ← NEW: keep File object
+        document.getElementById('fileName').textContent = "&#10003; " + file.name;
         document.getElementById('uploadWrapper').classList.add('has-file');
         const preview = document.getElementById('receiptPreview');
         preview.style.display = 'block';
@@ -566,20 +487,73 @@
     });
 
     // ==========================================
-    // BANK: WHATSAPP
+    // CHANGE 4: markWhatsappSent — now async.
+    //
+    // PATH A (mobile / modern browser):
+    //   Web Share API — shares text + image file natively.
+    //   User picks WhatsApp from native share sheet.
+    //   Receipt image is auto-attached.
+    //
+    // PATH B (desktop / older browser fallback):
+    //   1. Auto-download the receipt image to device.
+    //   2. Open WhatsApp Web in new tab with pre-filled text.
+    //   3. User manually attaches the downloaded image.
+    //
+    // All other logic (Firebase, email, redirect) — UNCHANGED.
     // ==========================================
-    window.markWhatsappSent = function() {
+    window.markWhatsappSent = async function(event) {
+        // Prevent default <button> submit / any default browser action
+        if (event) event.preventDefault();
+
+        let sharedViaApi = false;
+
+        // ── PATH A: Web Share API with file ──
+        if (receiptFile && navigator.canShare && navigator.canShare({ files: [receiptFile] })) {
+            try {
+                await navigator.share({
+                    title: 'Payment Receipt - Sea Mountain',
+                    text:  whatsappMsg,
+                    files: [receiptFile]
+                });
+                sharedViaApi = true;
+            } catch (err) {
+                // AbortError = user dismissed share sheet — don't mark as sent
+                if (err.name === 'AbortError') return;
+                // Other errors → fall through to Path B
+                console.warn('Web Share API failed, using fallback:', err.message);
+            }
+        }
+
+        // ── PATH B: Fallback — download image + open WhatsApp ──
+        if (!sharedViaApi) {
+            if (receiptFile) {
+                // Auto-download receipt so user can attach manually in WhatsApp
+                const ext    = (receiptFile.name.split('.').pop() || 'jpg').toLowerCase();
+                const dlLink = document.createElement('a');
+                dlLink.href     = URL.createObjectURL(receiptFile);
+                dlLink.download = `receipt-${refCode}.${ext}`;
+                document.body.appendChild(dlLink);
+                dlLink.click();
+                document.body.removeChild(dlLink);
+
+                alert(
+                    "📎 Receipt image downloaded to your device.\n\n" +
+                    "In WhatsApp, tap the attachment icon (📎) and select this image to send together with your message."
+                );
+            }
+            // Open WhatsApp with pre-filled text
+            window.open(`https://wa.me/${waPhone}?text=${encodeURIComponent(whatsappMsg)}`, '_blank');
+        }
+
+        // ── Mark UI as sent → unlocks "I HAVE SENT IT" button ──
         whatsappSent = true;
-        const waBtn = document.getElementById('whatsappBtn');
+        const waBtn  = document.getElementById('whatsappBtn');
         waBtn.classList.add('sent');
-        waBtn.innerHTML = '<i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Sent ✓';
+        waBtn.innerHTML = '<i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Sent &#10003;';
         document.getElementById('waSentNote').style.display = 'block';
         document.getElementById('nextToStep3').disabled = false;
     };
 
-    // ==========================================
-    // BANK: SUBMIT — UNCHANGED LOGIC
-    // ==========================================
     window.submitBankTransfer = function() {
         const btn = document.getElementById('confirmBtn');
         btn.innerText = "PROCESSING...";
@@ -595,32 +569,28 @@
             sessionStorage.removeItem('tempRegistration');
             alert("Payment Submitted! Please check your email for the receipt and QR Code.");
         }, () => {
-            btn.innerText = "✓ CONFIRM & SUBMIT PAYMENT";
+            btn.innerText = "&#10003; CONFIRM & SUBMIT PAYMENT";
             btn.disabled  = false;
         });
     };
 
-    // ==========================================
-    // TOYYIBPAY: CREATE BILL & REDIRECT
-    // ==========================================
     window.proceedToToyyibPay = function() {
         const btn = document.getElementById('tpPayBtn');
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span> Preparing payment...';
 
-        // Save to localStorage so data survives cross-domain redirect
         localStorage.setItem('pendingTP_regData', JSON.stringify(regData));
         localStorage.setItem('pendingTP_refCode',  refCode);
 
-        const amountInSen = Math.round(parseFloat(regData.amountPaid) * 100); // RM → sen
+        const amountInSen = Math.round(parseFloat(regData.amountPaid) * 100);
 
         const formData = new FormData();
         formData.append('userSecretKey',           TP_SECRET_KEY);
         formData.append('categoryCode',            TP_CATEGORY_CODE);
         formData.append('billName',                `${regData.event_name} - ${regData.category}`);
         formData.append('billDescription',         `Sea Mountain Registration. Ref: ${refCode}`);
-        formData.append('billPriceSetting',        1);          // 1 = fixed price
-        formData.append('billPayorInfo',           1);          // collect payor info
+        formData.append('billPriceSetting',        1);
+        formData.append('billPayorInfo',           1);
         formData.append('billAmount',              amountInSen);
         formData.append('billReturnUrl',           TP_RETURN_URL);
         formData.append('billCallbackUrl',         TP_CALLBACK_URL);
@@ -630,7 +600,7 @@
         formData.append('billPhone',               regData.phone || '');
         formData.append('billSplitPayment',        0);
         formData.append('billSplitPaymentArgs',    '');
-        formData.append('billPaymentChannel',      2);          // 2 = FPX + Credit Card + E-Wallet
+        formData.append('billPaymentChannel',      2);
         formData.append('billContentEmail',        `Thank you for registering for ${regData.event_name}. Ref: ${refCode}`);
         formData.append('billChargeToCustomer',    TP_CHARGE_CUSTOMER);
         formData.append('billExpiryDays',          1);
@@ -652,12 +622,9 @@
         });
     };
 
-    // ==========================================
-    // TOYYIBPAY: HANDLE RETURN AFTER PAYMENT
-    // ==========================================
     async function handleToyyibPaySuccess(billCode, orderId) {
         if (!regData) {
-            setReturnUI('⚠️', 'Data Not Found', 'Your session has expired. Please contact the organiser. Ref: ' + refCode);
+            setReturnUI('&#9888;', 'Data Not Found', 'Your session has expired. Please contact the organiser. Ref: ' + refCode);
             return;
         }
         regData.paymentRef    = refCode;
@@ -673,26 +640,19 @@
         }, null);
     }
 
-    // ==========================================
-    // SHARED: SAVE TO FIREBASE + EMAIL — UNCHANGED LOGIC
-    // ==========================================
     function saveToFirebase(data, onSuccess, onError) {
         const regRef    = push(ref(db, 'registrations/' + data.event_code));
         const newRegKey = regRef.key;
 
         set(regRef, data).then(() => {
-
-            // B. UPDATE COUNTER — UNCHANGED
             const eventCountRef = ref(db, 'events/' + data.event_code + '/registered');
             runTransaction(eventCountRef, (current) => (current || 0) + 1);
 
-            // C. UPDATE VOUCHER — UNCHANGED
             if (data.voucherUsed && data.voucherUsed !== "NONE") {
                 const voucherRef = ref(db, 'vouchers/' + data.voucherUsed + '/used');
                 runTransaction(voucherRef, (current) => (current || 0) + 1);
             }
 
-            // D. SEND EMAIL — UNCHANGED
             const emailParams = {
                 to_name:    data.first_name + " " + data.last_name,
                 to_email:   data.email,
@@ -710,7 +670,6 @@
 
             if (onSuccess) onSuccess(newRegKey);
 
-            // E. REDIRECT TO TICKET — UNCHANGED
             window.location.href = `ticket.html?eid=${data.event_code}&uid=${newRegKey}`;
 
         }).catch(error => {
@@ -719,13 +678,10 @@
         });
     }
 
-    // ==========================================
-    // HELPER: UPDATE RETURN SCREEN
-    // ==========================================
     function setReturnUI(icon, title, msg, showRetry = false) {
-        document.getElementById('returnIcon').textContent  = icon;
+        document.getElementById('returnIcon').innerHTML  = icon;
         document.getElementById('returnTitle').textContent = title;
-        document.getElementById('returnMsg').innerHTML     = msg +
+        document.getElementById('returnMsg').innerHTML   = msg +
             (showRetry ? `<br><br><button onclick="showScreen('method')" class="next-btn" style="margin-top:10px; max-width:250px; margin-left:auto; margin-right:auto; display:block;">Try Again</button>` : '');
     }
 
