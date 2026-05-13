@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Verification - Sea Mountain Admin</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-red: #ff0000;
+            --brand-yellow: #ffcc00;
+            --bg-dark: #0f1014;
+            --card-bg: #1a1c23;
+            --input-bg: #0a0b0e;
+            --text: #ffffff;
+            --text-muted: #888;
+            --green: #00cc66;
+            --orange: #ff9500;
+            --red-soft: #ff4d4d;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg-dark); color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh; padding: 20px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            max-width: 1400px; margin: 0 auto 25px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding-bottom: 20px; border-bottom: 1px solid #333;
+        }
+        .logo { font-family: 'Russo One'; font-size: 1.5rem; text-transform: uppercase; }
+        .logo span { color: var(--brand-red); }
+        .logo small { display:block; font-family: 'Montserrat'; font-size: 0.65rem; color: var(--text-muted); font-weight: 600; letter-spacing: 2px; margin-top: 2px; }
+        .back-btn { color: #aaa; text-decoration: none; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; transition: 0.3s; padding: 8px 16px; border: 1px solid #333; border-radius: 30px; }
+        .back-btn:hover { color: #fff; border-color: #fff; }
+
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            max-width: 1400px; margin: 0 auto 25px;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
+        }
+        .stat-card {
+            background: var(--card-bg); border: 1px solid #2a2d36;
+            border-radius: 12px; padding: 18px 22px; transition: 0.3s;
+            border-left: 4px solid;
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-card.pending  { border-left-color: var(--orange); }
+        .stat-card.verified { border-left-color: var(--green); }
+        .stat-card.rejected { border-left-color: var(--red-soft); }
+        .stat-card.total    { border-left-color: var(--brand-yellow); }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 6px; }
+        .stat-value { font-family: 'Russo One'; font-size: 1.8rem; }
+        .stat-card.pending  .stat-value { color: var(--orange); }
+        .stat-card.verified .stat-value { color: var(--green); }
+        .stat-card.rejected .stat-value { color: var(--red-soft); }
+        .stat-card.total    .stat-value { color: var(--brand-yellow); }
+
+        /* ===== FILTERS ===== */
+        .filters {
+            max-width: 1400px; margin: 0 auto 25px;
+            background: var(--card-bg); border: 1px solid #2a2d36;
+            border-radius: 12px; padding: 20px;
+            display: grid; grid-template-columns: 1fr 1fr 2fr auto; gap: 12px; align-items: end;
+        }
+        .filter-group label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+        .filter-input {
+            width: 100%; padding: 10px 14px; background: var(--input-bg);
+            border: 1px solid #444; border-radius: 8px; color: #fff;
+            font-family: 'Montserrat'; font-size: 0.9rem; outline: none;
+        }
+        .filter-input:focus { border-color: var(--brand-red); }
+        .btn-refresh {
+            padding: 10px 18px; background: #2a2d36; border: 1px solid #444;
+            border-radius: 8px; color: #fff; cursor: pointer; font-weight: 700;
+            font-family: 'Montserrat'; font-size: 0.85rem; transition: 0.2s;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .btn-refresh:hover { background: var(--brand-red); border-color: var(--brand-red); }
+        .btn-refresh.loading i { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== GRID ===== */
+        .container {
+            max-width: 1400px; margin: 0 auto;
+        }
+        .loading-state, .empty-state {
+            text-align: center; padding: 80px 20px; color: var(--text-muted);
+        }
+        .empty-state i { font-size: 3.5rem; margin-bottom: 15px; opacity: 0.3; }
+        .empty-state p { font-size: 1rem; margin-top: 10px; }
+        .empty-state .sub { font-size: 0.85rem; opacity: 0.7; margin-top: 5px; }
+
+        .receipt-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px;
+        }
+
+        /* ===== RECEIPT CARD ===== */
+        .receipt-card {
+            background: var(--card-bg); border: 1px solid #2a2d36;
+            border-radius: 14px; overflow: hidden; transition: 0.3s;
+            display: flex; flex-direction: column;
+            position: relative;
+        }
+        .receipt-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-color: #444; }
+
+        .receipt-thumb {
+            width: 100%; height: 180px; background: #0a0b0e; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            border-bottom: 1px solid #2a2d36; position: relative; overflow: hidden;
+        }
+        .receipt-thumb img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
+        .receipt-thumb:hover img { transform: scale(1.05); opacity: 0.85; }
+        .receipt-thumb .zoom-hint {
+            position: absolute; bottom: 8px; right: 8px;
+            background: rgba(0,0,0,0.7); color: #fff;
+            padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .receipt-thumb.no-image {
+            color: #444; font-size: 2rem; flex-direction: column; gap: 8px;
+        }
+        .receipt-thumb.no-image span { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; color: #555; }
+
+        .receipt-body { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; }
+        .receipt-name { font-weight: 700; font-size: 1rem; color: #fff; margin-bottom: 3px; line-height: 1.3; }
+        .receipt-event { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; }
+
+        .receipt-meta {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px;
+            font-size: 0.78rem; margin-bottom: 12px;
+        }
+        .receipt-meta div { display: flex; flex-direction: column; }
+        .receipt-meta .lbl { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.3px; }
+        .receipt-meta .val { color: #ddd; font-weight: 600; margin-top: 2px; }
+        .receipt-meta .val.amount { color: var(--brand-red); font-weight: 800; }
+        .receipt-meta .val.ref    { color: var(--brand-yellow); font-family: monospace; }
+
+        .receipt-actions {
+            display: flex; gap: 6px; padding-top: 12px; border-top: 1px solid #2a2d36; margin-top: auto;
+        }
+        .btn-action {
+            flex: 1; padding: 9px 8px; border: none; border-radius: 6px;
+            font-weight: 700; font-size: 0.72rem; cursor: pointer; transition: 0.2s;
+            font-family: 'Montserrat'; text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+        }
+        .btn-view    { background: #2a2d36; color: #fff; }
+        .btn-view:hover { background: #3a3d46; }
+        .btn-approve { background: var(--green); color: #fff; }
+        .btn-approve:hover { background: #00b358; transform: translateY(-1px); }
+        .btn-reject  { background: var(--red-soft); color: #fff; }
+        .btn-reject:hover  { background: #e63333; transform: translateY(-1px); }
+        .btn-action:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        /* ===== STATUS BADGE ===== */
+        .status-badge {
+            position: absolute; top: 10px; right: 10px;
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+            backdrop-filter: blur(8px); border: 1px solid;
+            z-index: 2;
+        }
+        .status-pending  { background: rgba(255,149,0,0.2); color: var(--orange); border-color: var(--orange); }
+        .status-verified { background: rgba(0,204,102,0.2); color: var(--green); border-color: var(--green); }
+        .status-rejected { background: rgba(255,77,77,0.2); color: var(--red-soft); border-color: var(--red-soft); }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(8px); z-index: 9999;
+            display: none; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--card-bg); border-radius: 16px;
+            max-width: 1000px; width: 100%; max-height: 92vh; overflow-y: auto;
+            border: 1px solid #333; display: grid; grid-template-columns: 1.4fr 1fr;
+        }
+        .modal-image-side { background: #0a0b0e; padding: 25px; display: flex; align-items: center; justify-content: center; min-height: 400px; }
+        .modal-image-side img { max-width: 100%; max-height: 75vh; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        .modal-info-side { padding: 30px; overflow-y: auto; }
+        .modal-close {
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(0,0,0,0.5); color: #fff; border: 1px solid #444;
+            width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .modal-close:hover { background: var(--brand-red); border-color: var(--brand-red); transform: rotate(90deg); }
+
+        .modal-title { font-family: 'Russo One'; font-size: 1.5rem; color: var(--brand-yellow); text-transform: uppercase; margin-bottom: 4px; }
+        .modal-subtitle { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #2a2d36; }
+
+        .detail-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #222; font-size: 0.88rem; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row .lbl { color: var(--text-muted); font-weight: 600; }
+        .detail-row .val { color: #fff; font-weight: 600; text-align: right; }
+        .detail-row .val.highlight { color: var(--brand-red); font-weight: 800; }
+        .detail-row .val.ref { color: var(--brand-yellow); font-family: monospace; }
+        .detail-row .val.ok  { color: var(--green); }
+        .detail-row .val.no  { color: var(--red-soft); }
+
+        .modal-actions {
+            margin-top: 25px; padding-top: 20px; border-top: 1px solid #2a2d36;
+            display: flex; gap: 10px;
+        }
+        .modal-actions .btn-action { padding: 14px; font-size: 0.85rem; }
+
+        /* Mobile */
+        @media (max-width: 900px) {
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+            .filters   { grid-template-columns: 1fr; }
+            .modal-box { grid-template-columns: 1fr; }
+            .modal-image-side { min-height: 300px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        SEA<span>MOUNTAIN</span>
+        <small>Receipt Verification</small>
+    </div>
+    <a href="admin-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
+</div>
+
+<!-- ===== STATS ===== -->
+<div class="stats-bar">
+    <div class="stat-card pending">
+        <div class="stat-label"><i class="fas fa-clock"></i> Pending</div>
+        <div class="stat-value" id="stat-pending">0</div>
+    </div>
+    <div class="stat-card verified">
+        <div class="stat-label"><i class="fas fa-check-circle"></i> Verified</div>
+        <div class="stat-value" id="stat-verified">0</div>
+    </div>
+    <div class="stat-card rejected">
+        <div class="stat-label"><i class="fas fa-times-circle"></i> Rejected</div>
+        <div class="stat-value" id="stat-rejected">0</div>
+    </div>
+    <div class="stat-card total">
+        <div class="stat-label"><i class="fas fa-receipt"></i> Total Receipts</div>
+        <div class="stat-value" id="stat-total">0</div>
+    </div>
+</div>
+
+<!-- ===== FILTERS ===== -->
+<div class="filters">
+    <div class="filter-group">
+        <label>Event</label>
+        <select id="filterEvent" class="filter-input">
+            <option value="">All Events</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Status</label>
+        <select id="filterStatus" class="filter-input">
+            <option value="">All Status</option>
+            <option value="pending">⏳ Pending Verification</option>
+            <option value="verified">✓ Verified</option>
+            <option value="rejected">✗ Rejected</option>
+        </select>
+    </div>
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" id="filterSearch" class="filter-input" placeholder="Search by name, email or ref no (SM-XXXXX)">
+    </div>
+    <button class="btn-refresh" id="btnRefresh" onclick="reloadData()">
+        <i class="fas fa-sync-alt"></i> Refresh
+    </button>
+</div>
+
+<!-- ===== GRID ===== -->
+<div class="container">
+    <div id="loadingState" class="loading-state">
+        <i class="fas fa-circle-notch fa-spin" style="font-size:2rem;"></i>
+        <p style="margin-top:15px;">Loading receipts...</p>
+    </div>
+    <div id="receiptGrid" class="receipt-grid" style="display:none;"></div>
+    <div id="emptyState" class="empty-state" style="display:none;">
+        <i class="fas fa-inbox"></i>
+        <p>No receipts to display</p>
+        <p class="sub">Adjust filters or wait for new bank transfer submissions.</p>
+    </div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div id="receiptModal" class="modal-overlay" onclick="closeModal(event)">
+    <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-image-side">
+            <img id="modalImage" src="" alt="Receipt">
+        </div>
+        <div class="modal-info-side">
+            <h2 class="modal-title" id="modalTitle">Receipt Details</h2>
+            <p class="modal-subtitle" id="modalSubtitle">—</p>
+
+            <div class="detail-row"><span class="lbl">Customer</span><span class="val" id="m-name">-</span></div>
+            <div class="detail-row"><span class="lbl">Email</span><span class="val" id="m-email">-</span></div>
+            <div class="detail-row"><span class="lbl">Team Name</span><span class="val" id="m-team">-</span></div>
+            <div class="detail-row"><span class="lbl">Event</span><span class="val" id="m-event">-</span></div>
+            <div class="detail-row"><span class="lbl">Category</span><span class="val" id="m-cat">-</span></div>
+            <div class="detail-row"><span class="lbl">Ref No.</span><span class="val ref" id="m-ref">-</span></div>
+            <div class="detail-row"><span class="lbl">Amount Paid</span><span class="val highlight" id="m-amount">-</span></div>
+            <div class="detail-row"><span class="lbl">Method</span><span class="val" id="m-method">-</span></div>
+            <div class="detail-row"><span class="lbl">WhatsApp Sent</span><span class="val" id="m-wa">-</span></div>
+            <div class="detail-row"><span class="lbl">Registered</span><span class="val" id="m-time">-</span></div>
+            <div class="detail-row"><span class="lbl">Status</span><span class="val" id="m-status">-</span></div>
+            <div class="detail-row" id="m-verified-row" style="display:none;"><span class="lbl">Verified By</span><span class="val" id="m-verified-by">-</span></div>
+
+            <div class="modal-actions" id="modalActions">
+                <!-- Filled dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getDatabase(app);
+
+    const ALLOWED_ADMIN = "admin@sm.com";
+    let currentAdminEmail = "";
+
+    // In-memory cache of all loaded receipts (so filters work without re-fetching)
+    let allReceipts = []; // [{ eventId, regId, eventTitle, data }, ...]
+    let currentModalReceipt = null;
+
+    // ===== AUTH =====
+    onAuthStateChanged(auth, (user) => {
+        if (!user || user.email !== ALLOWED_ADMIN) {
+            alert("Please login as Admin.");
+            window.location.href = "admin-login.html";
+        } else {
+            currentAdminEmail = user.email;
+
+            // ===== NEW: Deep-link support =====
+            // ?search=SM-12345 → pre-fill search (jump to specific receipt)
+            // ?filter=pending  → pre-fill status filter (e.g. from dashboard
+            //                     clicking "Awaiting Verification" stat card)
+            const params = new URLSearchParams(window.location.search);
+            const preSearch = params.get('search');
+            const preFilter = params.get('filter');
+            if (preSearch) document.getElementById('filterSearch').value = preSearch;
+            if (preFilter) document.getElementById('filterStatus').value = preFilter;
+
+            loadData();
+        }
+    });
+
+    // ===== DATA LOADING =====
+    async function loadData() {
+        showLoading();
+        try {
+            const [regSnap, eventSnap] = await Promise.all([
+                get(ref(db, 'registrations')),
+                get(ref(db, 'events'))
+            ]);
+
+            allReceipts = [];
+
+            if (!regSnap.exists()) {
+                renderUI();
+                return;
+            }
+
+            const allEvents = eventSnap.exists() ? eventSnap.val() : {};
+            const allRegs   = regSnap.val();
+
+            // Populate event filter dropdown
+            const eventFilter = document.getElementById('filterEvent');
+            const currentSelectedEvent = eventFilter.value;
+            eventFilter.innerHTML = '<option value="">All Events</option>';
+            Object.keys(allEvents).forEach(eid => {
+                const opt = document.createElement('option');
+                opt.value = eid;
+                opt.text = allEvents[eid].title || eid;
+                if (eid === currentSelectedEvent) opt.selected = true;
+                eventFilter.appendChild(opt);
+            });
+
+            // Flatten all bank-transfer registrations with receipt images
+            Object.keys(allRegs).forEach(eventId => {
+                const participants = allRegs[eventId];
+                if (!participants) return;
+                Object.keys(participants).forEach(regId => {
+                    const data = participants[regId];
+                    // Only show bank transfer entries that have an uploaded receipt
+                    const isBankTransfer = data.paymentMethod === "Bank Transfer";
+                    const hasReceipt     = !!data.receiptImage;
+                    if (isBankTransfer && hasReceipt) {
+                        allReceipts.push({
+                            eventId, regId,
+                            eventTitle: (allEvents[eventId]?.title) || data.event_name || eventId,
+                            data
+                        });
+                    }
+                });
+            });
+
+            // Sort newest first by registration_time
+            allReceipts.sort((a, b) => {
+                const ta = new Date(a.data.registration_time).getTime() || 0;
+                const tb = new Date(b.data.registration_time).getTime() || 0;
+                return tb - ta;
+            });
+
+            renderUI();
+
+        } catch (err) {
+            console.error('Load error:', err);
+            alert('Failed to load receipts: ' + err.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    window.reloadData = function() {
+        const btn = document.getElementById('btnRefresh');
+        btn.classList.add('loading');
+        loadData().finally(() => btn.classList.remove('loading'));
+    };
+
+    // ===== HELPERS =====
+    function getVerificationStatus(data) {
+        // Priority: explicit verificationStatus field, then derive from status
+        if (data.verificationStatus) return data.verificationStatus.toLowerCase();
+
+        const status = (data.status || '').toLowerCase();
+        if (status === 'rejected')        return 'rejected';
+        if (status === 'paid' && data.verifiedAt) return 'verified';
+        return 'pending'; // Bank transfer submitted, awaiting admin review
+    }
+
+    function statusBadge(status) {
+        if (status === 'verified') return '<span class="status-badge status-verified">✓ Verified</span>';
+        if (status === 'rejected') return '<span class="status-badge status-rejected">✗ Rejected</span>';
+        return '<span class="status-badge status-pending">⏳ Pending</span>';
+    }
+
+    function fmtTime(timeStr) {
+        if (!timeStr) return 'N/A';
+        const d = new Date(timeStr);
+        if (isNaN(d)) return timeStr.split(',')[0] || timeStr;
+        return d.toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    }
+
+    // ===== RENDER =====
+    function renderUI() {
+        const grid = document.getElementById('receiptGrid');
+        const empty = document.getElementById('emptyState');
+
+        // Apply filters
+        const evFilter   = document.getElementById('filterEvent').value;
+        const stFilter   = document.getElementById('filterStatus').value;
+        const searchTerm = document.getElementById('filterSearch').value.trim().toLowerCase();
+
+        const filtered = allReceipts.filter(r => {
+            if (evFilter && r.eventId !== evFilter) return false;
+            if (stFilter && getVerificationStatus(r.data) !== stFilter) return false;
+            if (searchTerm) {
+                const hay = [
+                    r.data.first_name, r.data.last_name, r.data.captainName,
+                    r.data.email, r.data.captainEmail,
+                    r.data.paymentRef, r.data.teamName
+                ].filter(Boolean).join(' ').toLowerCase();
+                if (!hay.includes(searchTerm)) return false;
+            }
+            return true;
+        });
+
+        // Stats — based on UNFILTERED full list
+        const stats = { pending: 0, verified: 0, rejected: 0 };
+        allReceipts.forEach(r => { stats[getVerificationStatus(r.data)]++; });
+        document.getElementById('stat-pending').textContent  = stats.pending;
+        document.getElementById('stat-verified').textContent = stats.verified;
+        document.getElementById('stat-rejected').textContent = stats.rejected;
+        document.getElementById('stat-total').textContent    = allReceipts.length;
+
+        if (filtered.length === 0) {
+            grid.style.display = 'none';
+            empty.style.display = 'block';
+            return;
+        }
+
+        grid.style.display = 'grid';
+        empty.style.display = 'none';
+
+        grid.innerHTML = filtered.map(r => renderCard(r)).join('');
+    }
+
+    function renderCard(r) {
+        const d = r.data;
+        const vStatus = getVerificationStatus(d);
+        const name = (d.first_name || d.captainName || 'Unknown') + ' ' + (d.last_name || '');
+        const isVerified = vStatus === 'verified';
+        const isRejected = vStatus === 'rejected';
+
+        const imgPart = d.receiptImage
+            ? `<img src="${d.receiptImage}" alt="Receipt" loading="lazy">`
+            : `<i class="fas fa-receipt"></i><span>No image</span>`;
+        const thumbClass = d.receiptImage ? 'receipt-thumb' : 'receipt-thumb no-image';
+
+        return `
+        <div class="receipt-card">
+            ${statusBadge(vStatus)}
+            <div class="${thumbClass}" onclick="openModal('${r.eventId}', '${r.regId}')">
+                ${imgPart}
+                ${d.receiptImage ? '<span class="zoom-hint"><i class="fas fa-search-plus"></i> Click to enlarge</span>' : ''}
+            </div>
+            <div class="receipt-body">
+                <div class="receipt-name">${name.trim()}</div>
+                <div class="receipt-event">${r.eventTitle}</div>
+
+                <div class="receipt-meta">
+                    <div><span class="lbl">Category</span><span class="val">${d.category || '-'}</span></div>
+                    <div><span class="lbl">Amount</span><span class="val amount">RM ${d.amountPaid || '0.00'}</span></div>
+                    <div><span class="lbl">Ref No.</span><span class="val ref">${d.paymentRef || '-'}</span></div>
+                    <div><span class="lbl">Submitted</span><span class="val">${fmtTime(d.registration_time)}</span></div>
+                </div>
+
+                <div class="receipt-actions">
+                    <button class="btn-action btn-view" onclick="openModal('${r.eventId}', '${r.regId}')">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <button class="btn-action btn-approve" ${isVerified ? 'disabled' : ''}
+                        onclick="quickApprove('${r.eventId}', '${r.regId}', event)">
+                        <i class="fas fa-check"></i> ${isVerified ? 'Verified' : 'Approve'}
+                    </button>
+                    <button class="btn-action btn-reject" ${isRejected ? 'disabled' : ''}
+                        onclick="quickReject('${r.eventId}', '${r.regId}', event)">
+                        <i class="fas fa-times"></i> ${isRejected ? 'Rejected' : 'Reject'}
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // ===== MODAL =====
+    window.openModal = function(eventId, regId) {
+        const receipt = allReceipts.find(r => r.eventId === eventId && r.regId === regId);
+        if (!receipt) return;
+        currentModalReceipt = receipt;
+
+        const d = receipt.data;
+        const vStatus = getVerificationStatus(d);
+        const name = (d.first_name || d.captainName || 'Unknown') + ' ' + (d.last_name || '');
+
+        document.getElementById('modalImage').src = d.receiptImage || '';
+        document.getElementById('modalTitle').textContent    = d.paymentRef || 'Receipt';
+        document.getElementById('modalSubtitle').textContent = receipt.eventTitle;
+
+        document.getElementById('m-name').textContent   = name.trim();
+        document.getElementById('m-email').textContent  = d.email || d.captainEmail || '-';
+        document.getElementById('m-team').textContent   = d.teamName || '-';
+        document.getElementById('m-event').textContent  = receipt.eventTitle;
+        document.getElementById('m-cat').textContent    = d.category || '-';
+        document.getElementById('m-ref').textContent    = d.paymentRef || '-';
+        document.getElementById('m-amount').textContent = 'RM ' + (d.amountPaid || '0.00');
+        document.getElementById('m-method').textContent = d.paymentMethod || '-';
+        document.getElementById('m-time').textContent   = fmtTime(d.registration_time);
+
+        const waEl = document.getElementById('m-wa');
+        if (d.whatsappSent) { waEl.textContent = '✓ Yes'; waEl.className = 'val ok'; }
+        else { waEl.textContent = '✗ No'; waEl.className = 'val no'; }
+
+        const statEl = document.getElementById('m-status');
+        statEl.textContent = vStatus.toUpperCase();
+        statEl.className = 'val ' + (vStatus === 'verified' ? 'ok' : (vStatus === 'rejected' ? 'no' : ''));
+
+        // Verified-by row
+        const vRow = document.getElementById('m-verified-row');
+        if (d.verifiedAt && d.verifiedBy) {
+            vRow.style.display = 'flex';
+            document.getElementById('m-verified-by').textContent = `${d.verifiedBy} • ${fmtTime(d.verifiedAt)}`;
+        } else if (d.rejectedBy) {
+            vRow.style.display = 'flex';
+            vRow.querySelector('.lbl').textContent = 'Rejected By';
+            document.getElementById('m-verified-by').textContent = `${d.rejectedBy} • ${fmtTime(d.rejectedAt)}`;
+        } else {
+            vRow.style.display = 'none';
+        }
+
+        // Action buttons
+        const actions = document.getElementById('modalActions');
+        actions.innerHTML = `
+            <button class="btn-action btn-approve" ${vStatus === 'verified' ? 'disabled' : ''}
+                onclick="modalApprove()">
+                <i class="fas fa-check"></i> ${vStatus === 'verified' ? 'Already Verified' : 'Approve & Mark Paid'}
+            </button>
+            <button class="btn-action btn-reject" ${vStatus === 'rejected' ? 'disabled' : ''}
+                onclick="modalReject()">
+                <i class="fas fa-times"></i> ${vStatus === 'rejected' ? 'Already Rejected' : 'Reject Receipt'}
+            </button>
+        `;
+
+        document.getElementById('receiptModal').classList.add('active');
+    };
+
+    window.closeModal = function(e) {
+        if (e && e.target !== e.currentTarget && !e.currentTarget.classList.contains('modal-close')) return;
+        document.getElementById('receiptModal').classList.remove('active');
+        // Reset 'Rejected By' label back if previously changed
+        document.querySelector('#m-verified-row .lbl').textContent = 'Verified By';
+        currentModalReceipt = null;
+    };
+
+    // ===== APPROVE / REJECT ACTIONS =====
+    async function updateStatus(eventId, regId, newStatus) {
+        const path = `registrations/${eventId}/${regId}`;
+        const updates = {};
+        const timestamp = new Date().toLocaleString();
+
+        if (newStatus === 'verified') {
+            updates.status              = 'Paid';
+            updates.verificationStatus  = 'Verified';
+            updates.verifiedBy          = currentAdminEmail;
+            updates.verifiedAt          = timestamp;
+            // Clear any previous rejection
+            updates.rejectedBy          = null;
+            updates.rejectedAt          = null;
+        } else if (newStatus === 'rejected') {
+            updates.status              = 'Rejected';
+            updates.verificationStatus  = 'Rejected';
+            updates.rejectedBy          = currentAdminEmail;
+            updates.rejectedAt          = timestamp;
+            updates.verifiedBy          = null;
+            updates.verifiedAt          = null;
+        }
+
+        await update(ref(db, path), updates);
+
+        // Update in-memory cache
+        const r = allReceipts.find(x => x.eventId === eventId && x.regId === regId);
+        if (r) Object.assign(r.data, updates);
+    }
+
+    window.quickApprove = async function(eventId, regId, e) {
+        if (e) e.stopPropagation();
+        if (!confirm('Approve this receipt and mark as PAID?')) return;
+        try {
+            await updateStatus(eventId, regId, 'verified');
+            renderUI();
+        } catch (err) {
+            alert('Failed: ' + err.message);
+        }
+    };
+
+    window.quickReject = async function(eventId, regId, e) {
+        if (e) e.stopPropagation();
+        if (!confirm('Reject this receipt? Customer\'s ticket will be hidden.')) return;
+        try {
+            await updateStatus(eventId, regId, 'rejected');
+            renderUI();
+        } catch (err) {
+            alert('Failed: ' + err.message);
+        }
+    };
+
+    window.modalApprove = async function() {
+        if (!currentModalReceipt) return;
+        if (!confirm('Approve this receipt and mark as PAID?')) return;
+        try {
+            await updateStatus(currentModalReceipt.eventId, currentModalReceipt.regId, 'verified');
+            renderUI();
+            openModal(currentModalReceipt.eventId, currentModalReceipt.regId); // refresh modal
+        } catch (err) {
+            alert('Failed: ' + err.message);
+        }
+    };
+
+    window.modalReject = async function() {
+        if (!currentModalReceipt) return;
+        if (!confirm('Reject this receipt? Customer\'s ticket will be hidden from my-tickets.')) return;
+        try {
+            await updateStatus(currentModalReceipt.eventId, currentModalReceipt.regId, 'rejected');
+            renderUI();
+            openModal(currentModalReceipt.eventId, currentModalReceipt.regId); // refresh modal
+        } catch (err) {
+            alert('Failed: ' + err.message);
+        }
+    };
+
+    // ===== UI HELPERS =====
+    function showLoading() {
+        document.getElementById('loadingState').style.display = 'block';
+        document.getElementById('receiptGrid').style.display  = 'none';
+        document.getElementById('emptyState').style.display   = 'none';
+    }
+    function hideLoading() {
+        document.getElementById('loadingState').style.display = 'none';
+    }
+
+    // ===== FILTER EVENTS =====
+    document.getElementById('filterEvent').addEventListener('change', renderUI);
+    document.getElementById('filterStatus').addEventListener('change', renderUI);
+    document.getElementById('filterSearch').addEventListener('input', renderUI);
+
+    // ESC closes modal
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+    });
+</script>
+
+</body>
+</html>
