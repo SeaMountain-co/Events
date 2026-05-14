@@ -261,7 +261,7 @@
                             </div>
                             <div class="form-group"><label>Captain Email</label><input type="email" id="captainEmail" class="form-control" required></div>
                             <div class="form-group"><label>Country of Team</label>
-                                <select id="teamCountry" class="form-control" required><option value="" disabled selected>Select Country</option><option value="Malaysia">Malaysia</option><option value="Other">Other</option></select>
+                                <select id="teamCountry" class="form-control" required><option value="" disabled selected>Select Country</option></select>
                             </div>
                             <div class="form-group"><label>Race Category</label>
                                 <select id="raceCategory" class="form-control" required onchange="updateRacersCount()"><option value="" disabled selected>Loading Categories...</option></select>
@@ -481,6 +481,10 @@
         });
         return opts;
     }
+
+    // Populate "Country of Team" dropdown with all countries (same list as nationality)
+    document.getElementById('teamCountry').innerHTML =
+        '<option value="" disabled selected>Select Country</option>' + getCountryOptions();
 
     // =====================================================
     // CHANGE 2a: Generate per-racer medical forms into
