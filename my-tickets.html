@@ -287,18 +287,15 @@
                         const data = participants[regId];
 
                         // =====================================================
-                        // SHOW TICKET ONLY WHEN:
-                        //   - Belongs to this user
-                        //   - status === "Paid"
-                        //   AND one of:
-                        //     a) ToyyibPay / no receipt → auto-verified, show directly
-                        //     b) Bank Transfer → ONLY after admin sets
-                        //        verificationStatus = "Verified" in admin-resit.html
+                        // OWNER CHECK — userId only (strict, per-user)
                         //
-                        // Rejected → status = "Rejected" → isPaid = false → hidden
-                        // Pending Verification → isPaid but not verified → hidden
+                        // Each registration stores userId = currentUser.uid
+                        // from Firebase Auth at time of registration.
+                        // Using uid alone is the correct way — email fallback
+                        // caused ALL tickets with matching email to appear for
+                        // any user sharing that email (test accounts, etc.).
                         // =====================================================
-                        const isOwner    = data.userId === user.uid || data.email === user.email;
+                        const isOwner    = data.userId === user.uid;
                         const isPaid     = data.status && data.status.toLowerCase() === 'paid';
                         const isBankTx   = data.paymentMethod === 'Bank Transfer';
                         const hasReceipt = !!data.receiptImage;
