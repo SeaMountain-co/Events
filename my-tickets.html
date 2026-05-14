@@ -286,17 +286,29 @@
                     Object.keys(participants).forEach(regId => {
                         const data = participants[regId];
 
-                        // Show ticket only if:
-                        //   1. Belongs to this user
-                        //   2. status === "Paid"  (hides Pending Payment & Rejected)
+                        // =====================================================
+                        // SHOW TICKET ONLY WHEN:
+                        //   - Belongs to this user
+                        //   - status === "Paid"
+                        //   AND one of:
+                        //     a) ToyyibPay / no receipt → auto-verified, show directly
+                        //     b) Bank Transfer → ONLY after admin sets
+                        //        verificationStatus = "Verified" in admin-resit.html
                         //
-                        // "Rejected" by admin → status becomes "Rejected" → filtered out here.
-                        // "Paid but awaiting admin verification" → status is "Paid" → shows with
-                        //    orange "Pending Verification" badge (logic in renderTicket below).
-                        const isOwner = data.userId === user.uid || data.email === user.email;
-                        const isPaid  = data.status && data.status.toLowerCase() === 'paid';
+                        // Rejected → status = "Rejected" → isPaid = false → hidden
+                        // Pending Verification → isPaid but not verified → hidden
+                        // =====================================================
+                        const isOwner    = data.userId === user.uid || data.email === user.email;
+                        const isPaid     = data.status && data.status.toLowerCase() === 'paid';
+                        const isBankTx   = data.paymentMethod === 'Bank Transfer';
+                        const hasReceipt = !!data.receiptImage;
+                        const isVerified = (data.verificationStatus || '').toLowerCase() === 'verified';
 
-                        if (isOwner && isPaid) {
+                        // Bank Transfer: must be verified by admin first
+                        // ToyyibPay / manual: show as soon as status is Paid
+                        const passesVerification = (isBankTx && hasReceipt) ? isVerified : true;
+
+                        if (isOwner && isPaid && passesVerification) {
                             hasTickets = true;
                             renderTicket(regId, eventId, data, eventDetails);
                         }
@@ -311,33 +323,10 @@
         function renderTicket(regId, eventId, data, eventDetails) {
             const container = document.getElementById('ticketList');
 
-            // =====================================================
-            // STATUS BADGE — mirrors admin-dashboard verification states
-            //
-            // Bank Transfer + receipt uploaded + admin NOT yet verified
-            //   → orange "Pending Verification" (admin needs to check receipt)
-            //
-            // Bank Transfer + admin Approved (verificationStatus = "Verified")
-            //   → green "Confirmed"
-            //
-            // ToyyibPay (no receipt, auto-verified by payment gateway)
-            //   → green "Confirmed"
-            //
-            // "Rejected" tickets never reach here (filtered out in loadUserTickets
-            //   because status is set to "Rejected" by admin, not "Paid").
-            // =====================================================
-            const vStatus    = (data.verificationStatus || '').toLowerCase();
-            const isBankTx   = data.paymentMethod === 'Bank Transfer';
-            const hasReceipt = !!data.receiptImage;
-
-            let statusHtml;
-            if (isBankTx && hasReceipt && vStatus !== 'verified') {
-                // Bank transfer — receipt submitted but admin has not verified yet
-                statusHtml = '<span class="status-badge status-verify"><i class="fas fa-hourglass-half"></i> Pending Verification</span>';
-            } else {
-                // ToyyibPay (auto), verified bank transfer, or manual admin mark
-                statusHtml = '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Confirmed</span>';
-            }
+            // All tickets that reach renderTicket are already verified
+            // (filter above ensures Bank Transfer = admin verified, ToyyibPay = auto).
+            // So badge is always "Confirmed".
+            const statusHtml = '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Confirmed</span>';
 
             // --- USE EVENT NAME FROM DATABASE (REALTIME UPDATE) ---
             const eventName = eventDetails.title || data.event_name || eventId.toUpperCase();
