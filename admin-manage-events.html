@@ -141,9 +141,13 @@
             appId: "1:812228825024:web:717049c1a64b39c8a60225"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+        // =====================================================
+        // Named app "admin" — separates admin auth from user auth
+        // so both can be logged in simultaneously in same browser.
+        // =====================================================
+        const adminApp = initializeApp(firebaseConfig, "admin");
+        const auth = getAuth(adminApp);
+        const db = getDatabase(adminApp);
         const ALLOWED_ADMIN = "admin@sm.com"; 
 
         // 1. SECURITY GUARD
