@@ -200,16 +200,16 @@
             <!-- Step 2: WhatsApp -->
             <div class="step-panel" id="panel-2">
                 <div class="wa-instruction">
-                    <p>Click the button to open WhatsApp <strong>directly to our number</strong>. Your receipt will be <strong>copied to clipboard</strong> automatically.</p>
+                    <p>Click below to open WhatsApp <strong>directly to our number</strong>. Your receipt image will be prepared automatically.</p>
                     <div class="wa-steps">
-                        <div class="wa-step"><span class="num">1</span><span>Click button below &#8594; WhatsApp opens to our number</span></div>
-                        <div class="wa-step"><span class="num">2</span><span><strong style="color:#ddd;">Paste</strong> the image — tap the text box, long-press &#8594; Paste (or Ctrl+V on desktop)</span></div>
-                        <div class="wa-step"><span class="num">3</span><span>Hit <strong style="color:#ddd;">Send</strong>, then come back and click "I Have Sent It"</span></div>
+                        <div class="wa-step"><span class="num">1</span><span>Click button &#8594; WhatsApp opens to our number with your details</span></div>
+                        <div class="wa-step"><span class="num">2</span><span id="step2hint">Attach the receipt image and tap <strong style="color:#ddd;">Send</strong></span></div>
+                        <div class="wa-step"><span class="num">3</span><span>Return here and click <strong style="color:#ddd;">"I Have Sent It"</strong></span></div>
                     </div>
                 </div>
 
                 <button id="whatsappBtn" class="wa-btn" onclick="sendViaWhatsApp(event)">
-                    <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> Open WhatsApp &amp; Copy Receipt
+                    <i class="fab fa-whatsapp" style="font-size:1.2rem;"></i> <span id="waBtnLabel">Open WhatsApp</span>
                 </button>
 
                 <p class="wa-confirm-note" id="waSentNote" style="display:none;">
@@ -379,68 +379,80 @@
     });
 
     // ==========================================
-    // WHATSAPP: Direct to number + clipboard image
+    // DEVICE DETECTION — update UI hints on load
+    // ==========================================
+    const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // Update step 2 hint and button label to match device
+    const step2hint = document.getElementById('step2hint');
+    const waBtnLabel = document.getElementById('waBtnLabel');
+    if (step2hint) {
+        step2hint.innerHTML = IS_MOBILE
+            ? 'Tap &#128206; attach icon &#8594; Gallery/Files &#8594; select receipt &#8594; <strong style="color:#ddd;">Send</strong>'
+            : '<strong style="color:#ddd;">Ctrl+V</strong> (or right-click &#8594; Paste) to attach receipt &#8594; <strong style="color:#ddd;">Send</strong>';
+    }
+    if (waBtnLabel) {
+        waBtnLabel.textContent = IS_MOBILE
+            ? 'Save Receipt & Open WhatsApp'
+            : 'Open WhatsApp & Copy Receipt';
+    }
+
+    // ==========================================
+    // WHATSAPP: Direct to specific number
     //
-    // Flow:
-    //   1. Try copy receipt image to clipboard
-    //   2. Open WhatsApp DIRECTLY to WA_PHONE number
-    //      (wa.me → mobile opens WA app, desktop opens WA Web)
-    //   3. User just pastes image in WhatsApp & sends
+    // MOBILE path:
+    //   1. Auto-download receipt to device (reliable on all phones)
+    //   2. window.location.href = wa.me URL
+    //      → opens WhatsApp APP directly (not popup, not share sheet)
+    //   User then: 📎 → Gallery → select receipt → Send
     //
-    // If clipboard fails → fallback: auto-download image
+    // DESKTOP path:
+    //   1. Copy receipt image to clipboard
+    //   2. window.open(wa.me) → opens WhatsApp WEB in new tab
+    //   User then: Ctrl+V in WhatsApp chat → Send
     // ==========================================
     window.sendViaWhatsApp = async function(event) {
         if (event) event.preventDefault();
 
         const message = `Hi Sea Mountain, I have made payment of RM${regData.amountPaid} for ${regData.event_name}. Ref: ${refCode}. Name: ${regData.first_name}.`;
         const waUrl   = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(message)}`;
+        const hintEl  = document.getElementById('waActionHint');
 
-        let imageCopied   = false;
-        let imageDownloaded = false;
-
-        // STEP 1: Try copy receipt image to clipboard
-        if (receiptFile) {
-            try {
-                const objUrl  = URL.createObjectURL(receiptFile);
-                const resp    = await fetch(objUrl);
-                const blob    = await resp.blob();
-                const mime    = blob.type.startsWith('image/') ? blob.type : 'image/png';
-                await navigator.clipboard.write([new ClipboardItem({ [mime]: blob })]);
-                URL.revokeObjectURL(objUrl);
-                imageCopied = true;
-            } catch (err) {
-                console.warn('Clipboard copy failed, trying download fallback:', err.message);
-                // Fallback: auto-download the image
-                try {
-                    const ext    = (receiptFile.name.split('.').pop() || 'jpg').toLowerCase();
-                    const dlLink = document.createElement('a');
-                    dlLink.href     = URL.createObjectURL(receiptFile);
-                    dlLink.download = `receipt-${refCode}.${ext}`;
-                    document.body.appendChild(dlLink);
-                    dlLink.click();
-                    document.body.removeChild(dlLink);
-                    imageDownloaded = true;
-                } catch (e2) { console.warn('Download also failed:', e2.message); }
+        if (IS_MOBILE) {
+            // ── MOBILE: download image → open WhatsApp app directly ──
+            if (receiptFile) {
+                const ext    = (receiptFile.name.split('.').pop() || 'jpg').toLowerCase();
+                const dlLink = document.createElement('a');
+                dlLink.href     = URL.createObjectURL(receiptFile);
+                dlLink.download = `receipt-${refCode}.${ext}`;
+                document.body.appendChild(dlLink);
+                dlLink.click();
+                document.body.removeChild(dlLink);
             }
-        }
+            // Directly navigate — 100% reliable on mobile (no popup block)
+            // Browser stays in history; user presses back after sending
+            window.location.href = waUrl;
+            hintEl.textContent = 'Receipt saved! In WhatsApp tap \uD83D\uDCCE → Gallery/Files → select the receipt image → Send. Then come back here.';
 
-        // STEP 2: Open WhatsApp DIRECTLY to the number (no share sheet)
-        window.open(waUrl, '_blank');
-
-        // STEP 3: Show contextual hint based on result
-        const noteEl   = document.getElementById('waSentNote');
-        const hintEl   = document.getElementById('waActionHint');
-        noteEl.style.display = 'block';
-
-        if (imageCopied) {
-            hintEl.textContent = 'Receipt copied! Long-press the message box in WhatsApp \u2192 tap Paste \u2192 then Send.';
-        } else if (imageDownloaded) {
-            hintEl.textContent = 'Receipt downloaded! Tap the \uD83D\uDCCE attach icon in WhatsApp, pick the image, then Send.';
         } else {
-            hintEl.textContent = 'In WhatsApp, attach your receipt image manually before sending.';
+            // ── DESKTOP: clipboard → WhatsApp Web in new tab ──
+            let copied = false;
+            if (receiptFile) {
+                try {
+                    const blob = await (await fetch(URL.createObjectURL(receiptFile))).blob();
+                    const mime = blob.type.startsWith('image/') ? blob.type : 'image/png';
+                    await navigator.clipboard.write([new ClipboardItem({ [mime]: blob })]);
+                    copied = true;
+                } catch (err) { console.warn('Clipboard copy failed:', err.message); }
+            }
+            window.open(waUrl, '_blank');
+            hintEl.textContent = copied
+                ? 'Receipt copied! In WhatsApp click the text box then press Ctrl+V (or right-click \u2192 Paste) to attach, then Send.'
+                : 'In WhatsApp Web, click the \uD83D\uDCCE attach icon and upload your receipt image, then Send.';
         }
 
-        // Mark sent
+        // Update UI — mark opened (user still needs to click "I HAVE SENT IT")
+        document.getElementById('waSentNote').style.display = 'block';
         whatsappSent = true;
         const waBtn  = document.getElementById('whatsappBtn');
         waBtn.classList.add('sent');
