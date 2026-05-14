@@ -113,8 +113,9 @@
             appId: "1:812228825024:web:717049c1a64b39c8a60225"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+        const adminApp = initializeApp(firebaseConfig, "admin");
+        const auth = getAuth(adminApp);
+        const db   = getDatabase(adminApp);
 
         // EMAIL KHAS ADMIN
         const ADMIN_EMAIL_CHECK = "admin@sm.com"; 
