@@ -152,7 +152,12 @@
 
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-        /* STATUS BADGE */
+        /* ================================================
+           STATUS BADGES
+           status-paid    → green  → Confirmed (verified)
+           status-verify  → orange → Pending Verification
+           status-pending → yellow → Pending Payment
+        ================================================ */
         .status-badge { 
             position: absolute; top: 30px; right: 30px; 
             padding: 8px 18px; border-radius: 50px; 
@@ -160,8 +165,10 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
             backdrop-filter: blur(5px);
         }
-        .status-paid { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.2); }
-        .status-pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; border-color: #f1c40f; }
+        .status-paid    { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.2); }
+        .status-pending { background: rgba(241, 196, 15, 0.2);  color: #f1c40f;  border-color: #f1c40f; }
+        /* NEW: awaiting admin verification */
+        .status-verify  { background: rgba(255, 149, 0, 0.2);   color: #ff9500;  border-color: #ff9500; box-shadow: 0 0 15px rgba(255,149,0,0.15); }
 
         .empty-state { text-align: center; padding: 100px 20px; color: #555; }
         .btn-browse { background: var(--brand-red); color: #fff; padding: 15px 40px; border-radius: 50px; font-weight: 800; text-transform: uppercase; text-decoration: none; transition: 0.3s; box-shadow: 0 5px 20px rgba(255,0,0,0.4); }
@@ -279,9 +286,13 @@
                     Object.keys(participants).forEach(regId => {
                         const data = participants[regId];
 
-                        // ===== CHANGE: Only render tickets that BELONG to this user
-                        // AND have status === "Paid". Pending tickets stay hidden
-                        // here; admin can still see them in the admin panel.
+                        // Show ticket only if:
+                        //   1. Belongs to this user
+                        //   2. status === "Paid"  (hides Pending Payment & Rejected)
+                        //
+                        // "Rejected" by admin → status becomes "Rejected" → filtered out here.
+                        // "Paid but awaiting admin verification" → status is "Paid" → shows with
+                        //    orange "Pending Verification" badge (logic in renderTicket below).
                         const isOwner = data.userId === user.uid || data.email === user.email;
                         const isPaid  = data.status && data.status.toLowerCase() === 'paid';
 
@@ -299,9 +310,32 @@
 
         function renderTicket(regId, eventId, data, eventDetails) {
             const container = document.getElementById('ticketList');
-            
-            let statusHtml = '<span class="status-badge status-pending"><i class="fas fa-clock"></i> Pending</span>';
-            if (data.status && data.status.toLowerCase() === 'paid') {
+
+            // =====================================================
+            // STATUS BADGE — mirrors admin-dashboard verification states
+            //
+            // Bank Transfer + receipt uploaded + admin NOT yet verified
+            //   → orange "Pending Verification" (admin needs to check receipt)
+            //
+            // Bank Transfer + admin Approved (verificationStatus = "Verified")
+            //   → green "Confirmed"
+            //
+            // ToyyibPay (no receipt, auto-verified by payment gateway)
+            //   → green "Confirmed"
+            //
+            // "Rejected" tickets never reach here (filtered out in loadUserTickets
+            //   because status is set to "Rejected" by admin, not "Paid").
+            // =====================================================
+            const vStatus    = (data.verificationStatus || '').toLowerCase();
+            const isBankTx   = data.paymentMethod === 'Bank Transfer';
+            const hasReceipt = !!data.receiptImage;
+
+            let statusHtml;
+            if (isBankTx && hasReceipt && vStatus !== 'verified') {
+                // Bank transfer — receipt submitted but admin has not verified yet
+                statusHtml = '<span class="status-badge status-verify"><i class="fas fa-hourglass-half"></i> Pending Verification</span>';
+            } else {
+                // ToyyibPay (auto), verified bank transfer, or manual admin mark
                 statusHtml = '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Confirmed</span>';
             }
 
@@ -376,7 +410,7 @@
                         
                         <div class="meta-grid">
                             <div class="meta-item"><span class="meta-label">Category</span><span class="meta-value highlight">${data.category}</span></div>
-                            <div class="meta-item"><span class="meta-label">T-Shirt Size</span><span class="meta-value">${data.tshirt_size}</span></div>
+                            <div class="meta-item"><span class="meta-label">T-Shirt Size</span><span class="meta-value">${data.tshirt_size || '-'}</span></div>
                             <div class="meta-item"><span class="meta-label">Date Registered</span><span class="meta-value">${regDateFormatted}</span></div>
                             <div class="meta-item"><span class="meta-label">Bib Number</span><span class="meta-value" style="color:#aaa;">To be assigned</span></div>
                         </div>
