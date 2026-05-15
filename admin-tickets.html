@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket QR Viewer - Sea Mountain Admin</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        :root {
+            --brand-red: #ff0000;
+            --bg-dark: #0a0b0e;
+            --card-bg: #13151c;
+            --card-border: #1e2130;
+            --input-bg: #0d0e14;
+            --text: #ffffff;
+            --text-muted: #666;
+            --green: #00cc66;
+            --orange: #ff9500;
+            --red-soft: #ff4d4d;
+            --yellow: #ffcc00;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg-dark); color: var(--text);
+            font-family: 'Montserrat', sans-serif; min-height: 100vh;
+            background-image: radial-gradient(ellipse at top, rgba(255,0,0,0.04) 0%, transparent 60%);
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            padding: 20px 30px; border-bottom: 1px solid var(--card-border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(10,11,14,0.95); backdrop-filter: blur(10px);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .logo { font-family: 'Russo One'; font-size: 1.3rem; text-transform: uppercase; }
+        .logo span { color: var(--brand-red); }
+        .logo small { display: block; font-family: 'Montserrat'; font-size: 0.6rem; color: var(--text-muted); font-weight: 700; letter-spacing: 3px; margin-top: 2px; text-transform: uppercase; }
+        .back-btn {
+            color: #555; text-decoration: none; font-weight: 600; font-size: 0.8rem;
+            display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+            border: 1px solid #222; border-radius: 30px; transition: 0.2s;
+        }
+        .back-btn:hover { color: #fff; border-color: #444; }
+
+        .page-body { max-width: 1500px; margin: 0 auto; padding: 30px; }
+
+        /* ===== SECURITY NOTICE ===== */
+        .security-notice {
+            background: rgba(255,149,0,0.08); border: 1px solid rgba(255,149,0,0.2);
+            border-radius: 10px; padding: 14px 20px; margin-bottom: 25px;
+            display: flex; align-items: center; gap: 12px;
+            font-size: 0.82rem; color: var(--orange);
+        }
+        .security-notice i { font-size: 1rem; flex-shrink: 0; }
+
+        /* ===== STATS ===== */
+        .stats-bar {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;
+        }
+        .stat-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 12px; padding: 18px 20px; border-left: 3px solid;
+        }
+        .stat-card.s-total   { border-left-color: var(--yellow); }
+        .stat-card.s-confirm { border-left-color: var(--green); }
+        .stat-card.s-pending { border-left-color: var(--orange); }
+        .stat-card.s-reveal  { border-left-color: var(--brand-red); }
+        .stat-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 6px; }
+        .stat-value { font-family: 'Russo One'; font-size: 1.8rem; }
+        .s-total   .stat-value { color: var(--yellow); }
+        .s-confirm .stat-value { color: var(--green); }
+        .s-pending .stat-value { color: var(--orange); }
+        .s-reveal  .stat-value { color: var(--brand-red); }
+
+        /* ===== FILTERS ===== */
+        .filters {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 12px; padding: 18px 20px; margin-bottom: 25px;
+            display: grid; grid-template-columns: 1fr 1fr 2fr auto auto; gap: 12px; align-items: end;
+        }
+        .filter-group label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+        .filter-input {
+            width: 100%; padding: 9px 13px; background: var(--input-bg);
+            border: 1px solid #222; border-radius: 8px; color: #fff;
+            font-family: 'Montserrat'; font-size: 0.85rem; outline: none; transition: 0.2s;
+        }
+        .filter-input:focus { border-color: var(--brand-red); }
+        .btn-filter-action {
+            padding: 9px 16px; border-radius: 8px; font-weight: 700; font-size: 0.78rem;
+            cursor: pointer; border: none; font-family: 'Montserrat'; transition: 0.2s;
+            display: flex; align-items: center; gap: 6px; white-space: nowrap;
+        }
+        .btn-reveal-all  { background: rgba(255,0,0,0.15); color: var(--brand-red); border: 1px solid rgba(255,0,0,0.3); }
+        .btn-reveal-all:hover  { background: var(--brand-red); color: #fff; }
+        .btn-hide-all    { background: #1a1c23; color: #888; border: 1px solid #333; }
+        .btn-hide-all:hover    { background: #2a2d36; color: #fff; }
+
+        /* ===== GRID ===== */
+        .ticket-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px;
+        }
+
+        /* ===== TICKET CARD ===== */
+        .ticket-card {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 14px; overflow: hidden; transition: 0.25s;
+            display: flex; flex-direction: column;
+        }
+        .ticket-card:hover { border-color: #2a2d36; box-shadow: 0 8px 25px rgba(0,0,0,0.4); transform: translateY(-2px); }
+
+        /* Card top bar — colour coded by status */
+        .card-topbar {
+            height: 3px; width: 100%;
+        }
+        .card-topbar.confirmed { background: var(--green); }
+        .card-topbar.pending   { background: var(--orange); }
+
+        .card-info { padding: 16px 18px; }
+        .card-event { font-size: 0.68rem; color: var(--brand-red); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+        .card-name  { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 2px; line-height: 1.3; }
+        .card-team  { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px; }
+
+        .card-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; margin-bottom: 12px; }
+        .meta-chip { font-size: 0.7rem; }
+        .meta-chip .lbl { color: var(--text-muted); font-size: 0.6rem; text-transform: uppercase; font-weight: 700; display: block; }
+        .meta-chip .val { color: #ccc; font-weight: 600; }
+        .meta-chip .val.ref { color: var(--yellow); font-family: monospace; font-size: 0.75rem; }
+
+        /* Status badge */
+        .status-pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 20px; font-size: 0.62rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid;
+        }
+        .pill-confirmed { background: rgba(0,204,102,0.1); color: var(--green); border-color: var(--green); }
+        .pill-pending   { background: rgba(255,149,0,0.1); color: var(--orange); border-color: var(--orange); }
+
+        /* ===== QR SECTION ===== */
+        .qr-section {
+            background: #0d0e14; border-top: 1px solid var(--card-border);
+            padding: 20px; display: flex; flex-direction: column; align-items: center;
+            position: relative;
+        }
+
+        /* QR Wrapper — controls blur */
+        .qr-wrapper {
+            position: relative; display: inline-flex; align-items: center; justify-content: center;
+            margin-bottom: 12px; cursor: pointer;
+        }
+        .qr-canvas {
+            background: #fff; padding: 10px; border-radius: 10px;
+            transition: filter 0.3s ease;
+            filter: blur(10px);
+        }
+        .qr-canvas.revealed { filter: blur(0); }
+
+        /* Lock overlay */
+        .qr-lock {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 5px;
+            transition: opacity 0.25s;
+            pointer-events: none;
+        }
+        .qr-lock i { font-size: 1.6rem; color: rgba(255,255,255,0.9); text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+        .qr-lock span { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.7); }
+        .qr-lock.hidden { opacity: 0; }
+
+        .qr-reg-id {
+            font-family: monospace; font-size: 0.72rem; color: #555;
+            letter-spacing: 1px; text-transform: uppercase;
+            background: #111; padding: 3px 10px; border-radius: 20px; border: 1px solid #222;
+        }
+
+        /* Reveal button */
+        .btn-reveal {
+            width: 100%; padding: 10px; border: none; border-radius: 8px;
+            font-weight: 700; font-size: 0.75rem; cursor: pointer; transition: 0.2s;
+            font-family: 'Montserrat'; display: flex; align-items: center; justify-content: center; gap: 6px;
+            margin-top: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .btn-reveal.locked   { background: #1a1c23; color: #666; border: 1px solid #2a2d36; }
+        .btn-reveal.locked:hover { background: rgba(255,0,0,0.1); color: var(--brand-red); border-color: rgba(255,0,0,0.3); }
+        .btn-reveal.unlocked { background: rgba(0,204,102,0.1); color: var(--green); border: 1px solid rgba(0,204,102,0.2); }
+        .btn-reveal.unlocked:hover { background: rgba(0,204,102,0.15); }
+
+        /* ===== STATES ===== */
+        .loading-state, .empty-state {
+            text-align: center; padding: 80px 20px; color: var(--text-muted);
+        }
+        .empty-state i { font-size: 3rem; margin-bottom: 15px; opacity: 0.2; }
+
+        /* ===== MODAL (full QR) ===== */
+        .qr-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(12px); z-index: 9999;
+            display: none; justify-content: center; align-items: center;
+        }
+        .qr-modal.active { display: flex; }
+        .qr-modal-box {
+            background: #fff; padding: 35px; border-radius: 20px; text-align: center;
+            box-shadow: 0 0 60px rgba(255,255,255,0.1);
+            animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .qr-modal-name  { color: #000; font-weight: 800; font-size: 1rem; margin-top: 18px; text-transform: uppercase; }
+        .qr-modal-event { color: #888; font-size: 0.8rem; margin-top: 3px; }
+        .qr-modal-ref   { font-family: monospace; color: #333; font-size: 0.85rem; background: #f0f0f0; padding: 4px 12px; border-radius: 20px; margin-top: 8px; display: inline-block; }
+        .qr-modal-close {
+            position: absolute; top: 25px; right: 25px;
+            background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2);
+            width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.1rem;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+        .qr-modal-close:hover { background: var(--brand-red); border-color: var(--brand-red); transform: rotate(90deg); }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 900px) {
+            .header { padding: 15px 20px; }
+            .page-body { padding: 20px 15px; }
+            .stats-bar { grid-template-columns: repeat(2, 1fr); }
+            .filters { grid-template-columns: 1fr 1fr; }
+            .filters .filter-group:nth-child(3) { grid-column: 1 / -1; }
+            .btn-filter-action { justify-content: center; }
+            .ticket-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        SEA<span>MOUNTAIN</span>
+        <small>Ticket QR Viewer</small>
+    </div>
+    <a href="admin-dashboard.html" class="back-btn"><i class="fas fa-arrow-left"></i> Dashboard</a>
+</div>
+
+<div class="page-body">
+
+    <!-- Security Notice -->
+    <div class="security-notice">
+        <i class="fas fa-shield-alt"></i>
+        <span>QR codes are <strong>blurred by default</strong> to prevent accidental exposure. Click each card to reveal individually, or use "Reveal All" with caution. Each QR is unique per participant and grants event check-in access.</span>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <div class="stat-card s-total">
+            <div class="stat-label"><i class="fas fa-ticket-alt"></i> Total Tickets</div>
+            <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card s-confirm">
+            <div class="stat-label"><i class="fas fa-check-circle"></i> Confirmed</div>
+            <div class="stat-value" id="statConfirmed">0</div>
+        </div>
+        <div class="stat-card s-pending">
+            <div class="stat-label"><i class="fas fa-hourglass-half"></i> Pending Verify</div>
+            <div class="stat-value" id="statPending">0</div>
+        </div>
+        <div class="stat-card s-reveal">
+            <div class="stat-label"><i class="fas fa-eye"></i> Revealed</div>
+            <div class="stat-value" id="statRevealed">0</div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters">
+        <div class="filter-group">
+            <label>Event</label>
+            <select id="filterEvent" class="filter-input">
+                <option value="">All Events</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Status</label>
+            <select id="filterStatus" class="filter-input">
+                <option value="">All Status</option>
+                <option value="confirmed">✓ Confirmed</option>
+                <option value="pending">⏳ Pending Verify</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Search</label>
+            <input type="text" id="filterSearch" class="filter-input" placeholder="Name, team, ref no...">
+        </div>
+        <button class="btn-filter-action btn-reveal-all" onclick="toggleAllQR(true)">
+            <i class="fas fa-eye"></i> Reveal All
+        </button>
+        <button class="btn-filter-action btn-hide-all" onclick="toggleAllQR(false)">
+            <i class="fas fa-eye-slash"></i> Hide All
+        </button>
+    </div>
+
+    <!-- Grid -->
+    <div id="loadingState" class="loading-state">
+        <i class="fas fa-circle-notch fa-spin" style="font-size:2rem;"></i>
+        <p style="margin-top:15px; font-size:0.9rem;">Loading tickets...</p>
+    </div>
+    <div id="ticketGrid" class="ticket-grid" style="display:none;"></div>
+    <div id="emptyState" class="empty-state" style="display:none;">
+        <i class="fas fa-ticket-alt"></i>
+        <p style="font-size:0.95rem; margin-top:5px;">No tickets found</p>
+        <p style="font-size:0.8rem; margin-top:5px; opacity:0.6;">Adjust filters or check back after registrations are verified.</p>
+    </div>
+
+</div>
+
+<!-- Full QR Modal -->
+<div id="qrModal" class="qr-modal" onclick="closeModal()">
+    <button class="qr-modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    <div id="qrModalBox" class="qr-modal-box" onclick="event.stopPropagation()">
+        <div id="modalQrTarget"></div>
+        <div class="qr-modal-name" id="modalName">-</div>
+        <div class="qr-modal-event" id="modalEvent">-</div>
+        <div class="qr-modal-ref" id="modalRef">-</div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
+        authDomain: "sea-mountain.firebaseapp.com",
+        databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "sea-mountain",
+        storageBucket: "sea-mountain.firebasestorage.app",
+        messagingSenderId: "812228825024",
+        appId: "1:812228825024:web:717049c1a64b39c8a60225"
+    };
+
+    // Named "admin" app — keeps admin session separate from user session
+    const adminApp = initializeApp(firebaseConfig, "admin");
+    const auth = getAuth(adminApp);
+    const db   = getDatabase(adminApp);
+
+    const ALLOWED_ADMIN = "admin@sm.com";
+
+    let allTickets  = [];  // { eventId, regId, eventTitle, data, status }
+    let revealCount = 0;
+
+    // ===== AUTH =====
+    onAuthStateChanged(auth, (user) => {
+        if (!user || user.email !== ALLOWED_ADMIN) {
+            alert("Admin access required.");
+            window.location.href = "admin-login.html";
+        } else {
+            loadData();
+        }
+    });
+
+    // ===== LOAD =====
+    async function loadData() {
+        try {
+            const [regSnap, evSnap] = await Promise.all([
+                get(ref(db, 'registrations')),
+                get(ref(db, 'events'))
+            ]);
+
+            allTickets = [];
+
+            if (!regSnap.exists()) { showEmpty(); return; }
+
+            const allEvents = evSnap.exists() ? evSnap.val() : {};
+            const allRegs   = regSnap.val();
+
+            // Event filter dropdown
+            const evFilter = document.getElementById('filterEvent');
+            Object.keys(allEvents).forEach(eid => {
+                const opt = document.createElement('option');
+                opt.value = eid;
+                opt.text  = allEvents[eid].title || eid;
+                evFilter.appendChild(opt);
+            });
+
+            // Collect all paid registrations (bank transfer verified OR toyyibpay)
+            Object.keys(allRegs).forEach(eventId => {
+                const participants = allRegs[eventId];
+                if (!participants) return;
+                Object.keys(participants).forEach(regId => {
+                    const data = participants[regId];
+                    const isPaid     = (data.status || '').toLowerCase() === 'paid';
+                    const isBankTx   = data.paymentMethod === 'Bank Transfer';
+                    const hasReceipt = !!data.receiptImage;
+                    const isVerified = (data.verificationStatus || '').toLowerCase() === 'verified';
+
+                    // Only include tickets that would show in my-tickets.html
+                    const passesVerification = (isBankTx && hasReceipt) ? isVerified : true;
+                    if (!isPaid || !passesVerification) return;
+
+                    const ticketStatus = (isBankTx && hasReceipt)
+                        ? (isVerified ? 'confirmed' : 'pending')
+                        : 'confirmed'; // ToyyibPay = auto confirmed
+
+                    allTickets.push({
+                        eventId,
+                        regId,
+                        eventTitle: allEvents[eventId]?.title || data.event_name || eventId,
+                        data,
+                        status: ticketStatus
+                    });
+                });
+            });
+
+            // Sort by event then name
+            allTickets.sort((a, b) => {
+                if (a.eventId !== b.eventId) return a.eventId.localeCompare(b.eventId);
+                const na = (a.data.first_name || a.data.captainName || '').toLowerCase();
+                const nb = (b.data.first_name || b.data.captainName || '').toLowerCase();
+                return na.localeCompare(nb);
+            });
+
+            updateStats();
+            renderGrid();
+
+        } catch (err) {
+            console.error(err);
+            alert('Failed to load: ' + err.message);
+        }
+    }
+
+    // ===== STATS =====
+    function updateStats() {
+        const confirmed = allTickets.filter(t => t.status === 'confirmed').length;
+        const pending   = allTickets.filter(t => t.status === 'pending').length;
+        document.getElementById('statTotal').textContent     = allTickets.length;
+        document.getElementById('statConfirmed').textContent = confirmed;
+        document.getElementById('statPending').textContent   = pending;
+        document.getElementById('statRevealed').textContent  = revealCount;
+    }
+
+    // ===== RENDER =====
+    function renderGrid() {
+        const grid    = document.getElementById('ticketGrid');
+        const empty   = document.getElementById('emptyState');
+        const loading = document.getElementById('loadingState');
+
+        loading.style.display = 'none';
+
+        const evFilter  = document.getElementById('filterEvent').value;
+        const stFilter  = document.getElementById('filterStatus').value;
+        const search    = document.getElementById('filterSearch').value.trim().toLowerCase();
+
+        const filtered = allTickets.filter(t => {
+            if (evFilter && t.eventId !== evFilter) return false;
+            if (stFilter && t.status !== stFilter) return false;
+            if (search) {
+                const hay = [
+                    t.data.first_name, t.data.last_name, t.data.captainName,
+                    t.data.teamName, t.data.email, t.data.captainEmail,
+                    t.data.paymentRef
+                ].filter(Boolean).join(' ').toLowerCase();
+                if (!hay.includes(search)) return false;
+            }
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            grid.style.display  = 'none';
+            empty.style.display = 'block';
+            return;
+        }
+
+        grid.style.display  = 'grid';
+        empty.style.display = 'none';
+        grid.innerHTML      = '';
+
+        filtered.forEach(t => {
+            const card = buildCard(t);
+            grid.appendChild(card);
+            // Generate QR after card is in DOM
+            generateQR(t.regId, `qr-${t.regId}`);
+        });
+    }
+
+    function buildCard(t) {
+        const d    = t.data;
+        const name = [d.first_name || d.captainName || 'Unknown', d.last_name || ''].join(' ').trim();
+        const team = d.teamName || '';
+        const ref  = d.paymentRef || t.regId.substring(0, 8).toUpperCase();
+
+        const pillClass = t.status === 'confirmed' ? 'pill-confirmed' : 'pill-pending';
+        const pillText  = t.status === 'confirmed'
+            ? '<i class="fas fa-check-circle"></i> Confirmed'
+            : '<i class="fas fa-hourglass-half"></i> Pending Verify';
+
+        const div = document.createElement('div');
+        div.className = 'ticket-card';
+        div.dataset.regId = t.regId;
+        div.innerHTML = `
+            <div class="card-topbar ${t.status}"></div>
+            <div class="card-info">
+                <div class="card-event">${t.eventTitle}</div>
+                <div class="card-name">${name}</div>
+                ${team ? `<div class="card-team">${team}</div>` : '<div class="card-team" style="height:16px;"></div>'}
+                <div class="card-meta">
+                    <div class="meta-chip">
+                        <span class="lbl">Category</span>
+                        <span class="val">${d.category || '-'}</span>
+                    </div>
+                    <div class="meta-chip">
+                        <span class="lbl">Status</span>
+                        <span><span class="status-pill ${pillClass}">${pillText}</span></span>
+                    </div>
+                    <div class="meta-chip">
+                        <span class="lbl">Ref No.</span>
+                        <span class="val ref">${ref}</span>
+                    </div>
+                    <div class="meta-chip">
+                        <span class="lbl">Method</span>
+                        <span class="val">${d.paymentMethod || '-'}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="qr-section">
+                <div class="qr-wrapper" onclick="revealQR('${t.regId}', event)" title="Click to reveal QR">
+                    <div id="qr-${t.regId}" class="qr-canvas"></div>
+                    <div class="qr-lock" id="lock-${t.regId}">
+                        <i class="fas fa-lock"></i>
+                        <span>Click to reveal</span>
+                    </div>
+                </div>
+                <div class="qr-reg-id">${t.regId.substring(0,12).toUpperCase()}...</div>
+                <button class="btn-reveal locked" id="btn-${t.regId}"
+                    onclick="revealQR('${t.regId}', event)">
+                    <i class="fas fa-lock" id="btnIcon-${t.regId}"></i>
+                    <span id="btnTxt-${t.regId}">Reveal QR</span>
+                </button>
+            </div>
+        `;
+
+        // Double-click on QR → open full modal
+        setTimeout(() => {
+            const qrEl = div.querySelector(`#qr-${t.regId}`);
+            if (qrEl) qrEl.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                openModal(t);
+            });
+        }, 200);
+
+        return div;
+    }
+
+    function generateQR(regId, containerId) {
+        setTimeout(() => {
+            const el = document.getElementById(containerId);
+            if (!el || el.childElementCount > 0) return;
+            new QRCode(el, {
+                text: regId,
+                width: 130, height: 130,
+                colorDark: '#000000', colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }, 100);
+    }
+
+    // ===== REVEAL SINGLE QR =====
+    window.revealQR = function(regId, e) {
+        if (e) e.stopPropagation();
+        const canvas  = document.getElementById(`qr-${regId}`);
+        const lock    = document.getElementById(`lock-${regId}`);
+        const btn     = document.getElementById(`btn-${regId}`);
+        const btnIcon = document.getElementById(`btnIcon-${regId}`);
+        const btnTxt  = document.getElementById(`btnTxt-${regId}`);
+        if (!canvas) return;
+
+        const isRevealed = canvas.classList.contains('revealed');
+
+        if (isRevealed) {
+            // Hide
+            canvas.classList.remove('revealed');
+            lock.classList.remove('hidden');
+            lock.innerHTML = '<i class="fas fa-lock"></i><span>Click to reveal</span>';
+            btn.className  = 'btn-reveal locked';
+            btnIcon.className = 'fas fa-lock';
+            btnTxt.textContent = 'Reveal QR';
+            revealCount = Math.max(0, revealCount - 1);
+        } else {
+            // Reveal
+            canvas.classList.add('revealed');
+            lock.classList.add('hidden');
+            btn.className  = 'btn-reveal unlocked';
+            btnIcon.className = 'fas fa-eye-slash';
+            btnTxt.textContent = 'Hide QR';
+            revealCount++;
+        }
+        document.getElementById('statRevealed').textContent = revealCount;
+    };
+
+    // ===== REVEAL / HIDE ALL =====
+    window.toggleAllQR = function(reveal) {
+        const label = reveal ? 'REVEAL ALL QR codes?' : 'Hide all QR codes?';
+        if (reveal && !confirm(`⚠️ ${label}\n\nThis will expose ALL participant QR codes on screen. Make sure no unauthorised person can see your screen.`)) return;
+
+        document.querySelectorAll('.qr-canvas').forEach(canvas => {
+            const regId   = canvas.id.replace('qr-', '');
+            const lock    = document.getElementById(`lock-${regId}`);
+            const btn     = document.getElementById(`btn-${regId}`);
+            const btnIcon = document.getElementById(`btnIcon-${regId}`);
+            const btnTxt  = document.getElementById(`btnTxt-${regId}`);
+            if (!lock || !btn) return;
+
+            if (reveal) {
+                canvas.classList.add('revealed');
+                lock.classList.add('hidden');
+                btn.className  = 'btn-reveal unlocked';
+                btnIcon.className = 'fas fa-eye-slash';
+                btnTxt.textContent = 'Hide QR';
+            } else {
+                canvas.classList.remove('revealed');
+                lock.classList.remove('hidden');
+                lock.innerHTML = '<i class="fas fa-lock"></i><span>Click to reveal</span>';
+                btn.className  = 'btn-reveal locked';
+                btnIcon.className = 'fas fa-lock';
+                btnTxt.textContent = 'Reveal QR';
+            }
+        });
+
+        revealCount = reveal ? allTickets.length : 0;
+        document.getElementById('statRevealed').textContent = revealCount;
+    };
+
+    // ===== FULL QR MODAL =====
+    window.openModal = function(t) {
+        const d    = t.data;
+        const name = [d.first_name || d.captainName || '', d.last_name || ''].join(' ').trim();
+        const ref  = d.paymentRef || t.regId.substring(0, 8).toUpperCase();
+
+        document.getElementById('modalName').textContent  = name;
+        document.getElementById('modalEvent').textContent = t.eventTitle + ' — ' + (d.category || '');
+        document.getElementById('modalRef').textContent   = 'REF: ' + ref;
+
+        const target = document.getElementById('modalQrTarget');
+        target.innerHTML = '';
+        new QRCode(target, {
+            text: t.regId,
+            width: 260, height: 260,
+            colorDark: '#000000', colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+        });
+
+        document.getElementById('qrModal').classList.add('active');
+    };
+
+    window.closeModal = function() {
+        document.getElementById('qrModal').classList.remove('active');
+        document.getElementById('modalQrTarget').innerHTML = '';
+    };
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    // ===== FILTERS =====
+    function showEmpty() {
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('emptyState').style.display  = 'block';
+    }
+
+    document.getElementById('filterEvent').addEventListener('change', () => { revealCount = 0; renderGrid(); updateStats(); });
+    document.getElementById('filterStatus').addEventListener('change', () => { revealCount = 0; renderGrid(); updateStats(); });
+    document.getElementById('filterSearch').addEventListener('input',  () => { revealCount = 0; renderGrid(); updateStats(); });
+</script>
+
+</body>
+</html>
