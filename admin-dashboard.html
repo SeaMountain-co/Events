@@ -114,7 +114,7 @@
         .btn-delete  { background: #ff0000; } .btn-delete:hover  { background: #cc0000; }
         .btn-approve { background: #28a745; } .btn-approve:hover { background: #218838; }
         .btn-revoke  { background: #e67e22; } .btn-revoke:hover  { background: #d35400; }
-        /* New: verify receipt (opens admin-receipt) */
+        /* New: verify receipt (opens admin-resit) */
         .btn-verify  { background: #ff9500; } .btn-verify:hover  { background: #e68500; }
 
         .scroll-hint { display: none; font-size: 0.75rem; color: #888; margin-bottom: 5px; text-align: right; font-style: italic; }
@@ -164,10 +164,9 @@
             <div class="nav-label">Main</div>
             <a href="admin-dashboard.html" class="btn-nav active"><i class="fas fa-home"></i> Dashboard</a>
             <!-- NEW: Receipt Verification link with notification dot -->
-            <a href="admin-receipt.html" class="btn-nav"><i class="fas fa-receipt"></i> Receipt Verification<span class="nav-dot" id="navDot"></span></a>
+            <a href="admin-resit.html" class="btn-nav"><i class="fas fa-receipt"></i> Receipt Verification<span class="nav-dot" id="navDot"></span></a>
             <a href="admin-participants.html" class="btn-nav"><i class="fa-solid fa-person"></i> Edit Participant</a>
             <a href="admin-manage-events.html" class="btn-nav"><i class="fas fa-calendar-alt"></i> Manage Events</a>
-            <a href="admin-tickets.html" class="btn-nav"><i class="fas fa-qrcode"></i> Ticket QR Viewer</a>
             
             <div class="nav-label">Add</div>
             <a href="admin-add-event.html" class="btn-nav"><i class="fas fa-plus-circle"></i> Add Event</a>
@@ -216,7 +215,7 @@
                     <h3>Paid Participants</h3>
                     <div class="value" id="totalPaid">0</div>
                 </div>
-                <!-- NEW: Awaiting Verification stat (clickable, links to admin-receipt) -->
+                <!-- NEW: Awaiting Verification stat (clickable, links to admin-resit) -->
                 <div class="stat-card clickable" style="border-color: #ff9500;" onclick="goToReceipts()">
                     <h3>Awaiting Verification</h3>
                     <div class="value" id="totalAwaiting" style="color:#ff9500;">0</div>
@@ -277,9 +276,24 @@
             appId: "1:812228825024:web:717049c1a64b39c8a60225"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+        // =====================================================
+        // FIX: Use a NAMED Firebase app instance ("admin") for all
+        // admin-* pages. This separates the admin auth state from
+        // the regular user auth state stored under the default app.
+        //
+        // Result: same browser can be logged in as:
+        //   - Regular user on index.html (default app)
+        //   - Admin on admin-* pages (admin app)
+        // ...simultaneously, without one kicking the other out.
+        //
+        // IMPORTANT: Apply this same change to EVERY admin-*.html
+        // page (admin-login.html, admin-receipt.html, admin-add-*,
+        // admin-participants, admin-manage-events, admin-vouchers, etc.)
+        // Otherwise pages using the default app will still conflict.
+        // =====================================================
+        const adminApp = initializeApp(firebaseConfig, "admin");
+        const auth = getAuth(adminApp);
+        const db = getDatabase(adminApp);
         const ALLOWED_ADMIN = "admin@sm.com"; 
 
         window.toggleMenu = function() {
@@ -312,7 +326,7 @@
         //   - 'rejected'  → status=Rejected OR verificationStatus=Rejected
         //   - 'awaiting'  → status=Paid + Bank Transfer + has receiptImage
         //                   AND not yet verified by admin
-        //                   (i.e. admin must check at admin-receipt first)
+        //                   (i.e. admin must check at admin-resit first)
         //   - 'paid'      → status=Paid AND either no receipt to verify,
         //                   OR verificationStatus=Verified, OR ToyyibPay
         //   - 'pending'   → anything else (Pending Payment, etc.)
@@ -334,23 +348,63 @@
         }
 
         // =====================================================
-        // NEW: Open admin-receipt.html with a search hint
+        // NEW: Format shirt sizes per team.
+        // Data structure: row.racers = [{ shirt: 'L', ... }, ...]
+        //
+        // Examples:
+        //   Team of 2, both L           → "2-L"
+        //   Team of 4: 2 S, 1 M, 1 L    → "2-S 1-M 1-L"
+        //   Solo, L                     → "1-L"
+        //   No data                     → "-"
+        //
+        // Order: XS, S, M, L, XL, XXL, XXXL (standard apparel order)
+        // Falls back to legacy `row.tshirt_size` if racers array missing.
+        // =====================================================
+        function formatShirtSizes(row) {
+            // NEW format: count from racers array
+            if (row.racers && Array.isArray(row.racers) && row.racers.length > 0) {
+                const counts = {};
+                row.racers.forEach(r => {
+                    const size = (r.shirt || '').trim().toUpperCase();
+                    if (size) counts[size] = (counts[size] || 0) + 1;
+                });
+
+                if (Object.keys(counts).length > 0) {
+                    const sizeOrder = ['XS','S','M','L','XL','XXL','XXXL'];
+                    const sorted = Object.keys(counts).sort((a, b) => {
+                        const ai = sizeOrder.indexOf(a);
+                        const bi = sizeOrder.indexOf(b);
+                        if (ai === -1 && bi === -1) return a.localeCompare(b);
+                        if (ai === -1) return 1;
+                        if (bi === -1) return -1;
+                        return ai - bi;
+                    });
+                    return sorted.map(s => `${counts[s]}-${s}`).join(' ');
+                }
+            }
+            // LEGACY format fallback (old registrations with a single tshirt_size)
+            if (row.tshirt_size) return row.tshirt_size;
+            return '-';
+        }
+
+        // =====================================================
+        // NEW: Open admin-resit.html with a search hint
         // (so admin lands directly on the right receipt).
         // =====================================================
         window.openReceiptPage = function(searchHint) {
-            const url = 'admin-receipt.html' + (searchHint ? '?search=' + encodeURIComponent(searchHint) : '');
+            const url = 'admin-resit.html' + (searchHint ? '?search=' + encodeURIComponent(searchHint) : '');
             window.open(url, '_blank');
         }
 
         window.goToReceipts = function() {
-            window.open('admin-receipt.html?filter=pending', '_blank');
+            window.open('admin-resit.html?filter=pending', '_blank');
         }
 
         // --- 1. LOAD DATA ---
         function loadData() {
             const dbRef = ref(db, 'registrations');
             
-            // onValue = realtime listener. When admin-receipt updates the DB,
+            // onValue = realtime listener. When admin-resit updates the DB,
             // this fires automatically and the dashboard re-renders.
             onValue(dbRef, (snapshot) => {
                 const data = snapshot.val();
@@ -456,7 +510,7 @@
                 const refHint = row.paymentRef || row.regKey;
                 let actionBtn = "";
                 if (state === 'awaiting') {
-                    // Has receipt awaiting verification → force admin to admin-receipt
+                    // Has receipt awaiting verification → force admin to admin-resit
                     actionBtn = `<button class="btn-action btn-verify" title="Verify Receipt at Receipt Page"
                         onclick="openReceiptPage('${refHint}')"><i class="fas fa-receipt"></i></button>`;
                 } else if (state === 'rejected') {
@@ -476,7 +530,7 @@
                         <td style="color:var(--brand-red); font-weight:bold;">${row.eventId.toUpperCase()}</td>
                         <td>${row.first_name} ${row.last_name || ''}</td>
                         <td>${row.email || '-'}<br><small style="color:#888;">${row.phone || '-'}</small></td>
-                        <td>${row.category || '-'} <span style="color:#aaa; font-size:0.8rem;">(${row.tshirt_size || '-'})</span></td>
+                        <td>${row.category || '-'} <span style="color:#aaa; font-size:0.8rem;">(${formatShirtSizes(row)})</span></td>
                         <td><span class="badge ${b.cls}">${b.html}</span></td>
                         <td style="white-space:nowrap;">
                             ${actionBtn}
@@ -494,7 +548,7 @@
             let csvContent = "data:text/csv;charset=utf-8,";
             csvContent += "Event,First Name,Last Name,Email,Phone,Category,Size,Status,Reg Date\n"; 
             allRegistrations.forEach(row => {
-                let rowData = [ row.eventId, row.first_name, row.last_name, row.email, row.phone, row.category, row.tshirt_size, row.status, (row.registration_time || "").replace(',', '') ];
+                let rowData = [ row.eventId, row.first_name, row.last_name, row.email, row.phone, row.category, formatShirtSizes(row), row.status, (row.registration_time || "").replace(',', '') ];
                 csvContent += rowData.join(",") + "\n";
             });
             const encodedUri = encodeURI(csvContent);
@@ -538,7 +592,7 @@
         // =====================================================
         // NEW: tryMarkAsPaid — checks if there's a pending
         // receipt before allowing direct status change.
-        // If there's a receipt, admin MUST verify in admin-receipt
+        // If there's a receipt, admin MUST verify in admin-resit
         // first; otherwise, allow manual override (e.g. cash).
         // =====================================================
         window.tryMarkAsPaid = function(eventId, regKey) {
