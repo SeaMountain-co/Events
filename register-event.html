@@ -261,12 +261,12 @@
                             </div>
                             <div class="form-group"><label>Captain Email</label><input type="email" id="captainEmail" class="form-control" required></div>
                             <div class="form-group"><label>Country of Team</label>
-                                <select id="teamCountry" class="form-control" required><option value="" disabled selected>Select Country</option></select>
+                                <select id="teamCountry" class="form-control" required><option value="" disabled selected>Select Country</option><option value="Malaysia">Malaysia</option><option value="Other">Other</option></select>
                             </div>
                             <div class="form-group"><label>Race Category</label>
                                 <select id="raceCategory" class="form-control" required onchange="updateRacersCount()"><option value="" disabled selected>Loading Categories...</option></select>
                             </div>
-                            <div class="form-group"><label>Emergency Contact Name (Non-racer)(eg: Beyonce +6012333333)</label><input type="text" id="emergencyName" class="form-control" required placeholder="Name of next of kin"></div>
+                            <div class="form-group"><label>Emergency Contact (Non-racer)</label><input type="text" id="emergencyName" class="form-control" required placeholder="Name of next of kin"></div>
                         </div>
                     </div>
                 </div>
@@ -481,10 +481,6 @@
         });
         return opts;
     }
-
-    // Populate "Country of Team" dropdown with all countries (same list as nationality)
-    document.getElementById('teamCountry').innerHTML =
-        '<option value="" disabled selected>Select Country</option>' + getCountryOptions();
 
     // =====================================================
     // CHANGE 2a: Generate per-racer medical forms into
@@ -794,9 +790,19 @@
         let count = getTeamSize(catName);
 
         for (let i = 1; i <= count; i++) {
+            const isCapt   = (i === 1);
+            const boxLabel = isCapt ? '&#9733; Captain' : `Racer ${i}`;
+            const captAck  = isCapt ? `
+                    <div class="checkbox-group" style="padding:15px; background:none; border:none;">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="racer1_ack" required>
+                            Team Captains are responsible for briefing all team members on the team member regulations and to sign the form signed during Team Registration in Sebauh.
+                        </label>
+                    </div>` : '';
+
             container.innerHTML += `
-                <div class="racer-box">
-                    <div class="racer-title">Racer ${i}</div>
+                <div class="racer-box" style="${isCapt ? 'border-color:#444; border-width:2px;' : ''}">
+                    <div class="racer-title" style="${isCapt ? 'color:var(--brand-yellow);' : 'color:#aaa;'}">${boxLabel}</div>
                     <div class="form-group">
                         <label>Full Name</label>
                         <input type="text" id="racer${i}_name" class="form-control" placeholder="As per ID/Passport" required>
@@ -833,12 +839,7 @@
                             <option>L</option><option>XL</option><option>XXL</option>
                         </select>
                     </div>
-                    <div class="checkbox-group" style="padding:15px; background:none; border:none;">
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="racer${i}_ack" required>
-                           Team Captains are responsible for briefing all team members on the team member regulations and to sign the form during Team Registration in Sebauh.
-                        </label>
-                    </div>
+                    ${captAck}
                 </div>`;
         }
 
