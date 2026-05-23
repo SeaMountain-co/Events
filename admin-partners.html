@@ -101,10 +101,9 @@
             appId: "1:812228825024:web:717049c1a64b39c8a60225"
         };
 
-        // Named "admin" app — must match admin-login.html
         const adminApp = initializeApp(firebaseConfig, "admin");
-        const db = getDatabase(adminApp);
-        const auth = getAuth(adminApp);
+        const db       = getDatabase(adminApp);
+        const auth     = getAuth(adminApp);
 
         // AUTH CHECK
         onAuthStateChanged(auth, (user) => {
