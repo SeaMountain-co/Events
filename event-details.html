@@ -355,7 +355,8 @@
                 </div>
                 <div id="contact" class="tab-panel">
                     <div class="contact-row"><span>Organiser:</span> Sea Mountain Team</div>
-                    <div class="contact-row"><span>Email:</span> info@seamountain.com</div>
+                    <div class="contact-row"><span>Email:</span> teamseamountain@gmail.com</div>
+                    <div class="contact-row </div>
                 </div>
             </div>
         </div>
@@ -366,8 +367,16 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <h4>About</h4>
-                <p>THE SPORTS AND FITNESS ONLINE EVENT REGISTRATION SOLUTION.</p>
-                <p style="margin-top:10px; color:#aaa;"><strong>info@seamountain.com</strong></p>
+                <p class="footer-tagline">"Race with Purpose. Build Communities."</p>
+                <p>We are a team of highly specialised individuals united by passion for sports, events, and community impact — and we are racers ourselves.</p>
+                <ul class="footer-spec-list">
+                    <li><i class="fas fa-running"></i> Sports &amp; Endurance Events</li>
+                    <li><i class="fas fa-compass"></i> Adventure Racing &amp; Outdoor Experiences</li>
+                    <li><i class="fas fa-cogs"></i> Event Operations &amp; Safety Management</li>
+                    <li><i class="fas fa-bullhorn"></i> Branding, Media &amp; Community Engagement</li>
+                    <li><i class="fas fa-laptop-code"></i> Digital Systems &amp; Event Technology</li>
+                    <li><i class="fas fa-handshake"></i> Community-Based &amp; Eco-Tourism Activation</li>
+                </ul>
             </div>
             <div class="footer-col">
                 <h4>Get The App</h4>
@@ -378,11 +387,13 @@
             </div>
             <div class="footer-col">
                 <h4>Follow Us</h4>
+                <p>Stay connected on social media.</p>
                 <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-tiktok"></i></a>
-                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="" title="Facebook"  target="_blank"><i class="fab fa-facebook-f"></i></a>
+                    <a href="http://instagram.com/hey.seamountain/" title="Instagram" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.tiktok.com/@seamountainco" title="TikTok"    target="_blank"><i class="fab fa-tiktok"></i></a>
+                    <a href="https://www.youtube.com/@SEAMOUNTAINCO" title="YouTube"   target="_blank"><i class="fab fa-youtube"></i></a>
+                    <a href="#" title="Threads"   target="_blank"><i class="fab fa-threads"></i></a>
                 </div>
             </div>
         </div>
@@ -527,7 +538,7 @@
                     registerBtn.href = "#";
                     registerBtn.onclick = function(e) { e.preventDefault(); }
                 } else if(data.price) {
-                    registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
+                    registerBtn.innerHTML = `Register Now <i class="fas fa-arrow-right"></i>`;
                     registerBtn.onclick = function(e) {
                         e.preventDefault(); 
                         if (isUserLoggedIn) {
