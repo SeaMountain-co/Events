@@ -257,13 +257,13 @@
         appId: "1:812228825024:web:717049c1a64b39c8a60225"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const ALLOWED_ADMIN = "admin@sm.com"; 
+    const adminApp     = initializeApp(firebaseConfig, "admin");
+    const auth         = getAuth(adminApp);
+    const db           = getDatabase(adminApp);
+    const ALLOWED_ADMIN = "admin@sm.com";          // ✅ luar .then()
 
-    // 1. SECURITY & MODE CHECK
-    onAuthStateChanged(auth, (user) => {
+    auth.authStateReady().then(() => {             // ✅ buka
+    onAuthStateChanged(auth, (user) => {       // ✅ buka
         if (!user || user.email !== ALLOWED_ADMIN) {
             alert("ACCESS DENIED");
             window.location.href = "admin-login.html";
@@ -273,7 +273,8 @@
             if(editId) enterEditMode(editId);
             else addCategoryRow();
         }
-    });
+        });                                        // ✅ tutup onAuthStateChanged
+    });                                            // ✅ tutup authStateReady
 
     // --- CATEGORY BUILDER LOGIC ---
     window.addCategoryRow = function(name="", normalPrice="", earlyPrice="") {
