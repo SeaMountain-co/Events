@@ -344,8 +344,16 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <h4>About</h4>
-                <p>THE SPORTS AND FITNESS ONLINE EVENT REGISTRATION SOLUTION.</p>
-                <p style="margin-top:10px; color:#aaa;"><strong>info@seamountain.com</strong></p>
+                <p class="footer-tagline">"Race with Purpose. Build Communities."</p>
+                <p>We are a team of highly specialised individuals united by passion for sports, events, and community impact — and we are racers ourselves.</p>
+                <ul class="footer-spec-list">
+                    <li><i class="fas fa-running"></i> Sports &amp; Endurance Events</li>
+                    <li><i class="fas fa-compass"></i> Adventure Racing &amp; Outdoor Experiences</li>
+                    <li><i class="fas fa-cogs"></i> Event Operations &amp; Safety Management</li>
+                    <li><i class="fas fa-bullhorn"></i> Branding, Media &amp; Community Engagement</li>
+                    <li><i class="fas fa-laptop-code"></i> Digital Systems &amp; Event Technology</li>
+                    <li><i class="fas fa-handshake"></i> Community-Based &amp; Eco-Tourism Activation</li>
+                </ul>
             </div>
             <div class="footer-col">
                 <h4>Get The App</h4>
@@ -483,7 +491,7 @@
                     registerBtn.href = "#";
                     registerBtn.onclick = function(e) { e.preventDefault(); }
                 } else if(data.price) {
-                    registerBtn.innerHTML = `Register Now <i class="fas fa-arrow-right"></i>`;
+                    registerBtn.innerHTML = `Register Now  <i class="fas fa-arrow-right"></i>`;
                     registerBtn.onclick = function(e) {
                         e.preventDefault(); 
                         if (isUserLoggedIn) {
