@@ -139,18 +139,22 @@
             appId: "1:812228825024:web:717049c1a64b39c8a60225"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
+        const adminApp = initializeApp(firebaseConfig, "admin");
+        const db     = getDatabase(adminApp);
+        const auth   = getAuth(adminApp);
         const ALLOWED_ADMIN = "admin@sm.com"; 
 
-        onAuthStateChanged(auth, (user) => {
-            if (!user || user.email !== ALLOWED_ADMIN) {
-                alert("Please login as Admin.");
-                window.location.href = "admin-login.html";
-            } else {
-                loadSettings();
-            }
+        // authStateReady() ensures Firebase loads cached session from
+        // IndexedDB BEFORE checking — prevents false redirect on first null
+        auth.authStateReady().then(() => {
+            onAuthStateChanged(auth, (user) => {
+                if (!user || user.email !== ALLOWED_ADMIN) {
+                    alert("Please login as Admin.");
+                    window.location.href = "admin-login.html";
+                } else {
+                    loadSettings();
+                }
+            });
         });
 
         // LOAD CURRENT SETTINGS
