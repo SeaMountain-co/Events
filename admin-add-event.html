@@ -62,6 +62,15 @@
             .cat-builder-row { flex-direction: column; align-items: stretch; }
         }
         input[type="date"]::-webkit-calendar-picker-indicator, input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+        .pdf-link-group { margin-top: 10px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px 15px; }
+        .pdf-link-group i { color: #ff4d4d; flex-shrink: 0; font-size: 1.1rem; }
+        .pdf-link-group input { background: transparent; border: none; color: #fff; font-size: 0.9rem; outline: none; width: 100%; font-family: 'Montserrat'; }
+        .pdf-link-group input::placeholder { color: #555; }
+        .pdf-link-group input:focus { border: none; box-shadow: none; }
+        .pdf-link-label { font-size: 0.65rem; color: #666; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+        .pdf-link-label::before { content: ''; display: inline-block; width: 20px; height: 1px; background: #444; }
+        .pdf-link-label::after { content: ''; display: inline-block; width: 20px; height: 1px; background: #444; }
+        .or-divider { text-align: center; color: #555; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; margin: 8px 0; }
     </style>
 </head>
 <body>
@@ -207,11 +216,23 @@
                 <div class="row">
                     <div class="col">
                         <label class="form-label">Terms & Conditions</label>
-                        <textarea id="tncInput" class="form-input" rows="4" placeholder="e.g. Fees are non-refundable..."></textarea>
+                        <textarea id="tncInput" class="form-input" rows="4" placeholder="Type T&C here... (optional if PDF provided)"></textarea>
+                        <div class="or-divider">OR / AND</div>
+                        <span class="pdf-link-label"><i class="fas fa-file-pdf" style="color:#ff4d4d;font-size:0.75rem;"></i> PDF Link</span>
+                        <div class="pdf-link-group">
+                            <i class="fas fa-file-pdf"></i>
+                            <input type="url" id="tncPdf" placeholder="Paste Google Drive / PDF link...">
+                        </div>
                     </div>
                     <div class="col">
                         <label class="form-label">FAQ (Frequently Asked Questions)</label>
-                        <textarea id="faqInput" class="form-input" rows="4" placeholder="Q: Venue? A: Putrajaya..."></textarea>
+                        <textarea id="faqInput" class="form-input" rows="4" placeholder="Q: Venue? A: Putrajaya... (optional if PDF provided)"></textarea>
+                        <div class="or-divider">OR / AND</div>
+                        <span class="pdf-link-label"><i class="fas fa-file-pdf" style="color:#ff4d4d;font-size:0.75rem;"></i> PDF Link</span>
+                        <div class="pdf-link-group">
+                            <i class="fas fa-file-pdf"></i>
+                            <input type="url" id="faqPdf" placeholder="Paste Google Drive / PDF link...">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -236,13 +257,9 @@
         appId: "1:812228825024:web:717049c1a64b39c8a60225"
     };
 
-    // =====================================================
-    // Named app "admin" — separates admin auth from user auth
-    // so both can be logged in simultaneously in same browser.
-    // =====================================================
-    const adminApp = initializeApp(firebaseConfig, "admin");
-    const auth = getAuth(adminApp);
-    const db = getDatabase(adminApp);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
     const ALLOWED_ADMIN = "admin@sm.com"; 
 
     // 1. SECURITY & MODE CHECK
@@ -323,6 +340,8 @@
                 if(data.entitlements) document.getElementById('entitlementInput').value = data.entitlements;
                 if(data.faq) document.getElementById('faqInput').value = data.faq;
                 if(data.tnc) document.getElementById('tncInput').value = data.tnc;
+                if(data.tnc_pdf) document.getElementById('tncPdf').value = data.tnc_pdf;
+                if(data.faq_pdf) document.getElementById('faqPdf').value = data.faq_pdf;
 
                 if(data.raw_reg_start) document.getElementById('regStart').value = data.raw_reg_start;
                 if(data.raw_reg_end) document.getElementById('regEnd').value = data.raw_reg_end;
@@ -430,6 +449,8 @@
                 entitlements: document.getElementById('entitlementInput').value,
                 faq: document.getElementById('faqInput').value,
                 tnc: document.getElementById('tncInput').value,
+                tnc_pdf: document.getElementById('tncPdf').value || null,
+                faq_pdf: document.getElementById('faqPdf').value || null,
                 
                 categories: simpleCategories, 
                 categories_data: categoriesData,
