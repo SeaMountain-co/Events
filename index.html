@@ -166,13 +166,17 @@
         .card-btn.disabled { background: #333 !important; color: #777 !important; border-color: #555 !important; cursor: not-allowed; pointer-events: none; }
 
         /* FOOTER */
-        .footer-wrapper { background: linear-gradient(to bottom, #111, #0a0a0a); border-top: 1px solid #222; margin-top: 50px; padding-top: 60px; }
         .contact-container { max-width: 1200px; margin: 0 auto; display: flex; gap: 60px; flex-wrap: wrap; padding: 0 5% 60px; }
         .contact-info { flex: 1; min-width: 300px; }
         .contact-info h2 { font-family: 'Russo One'; font-size: 2rem; text-transform: uppercase; margin-bottom: 20px; color: #fff; }
         .contact-info p { color: #888; margin-bottom: 30px; line-height: 1.6; }
         .contact-item { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; font-size: 1rem; color: #ccc; }
         .contact-item i { color: var(--brand-orange); font-size: 1.2rem; width: 30px; text-align: center; }
+        .contact-item { align-items: flex-start; }
+        .address-branches { display: flex; flex-direction: column; gap: 14px; }
+        .branch-block { display: flex; flex-direction: column; gap: 2px; }
+        .branch-label { font-size: 0.68rem; font-weight: 800; color: var(--brand-orange); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 3px; }
+        .branch-addr { font-size: 0.85rem; color: #bbb; line-height: 1.7; }
         .contact-form { flex: 1; min-width: 300px; background: rgba(255,255,255,0.03); padding: 35px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; color: #666; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
@@ -180,9 +184,13 @@
         .form-input:focus { border-color: var(--brand-orange); background: #000; }
         .btn-send { width: 100%; background: var(--brand-orange); color: #000; padding: 15px; border: none; border-radius: 6px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
         .btn-send:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255,0,0,0.3); }
-        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 5% 40px; border-bottom: 1px solid #222; }
-        .footer-col h4 { color: var(--brand-red); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 5% 40px; border-bottom: 1px solid #222; }
+        .footer-col h4 { color: var(--brand-orange); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
         .footer-col p { color: #888; font-size: 0.9rem; line-height: 1.6; }
+        .footer-tagline { font-style: italic; color: #aaa; font-size: 0.95rem; margin-bottom: 12px; font-weight: 600; }
+        .footer-spec-list { list-style: none; margin: 12px 0 0; }
+        .footer-spec-list li { color: #888; font-size: 0.82rem; padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+        .footer-spec-list li i { color: var(--brand-orange); font-size: 0.75rem; width: 14px; flex-shrink: 0; }
         .app-buttons { display: flex; gap: 10px; margin-top: 15px; }
         .app-btn { background: #222; color: #fff; padding: 10px 15px; border-radius: 5px; border: 1px solid #333; display: flex; align-items: center; gap: 10px; font-size: 0.8rem; cursor: pointer; transition: 0.3s; }
         .social-icons { display: flex; gap: 10px; margin-top: 15px; }
@@ -306,9 +314,21 @@
                 <div class="contact-info">
                     <h2>Get In Touch</h2>
                     <p>Have questions about the race? Interested in sponsorship? Or just want to say hi?</p>
-                    <div class="contact-item"><i class="fas fa-map-marker-alt"></i> <span>Sea Mountain HQ</span></div>
-                    <div class="contact-item"><i class="fas fa-envelope"></i> <span>seamountaincosocmed@gmail.com</span></div>
-                    <div class="contact-item"><i class="fas fa-phone-alt"></i> <span>+60 10-263 9958</span></div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt" style="margin-top:4px; flex-shrink:0;"></i>
+                        <div class="address-branches">
+                            <div class="branch-block">
+                                <span class="branch-label"><i class="fas fa-circle" style="font-size:0.4rem; vertical-align:middle; margin-right:4px;"></i>East Malaysia</span>
+                                <span class="branch-addr">No 139, 2nd Floor, Parkcity Commerce Square,<br>Phase 1, Jalan Tun Ahmad Zaidi,<br>97000 Bintulu, Sarawak</span>
+                            </div>
+                            <div class="branch-block">
+                                <span class="branch-label"><i class="fas fa-circle" style="font-size:0.4rem; vertical-align:middle; margin-right:4px;"></i>West Malaysia</span>
+                                <span class="branch-addr">A 26-3A, Kanvas SOHO,<br>Jalan Teknokrat 6,<br>63000 Cyberjaya, Selangor</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact-item"><i class="fas fa-envelope"></i> <a href="mailto:seamountaincosocmed@gmail.com" style="color:#ccc; transition:0.3s;" onmouseover="this.style.color='var(--brand-orange)'" onmouseout="this.style.color='#ccc'">seamountaincosocmed@gmail.com</a></div>
+                    <div class="contact-item"><i class="fas fa-phone-alt"></i> <a href="tel:+60102639958" style="color:#ccc; transition:0.3s;" onmouseover="this.style.color='var(--brand-orange)'" onmouseout="this.style.color='#ccc'">+60 10-263 9958</a></div>
                 </div>
                 <div class="contact-form">
                     <form id="waForm">
@@ -322,23 +342,17 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <h4>About</h4>
-                <p>Where Creativity Meets Discipline — Powered by Digital.
-“Race with Purpose. Build Communities.” reflects who we are — a group of highly specialised individuals with experience in our own fields, united by passion for sports, events, community impact, and purposeful experiences.
-What makes our team unique is that we are not just event organisers — we are also racers ourselves.
-Our team ranges from finishers,  passionate supporters, and endurance enthusiasts to former national athletes, elite racers, and military fitness coaching backgrounds.
-Led by a fun-spirited team leader alongside a former military commando fitness coach, an anime-inspired creative designer, a meticulous data-driven digital specialist, and a drone-obsessed technician — we blend discipline, creativity, and innovation to deliver purposeful, high-impact events.
-Because of this, we understand racers at every level — what they need, what they fear, what motivates them, and what creates a meaningful race experience.
-We specialise in:
-🏃 Sports & Endurance Events
-🧭 Adventure Racing & Outdoor Experiences
-⚙️ Event Operations & Safety Management
-📢 Branding, Media & Community Engagement
-💻 Digital Systems & Event Technology
-🎨 Creative Production & Event Branding
-🤝 Community-Based & Eco-Tourism Activation
-From concept development to on-ground execution, we deliver high-impact event experiences designed to inspire communities, empower local participation, and create lasting value beyond the event itself.
-</p>
-                <p style="margin-top:10px; color:#aaa;"><strong>seamountaincosocmed@gmail.com</strong></p>
+                <p class="footer-tagline">"Race with Purpose. Build Communities."</p>
+                <p>We are a team of highly specialised individuals united by passion for sports, events, and community impact — and we are racers ourselves.</p>
+                <ul class="footer-spec-list">
+                    <li><i class="fas fa-running"></i> Sports &amp; Endurance Events</li>
+                    <li><i class="fas fa-compass"></i> Adventure Racing &amp; Outdoor Experiences</li>
+                    <li><i class="fas fa-cogs"></i> Event Operations &amp; Safety Management</li>
+                    <li><i class="fas fa-bullhorn"></i> Branding, Media &amp; Community Engagement</li>
+                    <li><i class="fas fa-laptop-code"></i> Digital Systems &amp; Event Technology</li>
+                    <li><i class="fas fa-handshake"></i> Community-Based &amp; Eco-Tourism Activation</li>
+                </ul>
+                <p style="margin-top:14px; color:#666; font-size:0.8rem;"><i class="fas fa-envelope" style="color:var(--brand-orange); margin-right:6px;"></i>seamountaincosocmed@gmail.com</p>
             </div>
             <div class="footer-col">
                 <h4>Get The App</h4>
