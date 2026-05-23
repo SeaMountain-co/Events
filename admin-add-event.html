@@ -461,10 +461,40 @@
     }
 
     // 3. PREVIEW IMAGE
+    // Converts Google Drive share links to direct embeddable image URLs
+    function convertToImageUrl(url) {
+        if (!url) return url;
+
+        // Google Drive: /file/d/ID/view → uc?export=view&id=ID
+        const gdriveFile = url.match(/drive\.google\.com\/file\/d\/([^\/\?#]+)/i);
+        if (gdriveFile) {
+            return `https://drive.google.com/uc?export=view&id=${gdriveFile[1]}`;
+        }
+
+        // Google Drive: open?id=ID → uc?export=view&id=ID
+        const gdriveOpen = url.match(/drive\.google\.com\/open\?id=([^&]+)/i);
+        if (gdriveOpen) {
+            return `https://drive.google.com/uc?export=view&id=${gdriveOpen[1]}`;
+        }
+
+        // Already a direct uc link — return as-is
+        if (/drive\.google\.com\/uc/i.test(url)) return url;
+
+        // Not a Google Drive link — return as-is
+        return url;
+    }
+
     window.previewImg = function(input, imgId) {
         const img = document.getElementById(imgId);
-        if(input.value) { img.src = input.value; img.style.display = "block"; } 
-        else { img.style.display = "none"; }
+        if (input.value) {
+            const directUrl = convertToImageUrl(input.value);
+            img.src = directUrl;
+            img.style.display = "block";
+            // Also update the input value to the direct URL so it saves correctly
+            if (directUrl !== input.value) input.value = directUrl;
+        } else {
+            img.style.display = "none";
+        }
     }
 
     // 4. SUBMIT FORM
@@ -548,9 +578,9 @@
                 custom_questions: existingQuestions,
 
                 early_bird_end: document.getElementById('earlyBirdDate').value,
-                image_url: document.getElementById('mainPoster').value,
-                entitlement_image: document.getElementById('entitlementPoster').value,
-                cert_template: document.getElementById('certTemplate').value,
+                image_url: convertToImageUrl(document.getElementById('mainPoster').value),
+                entitlement_image: convertToImageUrl(document.getElementById('entitlementPoster').value),
+                cert_template: convertToImageUrl(document.getElementById('certTemplate').value),
                 kit_date: document.getElementById('kitDate').value,
                 category: document.getElementById('eventCategory').value,
                 quota: parseInt(document.getElementById('eventQuota').value), 
