@@ -122,16 +122,16 @@
         .tab-panel h3 { margin-bottom: 15px; color: var(--brand-red); text-transform: uppercase; } .tab-panel p { color: #ccc; line-height: 1.6; margin-bottom: 10px; }
         .contact-row { margin-bottom: 10px; font-size: 1rem; color: #ddd; } .contact-row span { color: var(--text-gray); display: inline-block; width: 160px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .pdf-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 15px; padding: 10px 20px; background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.3); color: #ff6666; border-radius: 8px; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.3s; text-decoration: none; }
+        .pdf-btn:hover { background: rgba(255,0,0,0.2); border-color: var(--brand-red); color: #fff; transform: translateY(-2px); }
+        .pdf-btn i { font-size: 1rem; }
+        .pdf-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 15px 0; }
 
         /* FOOTER */
         .footer-wrapper { background: linear-gradient(to bottom, #111, #0a0a0a); border-top: 1px solid #222; padding-top: 60px; margin-top: auto; }
-        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 5% 40px; border-bottom: 1px solid #222; }
-        .footer-col h4 { color: var(--brand-orange); font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; }
-        .footer-col p { color: #888; font-size: 0.9rem; line-height: 1.6; }
-        .footer-tagline { font-style: italic; color: #aaa; font-size: 0.95rem; margin-bottom: 12px; font-weight: 600; }
-        .footer-spec-list { list-style: none; margin: 12px 0 0; }
-        .footer-spec-list li { color: #888; font-size: 0.82rem; padding: 4px 0; display: flex; align-items: center; gap: 8px; }
-        .footer-spec-list li i { color: var(--brand-orange); font-size: 0.75rem; width: 14px; flex-shrink: 0; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 5% 40px; border-bottom: 1px solid #222; }
+        .footer-col h4 { color: #fff; font-weight: 700; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
+        .footer-col p { color: #666; font-size: 0.85rem; line-height: 1.6; }
         .social-icons { display: flex; gap: 10px; margin-top: 15px; }
         .social-icons a { width: 35px; height: 35px; background: #222; color: #aaa; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
         .social-icons a:hover { background: var(--brand-red); color: #fff; }
@@ -333,8 +333,26 @@
                     <img id="entitlementImg" src="" alt="Entitlements" style="width:100%; max-width:600px; margin-top:20px; border-radius:10px; display:none; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
                 </div>
 
-                <div id="tnc" class="tab-panel"><h3>Terms & Conditions</h3><p id="tncList">Loading...</p> </div>
-                <div id="faq" class="tab-panel"><h3>FAQ</h3><p id="faqList">Loading...</p></div>
+                <div id="tnc" class="tab-panel">
+                    <h3>Terms & Conditions</h3>
+                    <p id="tncList" style="white-space: pre-line;"></p>
+                    <div id="tncPdfWrap" style="display:none;">
+                        <div class="pdf-divider" id="tncDivider" style="display:none;"></div>
+                        <a id="tncPdfBtn" href="#" target="_blank" class="pdf-btn">
+                            <i class="fas fa-file-pdf"></i> View T&C PDF
+                        </a>
+                    </div>
+                </div>
+                <div id="faq" class="tab-panel">
+                    <h3>FAQ</h3>
+                    <p id="faqList" style="white-space: pre-line;"></p>
+                    <div id="faqPdfWrap" style="display:none;">
+                        <div class="pdf-divider" id="faqDivider" style="display:none;"></div>
+                        <a id="faqPdfBtn" href="#" target="_blank" class="pdf-btn">
+                            <i class="fas fa-file-pdf"></i> View FAQ PDF
+                        </a>
+                    </div>
+                </div>
                 <div id="contact" class="tab-panel">
                     <div class="contact-row"><span>Organiser:</span> Sea Mountain Team</div>
                     <div class="contact-row"><span>Email:</span> info@seamountain.com</div>
@@ -348,16 +366,8 @@
         <div class="footer-grid">
             <div class="footer-col">
                 <h4>About</h4>
-                <p class="footer-tagline">"Race with Purpose. Build Communities."</p>
-                <p>We are a team of highly specialised individuals united by passion for sports, events, and community impact — and we are racers ourselves.</p>
-                <ul class="footer-spec-list">
-                    <li><i class="fas fa-running"></i> Sports &amp; Endurance Events</li>
-                    <li><i class="fas fa-compass"></i> Adventure Racing &amp; Outdoor Experiences</li>
-                    <li><i class="fas fa-cogs"></i> Event Operations &amp; Safety Management</li>
-                    <li><i class="fas fa-bullhorn"></i> Branding, Media &amp; Community Engagement</li>
-                    <li><i class="fas fa-laptop-code"></i> Digital Systems &amp; Event Technology</li>
-                    <li><i class="fas fa-handshake"></i> Community-Based &amp; Eco-Tourism Activation</li>
-                </ul>
+                <p>THE SPORTS AND FITNESS ONLINE EVENT REGISTRATION SOLUTION.</p>
+                <p style="margin-top:10px; color:#aaa;"><strong>info@seamountain.com</strong></p>
             </div>
             <div class="footer-col">
                 <h4>Get The App</h4>
@@ -369,11 +379,10 @@
             <div class="footer-col">
                 <h4>Follow Us</h4>
                 <div class="social-icons">
-                    <a href="" title="Facebook"  target="_blank"><i class="fab fa-facebook-f"></i></a>
-                    <a href="http://instagram.com/hey.seamountain/" title="Instagram" target="_blank"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.tiktok.com/@seamountainco" title="TikTok"    target="_blank"><i class="fab fa-tiktok"></i></a>
-                    <a href="https://www.youtube.com/@SEAMOUNTAINCO" title="YouTube"   target="_blank"><i class="fab fa-youtube"></i></a>
-                    <a href="#" title="Threads"   target="_blank"><i class="fab fa-threads"></i></a>
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-tiktok"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
         </div>
@@ -473,11 +482,33 @@
                     entImg.style.display = "none";
                 }
 
+                // TnC — text + optional PDF
                 const tncElement = document.getElementById('tncList');
-                if(tncElement) tncElement.innerText = data.tnc || "Participants must be 18 years and above. Fees are non-refundable.";
+                const tncPdfWrap = document.getElementById('tncPdfWrap');
+                const tncPdfBtn  = document.getElementById('tncPdfBtn');
+                const tncDivider = document.getElementById('tncDivider');
+                if (tncElement) {
+                    tncElement.innerText = data.tnc || (data.tnc_pdf ? "" : "Participants must be 18 years and above. Fees are non-refundable.");
+                }
+                if (data.tnc_pdf) {
+                    tncPdfBtn.href = data.tnc_pdf;
+                    tncPdfWrap.style.display = "block";
+                    if (data.tnc) tncDivider.style.display = "block"; // divider only if text also exists
+                }
 
-                const faqElement = document.getElementById('faqList'); 
-                if(faqElement) faqElement.innerText = data.faq || "No FAQ available yet.";
+                // FAQ — text + optional PDF
+                const faqElement = document.getElementById('faqList');
+                const faqPdfWrap = document.getElementById('faqPdfWrap');
+                const faqPdfBtn  = document.getElementById('faqPdfBtn');
+                const faqDivider = document.getElementById('faqDivider');
+                if (faqElement) {
+                    faqElement.innerText = data.faq || (data.faq_pdf ? "" : "No FAQ available yet.");
+                }
+                if (data.faq_pdf) {
+                    faqPdfBtn.href = data.faq_pdf;
+                    faqPdfWrap.style.display = "block";
+                    if (data.faq) faqDivider.style.display = "block";
+                }
 
                 const registerBtn = document.getElementById('registerBtn'); 
                 
@@ -496,7 +527,7 @@
                     registerBtn.href = "#";
                     registerBtn.onclick = function(e) { e.preventDefault(); }
                 } else if(data.price) {
-                    registerBtn.innerHTML = `Register Now  <i class="fas fa-arrow-right"></i>`;
+                    registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
                     registerBtn.onclick = function(e) {
                         e.preventDefault(); 
                         if (isUserLoggedIn) {
