@@ -483,7 +483,7 @@
                     registerBtn.href = "#";
                     registerBtn.onclick = function(e) { e.preventDefault(); }
                 } else if(data.price) {
-                    registerBtn.innerHTML = `Register Now (${data.price}) <i class="fas fa-arrow-right"></i>`;
+                    registerBtn.innerHTML = `Register Now <i class="fas fa-arrow-right"></i>`;
                     registerBtn.onclick = function(e) {
                         e.preventDefault(); 
                         if (isUserLoggedIn) {
