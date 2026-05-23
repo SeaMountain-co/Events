@@ -62,6 +62,22 @@
             .cat-builder-row { flex-direction: column; align-items: stretch; }
         }
         input[type="date"]::-webkit-calendar-picker-indicator, input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+        /* CREW TOGGLE SWITCH */
+        .crew-toggle-wrap { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+        .toggle-switch { position: relative; display: inline-block; width: 52px; height: 28px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #333; border-radius: 28px; transition: 0.3s; }
+        .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background: #fff; border-radius: 50%; transition: 0.3s; }
+        input:checked + .toggle-slider { background: var(--brand-red); }
+        input:checked + .toggle-slider:before { transform: translateX(24px); }
+        .toggle-label-text { font-size: 0.85rem; color: #aaa; font-weight: 600; }
+        .toggle-label-text strong { color: #fff; }
+
+        /* CREW FIELDS — hidden by default */
+        .crew-fields { display: none; }
+        .crew-fields.visible { display: block; }
+        .crew-fee-note { font-size: 0.78rem; color: #666; margin-top: 6px; font-style: italic; }
         .pdf-link-group { margin-top: 10px; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid #333; border-radius: 8px; padding: 10px 15px; }
         .pdf-link-group i { color: #ff4d4d; flex-shrink: 0; font-size: 1.1rem; }
         .pdf-link-group input { background: transparent; border: none; color: #fff; font-size: 0.9rem; outline: none; width: 100%; font-family: 'Montserrat'; }
@@ -237,6 +253,50 @@
                 </div>
             </div>
 
+            <!-- ===== PERSONAL CREW SECTION ===== -->
+            <div class="form-section">
+                <span class="section-title"><i class="fas fa-user-friends"></i> Personal Crew / Supporter</span>
+
+                <div class="crew-toggle-wrap">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="crewEnabled" onchange="toggleCrewFields()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label-text"><strong>Allow Personal Crew</strong> — 1 crew per racer (optional for participant)</span>
+                </div>
+
+                <div class="crew-fields" id="crewFields">
+                    <div class="row">
+                        <div class="col">
+                            <label class="form-label">Early Bird Crew Fee (RM)</label>
+                            <input type="number" id="crewFeeEarly" class="form-input" placeholder="e.g. 350" min="0">
+                            <p class="crew-fee-note">Applies while Early Bird is active (uses same Early Bird end date above)</p>
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Normal Crew Fee (RM)</label>
+                            <input type="number" id="crewFeeNormal" class="form-input" placeholder="e.g. 450" min="0">
+                            <p class="crew-fee-note">Applied after Early Bird ends, or if no Early Bird date set</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label class="form-label">Crew Package Description</label>
+                        <textarea id="crewPackageDesc" class="form-input" rows="3"
+                            placeholder="e.g. Includes 4D/2N accommodation, Airport/local transportation, 1 packed lunch, 2 dinners, 1 BBQ, 1 breakfast (HALAL)"></textarea>
+                        <p class="crew-fee-note">Shown to participant when they select Yes for crew — so they know what they're paying for</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Crew Registration Form Link (Google Form)</label>
+                        <div class="upload-group">
+                            <input type="url" id="crewFormLink" class="form-input"
+                                placeholder="https://forms.gle/... or https://docs.google.com/forms/...">
+                        </div>
+                        <p class="crew-fee-note"><i class="fas fa-info-circle"></i> Participant will see a "Fill Crew Form" button next to their crew checkbox during registration</p>
+                    </div>
+                </div>
+            </div>
+
             <button type="submit" id="submitBtn" class="btn-submit">PUBLISH EVENT</button>
         </form>
     </div>
@@ -257,24 +317,27 @@
         appId: "1:812228825024:web:717049c1a64b39c8a60225"
     };
 
-    const adminApp     = initializeApp(firebaseConfig, "admin");
-    const auth         = getAuth(adminApp);
-    const db           = getDatabase(adminApp);
-    const ALLOWED_ADMIN = "admin@sm.com";          // ✅ luar .then()
+    const adminApp = initializeApp(firebaseConfig, "admin");
+    const auth = getAuth(adminApp);
+    const db = getDatabase(adminApp);
+    const ALLOWED_ADMIN = "admin@sm.com"; 
 
-    auth.authStateReady().then(() => {             // ✅ buka
-    onAuthStateChanged(auth, (user) => {       // ✅ buka
-        if (!user || user.email !== ALLOWED_ADMIN) {
-            alert("ACCESS DENIED");
-            window.location.href = "admin-login.html";
-        } else {
-            const urlParams = new URLSearchParams(window.location.search);
-            const editId = urlParams.get('id');
-            if(editId) enterEditMode(editId);
-            else addCategoryRow();
-        }
-        });                                        // ✅ tutup onAuthStateChanged
-    });                                            // ✅ tutup authStateReady
+    // 1. SECURITY & MODE CHECK
+    // authStateReady() waits for Firebase to load cached session
+    // before checking — prevents false redirect on first null fire
+    auth.authStateReady().then(() => {
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email !== ALLOWED_ADMIN) {
+                alert("ACCESS DENIED");
+                window.location.href = "admin-login.html";
+            } else {
+                const urlParams = new URLSearchParams(window.location.search);
+                const editId = urlParams.get('id');
+                if(editId) enterEditMode(editId);
+                else addCategoryRow();
+            }
+        });
+    });
 
     // --- CATEGORY BUILDER LOGIC ---
     window.addCategoryRow = function(name="", normalPrice="", earlyPrice="") {
@@ -344,6 +407,16 @@
                 if(data.tnc_pdf) document.getElementById('tncPdf').value = data.tnc_pdf;
                 if(data.faq_pdf) document.getElementById('faqPdf').value = data.faq_pdf;
 
+                // Load crew settings
+                if(data.allow_crew) {
+                    document.getElementById('crewEnabled').checked = true;
+                    toggleCrewFields();
+                    document.getElementById('crewFeeEarly').value   = data.crew_fee_early  || '';
+                    document.getElementById('crewFeeNormal').value  = data.crew_fee_normal || '';
+                    document.getElementById('crewPackageDesc').value = data.crew_package_desc || '';
+                    document.getElementById('crewFormLink').value   = data.crew_form_link  || '';
+                }
+
                 if(data.raw_reg_start) document.getElementById('regStart').value = data.raw_reg_start;
                 if(data.raw_reg_end) document.getElementById('regEnd').value = data.raw_reg_end;
                 if(data.raw_event_start) document.getElementById('eventStart').value = data.raw_event_start;
@@ -377,6 +450,14 @@
                 alert("Event ID not found!");
             }
         });
+    }
+
+    // CREW TOGGLE
+    window.toggleCrewFields = function() {
+        const enabled = document.getElementById('crewEnabled').checked;
+        const fields  = document.getElementById('crewFields');
+        if (enabled) fields.classList.add('visible');
+        else fields.classList.remove('visible');
     }
 
     // 3. PREVIEW IMAGE
@@ -452,6 +533,13 @@
                 tnc: document.getElementById('tncInput').value,
                 tnc_pdf: document.getElementById('tncPdf').value || null,
                 faq_pdf: document.getElementById('faqPdf').value || null,
+
+                // Crew settings
+                allow_crew:        document.getElementById('crewEnabled').checked,
+                crew_fee_early:    parseFloat(document.getElementById('crewFeeEarly').value)  || 0,
+                crew_fee_normal:   parseFloat(document.getElementById('crewFeeNormal').value) || 0,
+                crew_package_desc: document.getElementById('crewPackageDesc').value || '',
+                crew_form_link:    document.getElementById('crewFormLink').value    || '',
                 
                 categories: simpleCategories, 
                 categories_data: categoriesData,
