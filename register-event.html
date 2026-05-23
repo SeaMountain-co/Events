@@ -188,6 +188,30 @@
         }
         .pdf-preview-tooltip .preview-hint i { margin-right: 5px; color: #6ba6dd; }
 
+        /* Google Form badge — green tone */
+        .pdf-link-badge.is-form {
+            background: rgba(52, 168, 83, 0.15);
+            color: #4caf6e;
+            border-color: rgba(52, 168, 83, 0.35);
+        }
+        .pdf-link-badge.is-form:hover {
+            background: rgba(52, 168, 83, 0.3);
+            border-color: #4caf6e;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(52, 168, 83, 0.3);
+        }
+        /* Google Doc/Sheets badge — purple tone */
+        .pdf-link-badge.is-doc {
+            background: rgba(130, 80, 200, 0.15);
+            color: #a07ad4;
+            border-color: rgba(130, 80, 200, 0.35);
+        }
+        .pdf-link-badge.is-doc:hover {
+            background: rgba(130, 80, 200, 0.3);
+            border-color: #a07ad4;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(130, 80, 200, 0.3);
+        }
         /* Mobile: hide hover preview entirely, badge still works as link */
         @media (max-width: 768px) {
             .pdf-preview-tooltip { display: none !important; }
@@ -596,26 +620,46 @@
         // Google Drive folder
         if (/drive\.google\.com\/drive\/folders\//i.test(url)) return 'folder';
 
-        // Dropbox folder (legacy /sh/ and new /scl/fo/)
+        // Dropbox folder
         if (/dropbox\.com\/(sh|scl\/fo)\//i.test(url)) return 'folder';
 
-        // Anything else → treat as single file (PDF, doc, image, etc.)
+        // Google Forms (forms.gle shortlink OR full docs.google.com/forms URL)
+        if (/forms\.gle\//i.test(url)) return 'form';
+        if (/docs\.google\.com\/forms/i.test(url)) return 'form';
+
+        // Google Docs / Sheets / Slides → treat as doc
+        if (/docs\.google\.com\/(document|spreadsheets|presentation)/i.test(url)) return 'doc';
+
+        // Anything else → single file (PDF, image, etc.)
         return 'file';
     }
 
     function toEmbeddableUrl(url) {
         if (!url) return url;
 
-        // Google Drive FOLDER → embedded folder view (file browser)
+        // Google Drive FOLDER → embedded folder view
         const gdriveFolder = url.match(/drive\.google\.com\/drive\/folders\/([^\/\?#]+)/i);
         if (gdriveFolder) {
             return `https://drive.google.com/embeddedfolderview?id=${gdriveFolder[1]}#grid`;
         }
 
-        // Google Drive FILE → /preview (embeddable)
+        // Google Drive FILE → /preview
         const gdriveFile = url.match(/drive\.google\.com\/file\/d\/([^\/\?#]+)/i);
         if (gdriveFile) {
             return `https://drive.google.com/file/d/${gdriveFile[1]}/preview`;
+        }
+
+        // Google Forms full URL → add ?embedded=true
+        const gformsMatch = url.match(/docs\.google\.com\/forms\/d\/([^\/\?#]+)/i);
+        if (gformsMatch) {
+            // Strip existing params, use viewform?embedded=true
+            return `https://docs.google.com/forms/d/${gformsMatch[1]}/viewform?embedded=true`;
+        }
+
+        // Google Docs → /preview
+        const gdocsMatch = url.match(/docs\.google\.com\/(document|spreadsheets|presentation)\/d\/([^\/\?#]+)/i);
+        if (gdocsMatch) {
+            return `https://docs.google.com/${gdocsMatch[1]}/d/${gdocsMatch[2]}/preview`;
         }
 
         // Dropbox file: ?dl=0|1 → ?raw=1
@@ -623,7 +667,7 @@
             return url.replace(/\?dl=[01]/, '?raw=1');
         }
 
-        // Default: return as-is (direct hosted PDFs, etc.)
+        // Default: as-is
         return url;
     }
 
@@ -674,12 +718,16 @@
                     // =====================================================
                     if (q.pdf_link) {
                         const attachType = getAttachmentType(q.pdf_link);
-                        const isFolder   = attachType === 'folder';
                         const embedUrl   = toEmbeddableUrl(q.pdf_link);
-                        const badgeIcon  = isFolder ? 'fa-folder-open' : 'fa-file-pdf';
-                        const badgeLabel = isFolder ? 'View Folder'    : 'View PDF';
-                        const hintText   = isFolder ? 'Click to browse all files' : 'Click to open full document';
-                        const badgeClass = isFolder ? 'pdf-link-badge is-folder'  : 'pdf-link-badge';
+
+                        // Badge config per attachment type
+                        const typeConfig = {
+                            folder: { icon: 'fa-folder-open',  label: 'View Folder',    hint: 'Click to browse all files',    cls: 'pdf-link-badge is-folder' },
+                            form:   { icon: 'fa-wpforms',      label: 'View Form',       hint: 'Click to open the form',       cls: 'pdf-link-badge is-form'   },
+                            doc:    { icon: 'fa-file-alt',     label: 'View Document',   hint: 'Click to read full document',  cls: 'pdf-link-badge is-doc'    },
+                            file:   { icon: 'fa-file-pdf',     label: 'View PDF',        hint: 'Click to open full document',  cls: 'pdf-link-badge'           },
+                        };
+                        const cfg = typeConfig[attachType] || typeConfig.file;
 
                         html += `
                             <div class="checkbox-group">
@@ -689,11 +737,11 @@
                                         ${q.question_text}
                                     </label>
                                     <a href="${q.pdf_link}" target="_blank" rel="noopener noreferrer"
-                                       class="${badgeClass}"
+                                       class="${cfg.cls}"
                                        title="Click to open in new tab — hover to preview">
-                                        <i class="fas ${badgeIcon}"></i> ${badgeLabel}
+                                        <i class="fas ${cfg.icon}"></i> ${cfg.label}
                                         <span class="pdf-preview-tooltip">
-                                            <span class="preview-hint"><i class="fas fa-external-link-alt"></i> ${hintText}</span>
+                                            <span class="preview-hint"><i class="fas fa-external-link-alt"></i> ${cfg.hint}</span>
                                             <iframe src="${embedUrl}" loading="lazy" title="Attachment preview"></iframe>
                                         </span>
                                     </a>
