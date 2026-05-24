@@ -114,7 +114,7 @@
         .btn-delete  { background: #ff0000; } .btn-delete:hover  { background: #cc0000; }
         .btn-approve { background: #28a745; } .btn-approve:hover { background: #218838; }
         .btn-revoke  { background: #e67e22; } .btn-revoke:hover  { background: #d35400; }
-        /* New: verify receipt (opens admin-resit) */
+        /* New: verify receipt (opens admin-receipt) */
         .btn-verify  { background: #ff9500; } .btn-verify:hover  { background: #e68500; }
 
         .scroll-hint { display: none; font-size: 0.75rem; color: #888; margin-bottom: 5px; text-align: right; font-style: italic; }
@@ -216,7 +216,7 @@
                     <h3>Paid Participants</h3>
                     <div class="value" id="totalPaid">0</div>
                 </div>
-                <!-- NEW: Awaiting Verification stat (clickable, links to admin-resit) -->
+                <!-- NEW: Awaiting Verification stat (clickable, links to admin-receipt) -->
                 <div class="stat-card clickable" style="border-color: #ff9500;" onclick="goToReceipts()">
                     <h3>Awaiting Verification</h3>
                     <div class="value" id="totalAwaiting" style="color:#ff9500;">0</div>
@@ -327,7 +327,7 @@
         //   - 'rejected'  → status=Rejected OR verificationStatus=Rejected
         //   - 'awaiting'  → status=Paid + Bank Transfer + has receiptImage
         //                   AND not yet verified by admin
-        //                   (i.e. admin must check at admin-resit first)
+        //                   (i.e. admin must check at admin-receipt first)
         //   - 'paid'      → status=Paid AND either no receipt to verify,
         //                   OR verificationStatus=Verified, OR ToyyibPay
         //   - 'pending'   → anything else (Pending Payment, etc.)
@@ -389,23 +389,23 @@
         }
 
         // =====================================================
-        // NEW: Open admin-resit.html with a search hint
+        // NEW: Open admin-receipt.html with a search hint
         // (so admin lands directly on the right receipt).
         // =====================================================
         window.openReceiptPage = function(searchHint) {
-            const url = 'admin-resit.html' + (searchHint ? '?search=' + encodeURIComponent(searchHint) : '');
+            const url = 'admin-receipt.html' + (searchHint ? '?search=' + encodeURIComponent(searchHint) : '');
             window.open(url, '_blank');
         }
 
         window.goToReceipts = function() {
-            window.open('admin-resit.html?filter=pending', '_blank');
+            window.open('admin-receipt.html?filter=pending', '_blank');
         }
 
         // --- 1. LOAD DATA ---
         function loadData() {
             const dbRef = ref(db, 'registrations');
             
-            // onValue = realtime listener. When admin-resit updates the DB,
+            // onValue = realtime listener. When admin-receipt updates the DB,
             // this fires automatically and the dashboard re-renders.
             onValue(dbRef, (snapshot) => {
                 const data = snapshot.val();
@@ -511,7 +511,7 @@
                 const refHint = row.paymentRef || row.regKey;
                 let actionBtn = "";
                 if (state === 'awaiting') {
-                    // Has receipt awaiting verification → force admin to admin-resit
+                    // Has receipt awaiting verification → force admin to admin-receipt
                     actionBtn = `<button class="btn-action btn-verify" title="Verify Receipt at Receipt Page"
                         onclick="openReceiptPage('${refHint}')"><i class="fas fa-receipt"></i></button>`;
                 } else if (state === 'rejected') {
@@ -593,7 +593,7 @@
         // =====================================================
         // NEW: tryMarkAsPaid — checks if there's a pending
         // receipt before allowing direct status change.
-        // If there's a receipt, admin MUST verify in admin-resit
+        // If there's a receipt, admin MUST verify in admin-receipt
         // first; otherwise, allow manual override (e.g. cash).
         // =====================================================
         window.tryMarkAsPaid = function(eventId, regKey) {
