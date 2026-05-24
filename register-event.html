@@ -1070,6 +1070,13 @@
             amountPaid:    (finalAmount + totalCrewCount * crewFeePerRacer).toFixed(2),
             crewCount:     totalCrewCount,
             crewFee:       (totalCrewCount * crewFeePerRacer).toFixed(2),
+            // Which racers opted for crew — saved as array for ticket display
+            crewRacers:    racers.map((r, idx) => {
+                const i  = idx + 1;
+                const cb = document.getElementById(`racer${i}_crew`);
+                if (!cb || !cb.checked) return null;
+                return { role: idx === 0 ? 'Captain' : `Racer ${i}`, name: r.name || '' };
+            }).filter(Boolean),
             voucherUsed:   currentVoucherCode || "NONE",
             registration_time: new Date().toLocaleString(),
             status:        "Pending Payment",
