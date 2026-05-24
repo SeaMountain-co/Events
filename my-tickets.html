@@ -152,12 +152,7 @@
 
         @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-        /* ================================================
-           STATUS BADGES
-           status-paid    → green  → Confirmed (verified)
-           status-verify  → orange → Pending Verification
-           status-pending → yellow → Pending Payment
-        ================================================ */
+        /* STATUS BADGE */
         .status-badge { 
             position: absolute; top: 30px; right: 30px; 
             padding: 8px 18px; border-radius: 50px; 
@@ -165,10 +160,8 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
             backdrop-filter: blur(5px);
         }
-        .status-paid    { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.2); }
-        .status-pending { background: rgba(241, 196, 15, 0.2);  color: #f1c40f;  border-color: #f1c40f; }
-        /* NEW: awaiting admin verification */
-        .status-verify  { background: rgba(255, 149, 0, 0.2);   color: #ff9500;  border-color: #ff9500; box-shadow: 0 0 15px rgba(255,149,0,0.15); }
+        .status-paid { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border-color: #2ecc71; box-shadow: 0 0 15px rgba(46, 204, 113, 0.2); }
+        .status-pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; border-color: #f1c40f; }
 
         .empty-state { text-align: center; padding: 100px 20px; color: #555; }
         .btn-browse { background: var(--brand-red); color: #fff; padding: 15px 40px; border-radius: 50px; font-weight: 800; text-transform: uppercase; text-decoration: none; transition: 0.3s; box-shadow: 0 5px 20px rgba(255,0,0,0.4); }
@@ -198,6 +191,40 @@
             box-shadow: 0 0 50px rgba(255,255,255,0.2); animation: zoomIn 0.3s ease;
         }
         @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* ── Shirt size table (dark theme) ── */
+        .size-table-dark { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.78rem; border-radius: 8px; overflow: hidden; }
+        .size-table-dark th { background: rgba(255,255,255,0.08); color: #888; padding: 6px 10px; font-weight: 800; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.5px; text-align: left; }
+        .size-table-dark td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #ccc; font-weight: 600; }
+        .size-table-dark tr:last-child td { border-bottom: none; }
+        .size-table-dark .shirt-size { color: #fff; font-weight: 800; font-size: 0.9rem; }
+        .size-table-dark .capt-role { color: #ff9500; }
+
+        /* ── Crew section (dark theme) ── */
+        .crew-section-dark {
+            margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;
+        }
+        .crew-block {
+            background: rgba(76,175,110,0.08); border: 1px solid rgba(76,175,110,0.25);
+            border-radius: 10px; overflow: hidden; margin-top: 8px;
+        }
+        .crew-block-header {
+            background: rgba(76,175,110,0.15); color: #4caf6e;
+            padding: 7px 14px; font-size: 0.7rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .crew-pill { background: rgba(76,175,110,0.3); border-radius: 10px; padding: 2px 8px; font-size: 0.62rem; }
+        .crew-row-dark {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 7px 14px; border-bottom: 1px solid rgba(76,175,110,0.1);
+            font-size: 0.78rem;
+        }
+        .crew-row-dark:last-child { border-bottom: none; }
+        .crew-dot { width: 7px; height: 7px; border-radius: 50%; background: #4caf6e; display: inline-block; margin-right: 8px; }
+        .crew-dot.capt { background: #ff9500; }
+        .crew-role-name { color: #ccc; font-weight: 600; }
+        .crew-check-icon { color: #4caf6e; font-size: 0.8rem; }
 
         /* --- MOBILE RESPONSIVE --- */
         @media (max-width: 700px) {
@@ -252,7 +279,7 @@
             authDomain: "sea-mountain.firebaseapp.com",
             databaseURL: "https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "sea-mountain",
-            storageBucket: "sea-mountain.appspot.com",
+            storageBucket: "sea-mountain.firebasestorage.app",
             messagingSenderId: "812228825024",
             appId: "1:812228825024:web:717049c1a64b39c8a60225"
         };
@@ -286,26 +313,13 @@
                     Object.keys(participants).forEach(regId => {
                         const data = participants[regId];
 
-                        // =====================================================
-                        // OWNER CHECK — userId only (strict, per-user)
-                        //
-                        // Each registration stores userId = currentUser.uid
-                        // from Firebase Auth at time of registration.
-                        // Using uid alone is the correct way — email fallback
-                        // caused ALL tickets with matching email to appear for
-                        // any user sharing that email (test accounts, etc.).
-                        // =====================================================
-                        const isOwner    = data.userId === user.uid;
-                        const isPaid     = data.status && data.status.toLowerCase() === 'paid';
-                        const isBankTx   = data.paymentMethod === 'Bank Transfer';
-                        const hasReceipt = !!data.receiptImage;
-                        const isVerified = (data.verificationStatus || '').toLowerCase() === 'verified';
+                        // ===== CHANGE: Only render tickets that BELONG to this user
+                        // AND have status === "Paid". Pending tickets stay hidden
+                        // here; admin can still see them in the admin panel.
+                        const isOwner = data.userId === user.uid || data.email === user.email;
+                        const isPaid  = data.status && data.status.toLowerCase() === 'paid';
 
-                        // Bank Transfer: must be verified by admin first
-                        // ToyyibPay / manual: show as soon as status is Paid
-                        const passesVerification = (isBankTx && hasReceipt) ? isVerified : true;
-
-                        if (isOwner && isPaid && passesVerification) {
+                        if (isOwner && isPaid) {
                             hasTickets = true;
                             renderTicket(regId, eventId, data, eventDetails);
                         }
@@ -317,13 +331,88 @@
             } catch (error) { console.error(error); }
         }
 
+        // ── Shirt size breakdown ────────────────────────────────────
+        function buildSizeSection(data) {
+            if (data.racers && Array.isArray(data.racers) && data.racers.length > 1) {
+                // Team — per-racer table
+                const rows = data.racers.map((r, idx) => {
+                    const role  = idx === 0 ? 'Captain' : `Racer ${idx + 1}`;
+                    const cls   = idx === 0 ? 'capt-role' : '';
+                    const name  = r.name ? r.name.split(' ')[0] : role;
+                    const shirt = (r.shirt || '-').toUpperCase();
+                    return `<tr>
+                        <td class="${cls}">${role}</td>
+                        <td>${name}</td>
+                        <td class="shirt-size">${shirt}</td>
+                    </tr>`;
+                }).join('');
+                return `<div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:15px;">
+                    <span style="font-size:0.65rem; color:#666; font-weight:800; text-transform:uppercase; letter-spacing:1px;">T-Shirt Sizes</span>
+                    <table class="size-table-dark">
+                        <tr><th>Role</th><th>Name</th><th>Shirt</th></tr>
+                        ${rows}
+                    </table>
+                </div>`;
+            } else if (data.racers && data.racers.length === 1) {
+                const shirt = (data.racers[0].shirt || data.tshirt_size || '-').toUpperCase();
+                return `<div style="margin-top:15px;">
+                    <span style="font-size:0.65rem; color:#666; font-weight:800; text-transform:uppercase; letter-spacing:1px;">T-Shirt Size</span>
+                    <div style="font-size:1.2rem; font-weight:800; color:#fff; margin-top:5px;">${shirt}</div>
+                </div>`;
+            } else if (data.tshirt_size) {
+                return `<div style="margin-top:15px;">
+                    <span style="font-size:0.65rem; color:#666; font-weight:800; text-transform:uppercase; letter-spacing:1px;">T-Shirt Size</span>
+                    <div style="font-size:1.2rem; font-weight:800; color:#fff; margin-top:5px;">${data.tshirt_size.toUpperCase()}</div>
+                </div>`;
+            }
+            return '';
+        }
+
+        // ── Crew breakdown ───────────────────────────────────────────
+        function buildCrewSection(data) {
+            const crewCount  = parseInt(data.crewCount) || 0;
+            const crewRacers = data.crewRacers || [];
+            if (crewCount === 0) return '';
+
+            let rows = '';
+            if (crewRacers.length > 0) {
+                crewRacers.forEach(cr => {
+                    const isCapt   = cr.role === 'Captain';
+                    const dotCls   = isCapt ? 'crew-dot capt' : 'crew-dot';
+                    const roleIcon = isCapt ? '★' : '●';
+                    const firstName = cr.name ? cr.name.split(' ')[0] : cr.role;
+                    rows += `<div class="crew-row-dark">
+                        <span><span class="${dotCls}"></span>
+                        <span class="crew-role-name">${roleIcon} ${cr.role} — ${firstName}</span></span>
+                        <i class="fas fa-check-circle crew-check-icon"></i>
+                    </div>`;
+                });
+            } else {
+                rows = `<div class="crew-row-dark">
+                    <span class="crew-role-name">${crewCount} Crew Confirmed</span>
+                    <i class="fas fa-check-circle crew-check-icon"></i>
+                </div>`;
+            }
+
+            const crewFee = data.crewFee ? ` • RM ${parseFloat(data.crewFee).toFixed(2)}` : '';
+            return `<div class="crew-section-dark">
+                <div class="crew-block">
+                    <div class="crew-block-header">
+                        <span><i class="fas fa-user-friends" style="margin-right:6px;"></i>Personal Crew${crewFee}</span>
+                        <span class="crew-pill">${crewCount} Pax</span>
+                    </div>
+                    ${rows}
+                </div>
+            </div>`;
+        }
+
         function renderTicket(regId, eventId, data, eventDetails) {
             const container = document.getElementById('ticketList');
-
-            // All tickets that reach renderTicket are already verified
-            // (filter above ensures Bank Transfer = admin verified, ToyyibPay = auto).
-            // So badge is always "Confirmed".
-            const statusHtml = '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Confirmed</span>';
+            
+            let statusHtml = '<span class="status-badge status-pending"><i class="fas fa-clock"></i> Pending</span>';
+            if (data.status && data.status.toLowerCase() === 'paid') {
+                statusHtml = '<span class="status-badge status-paid"><i class="fas fa-check-circle"></i> Confirmed</span>';
+            }
 
             // --- USE EVENT NAME FROM DATABASE (REALTIME UPDATE) ---
             const eventName = eventDetails.title || data.event_name || eventId.toUpperCase();
@@ -392,14 +481,16 @@
                     <div class="ticket-info">
                         ${statusHtml}
                         <div class="event-name">${eventName}</div>
-                        <div class="runner-name">${data.first_name} ${data.last_name || ''}</div>
+                        <div class="runner-name">${(data.teamName || data.captainName || data.first_name || '').toUpperCase()}</div>
                         
                         <div class="meta-grid">
                             <div class="meta-item"><span class="meta-label">Category</span><span class="meta-value highlight">${data.category}</span></div>
-                            <div class="meta-item"><span class="meta-label">T-Shirt Size</span><span class="meta-value">${data.tshirt_size || '-'}</span></div>
+                            <div class="meta-item"><span class="meta-label">Team</span><span class="meta-value">${data.teamName || data.captainName || data.first_name || '-'}</span></div>
                             <div class="meta-item"><span class="meta-label">Date Registered</span><span class="meta-value">${regDateFormatted}</span></div>
-                            <div class="meta-item"><span class="meta-label">Bib Number</span><span class="meta-value" style="color:#aaa;">To be assigned</span></div>
+                            <div class="meta-item"><span class="meta-label">Amount Paid</span><span class="meta-value">RM ${parseFloat(data.amountPaid || 0).toFixed(2)}</span></div>
                         </div>
+                        ${buildSizeSection(data)}
+                        ${buildCrewSection(data)}
                         ${mapSection}
                     </div>
                     <div class="ticket-divider"></div>
