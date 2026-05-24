@@ -248,6 +248,20 @@
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
+        /* ── CREW SECTION inside racer box ── */
+        .crew-section { margin-top: 15px; border-top: 1px dashed #2a2d36; padding-top: 15px; }
+        .crew-checkbox-row { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .crew-form-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(52,168,83,0.15); color: #4caf6e;
+            border: 1px solid rgba(52,168,83,0.35); border-radius: 20px;
+            padding: 6px 14px; font-size: 0.75rem; font-weight: 800;
+            text-transform: uppercase; text-decoration: none; letter-spacing: 0.5px;
+            transition: 0.2s; white-space: nowrap; flex-shrink: 0;
+        }
+        .crew-form-btn:hover { background: rgba(52,168,83,0.3); color: #fff; border-color: #4caf6e; }
+        .crew-pkg-desc { font-size: 0.78rem; color: #666; margin-top: 8px; font-style: italic; line-height: 1.5; }
+
         @media (max-width: 900px) {
             .container { flex-direction: column; padding: 0 20px; }
             .form-section { order: 1; }
@@ -362,6 +376,7 @@
                     <div id="voucherMsg" style="font-size:0.8rem; margin-top:8px; color:#ff4444; display:none;"></div>
                 </div>
                 <div class="price-row"><span>Reg. Fee</span><span id="displayPrice">RM 0.00</span></div>
+                <div class="price-row" id="rowCrew" style="display:none; color:#4caf6e;"><span>Crew (<span id="crewCount">0</span>x RM <span id="crewFeeDisplay">0</span>)</span><span>+ RM <span id="crewVal">0.00</span></span></div>
                 <div class="price-row" id="rowDiscount" style="display:none; color:#28a745;"><span>Discount</span><span>- RM <span id="discountVal">0.00</span></span></div>
                 <div class="price-total"><span>TOTAL</span><span style="color:var(--brand-red)" id="finalTotal">RM 0.00</span></div>
             </div>
@@ -394,6 +409,9 @@
     let currentUser = null;
     let currentVoucherCode = null;
     let customQuestionsData = [];
+    let crewData        = null;  // crew config from Firebase event
+    let crewFeePerRacer = 0;     // fee per crew (early or normal)
+    let totalCrewCount  = 0;     // how many racers ticked crew
 
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('event') || urlParams.get('id');
@@ -435,6 +453,21 @@
                     option.text = `General Entry - RM ${numPrice}`;
                     option.dataset.price = numPrice;
                     catSelect.appendChild(option);
+                }
+
+                // ── Personal Crew config ──────────────────────────
+                if (data.allow_crew) {
+                    const now2    = new Date();
+                    const earlyEnd2 = data.early_bird_end ? new Date(data.early_bird_end) : null;
+                    const isEarly2  = earlyEnd2 && now2 <= earlyEnd2;
+                    crewFeePerRacer = isEarly2 && data.crew_fee_early
+                        ? parseFloat(data.crew_fee_early)
+                        : parseFloat(data.crew_fee_normal) || 0;
+                    crewData = {
+                        fee:          crewFeePerRacer,
+                        form_link:    data.crew_form_link    || '',
+                        package_desc: data.crew_package_desc || ''
+                    };
                 }
 
                 if (data.custom_questions && data.custom_questions.length > 0) {
@@ -698,7 +731,9 @@
                 currentGroupDiv.appendChild(card);
                 dynContainer.appendChild(currentGroupDiv);
             } else if (currentCardBody) {
-                let html = `<div class="form-group"><label>${q.question_text}</label>`;
+                // For checkbox: skip outer label (text is already inside the checkbox label)
+                const outerLabel = q.type === 'checkbox' ? '' : `<label>${q.question_text}</label>`;
+                let html = `<div class="form-group">${outerLabel}`;
                 if (q.type === 'text') {
                     html += `<input type="text" id="customQ_${index}" class="form-control" ${q.required ? 'required' : ''}>`;
                 } else if (q.type === 'datetime' || q.type === 'date') {
@@ -888,6 +923,18 @@
                         </select>
                     </div>
                     ${captAck}
+                    ${crewData ? `
+                    <div class="crew-section">
+                        <div class="crew-checkbox-row">
+                            <label class="checkbox-item" style="flex:1; min-width:200px;">
+                                <input type="checkbox" id="racer${i}_crew" onchange="updateCrewCount()">
+                                I will bring 1 personal crew/supporter
+                                <strong style="color:var(--brand-yellow); margin-left:5px;">(+RM ${crewData.fee.toFixed(2)})</strong>
+                            </label>
+                            ${crewData.form_link ? `<a href="${crewData.form_link}" target="_blank" rel="noopener" class="crew-form-btn"><i class="fas fa-wpforms"></i> Fill Crew Form</a>` : ''}
+                        </div>
+                        ${crewData.package_desc ? `<p class="crew-pkg-desc"><i class="fas fa-info-circle" style="color:#4caf6e;margin-right:5px;"></i>${crewData.package_desc}</p>` : ''}
+                    </div>` : ''}
                 </div>`;
         }
 
@@ -919,6 +966,18 @@
         });
     });
 
+    // Update crew count & price when racer ticks/unticks crew
+    window.updateCrewCount = function() {
+        const cat   = document.getElementById('raceCategory').value;
+        const count = getTeamSize(cat);
+        totalCrewCount = 0;
+        for (let i = 1; i <= count; i++) {
+            const cb = document.getElementById(`racer${i}_crew`);
+            if (cb && cb.checked) totalCrewCount++;
+        }
+        updatePriceUI();
+    }
+
     window.removeVoucher = function() {
         currentVoucherCode = null;
         finalAmount = originalPrice;
@@ -930,8 +989,24 @@
     }
 
     function updatePriceUI() {
+        const crewTotal  = totalCrewCount * crewFeePerRacer;
+        const grandTotal = finalAmount + crewTotal;
+
         document.getElementById('displayPrice').innerText = "RM " + originalPrice.toFixed(2);
-        document.getElementById('finalTotal').innerText = "RM " + finalAmount.toFixed(2);
+        document.getElementById('finalTotal').innerText   = "RM " + grandTotal.toFixed(2);
+
+        // Crew row in summary
+        const rowCrew = document.getElementById('rowCrew');
+        if (rowCrew) {
+            if (crewTotal > 0) {
+                rowCrew.style.display = 'flex';
+                document.getElementById('crewCount').innerText      = totalCrewCount;
+                document.getElementById('crewFeeDisplay').innerText = crewFeePerRacer.toFixed(2);
+                document.getElementById('crewVal').innerText        = crewTotal.toFixed(2);
+            } else {
+                rowCrew.style.display = 'none';
+            }
+        }
     }
 
     document.getElementById('payBtn').addEventListener('click', () => {
@@ -992,7 +1067,9 @@
             racers:        racers,
             custom_answers: customAnswers,
             medical:       medical,   // ← now an array per racer
-            amountPaid:    finalAmount.toFixed(2),
+            amountPaid:    (finalAmount + totalCrewCount * crewFeePerRacer).toFixed(2),
+            crewCount:     totalCrewCount,
+            crewFee:       (totalCrewCount * crewFeePerRacer).toFixed(2),
             voucherUsed:   currentVoucherCode || "NONE",
             registration_time: new Date().toLocaleString(),
             status:        "Pending Payment",
