@@ -83,7 +83,39 @@
         .size-table tr:last-child td { border-bottom: none; }
         .size-table td:last-child { font-weight: 800; color: #000; }
         .size-solo { font-size: 0.95rem; font-weight: 800; color: #333; padding: 4px 0; }
-        .crew-badge { display: inline-block; background: #4caf6e; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: 5px; text-transform: uppercase; vertical-align: middle; }
+        /* Premium Crew Section */
+        .crew-section {
+            margin-top: 12px; width: 100%;
+            background: linear-gradient(135deg, #f0fff4, #e8f5e9);
+            border: 1.5px solid #4caf6e; border-radius: 10px;
+            overflow: hidden;
+        }
+        .crew-section-header {
+            background: #4caf6e; color: #fff;
+            padding: 6px 12px;
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .crew-section-header i { margin-right: 6px; }
+        .crew-count-pill {
+            background: rgba(255,255,255,0.3); border-radius: 10px;
+            padding: 2px 8px; font-size: 0.65rem; font-weight: 800;
+        }
+        .crew-racer-list { padding: 8px 12px; }
+        .crew-racer-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 5px 0; border-bottom: 1px dashed rgba(76,175,110,0.2);
+            font-size: 0.78rem;
+        }
+        .crew-racer-row:last-child { border-bottom: none; }
+        .crew-racer-left { display: flex; align-items: center; gap: 8px; }
+        .crew-role-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #4caf6e; flex-shrink: 0;
+        }
+        .crew-role-dot.captain { background: #ff9500; }
+        .crew-role-label { font-weight: 700; color: #333; }
+        .crew-racer-name { color: #555; font-size: 0.73rem; margin-top: 1px; }
+        .crew-check { color: #4caf6e; font-size: 0.8rem; }
 
         @media print {
             body { background: #fff; color: #000; display: block; }
@@ -193,12 +225,51 @@
                     sizeBlock.innerHTML = '';
                 }
 
-                // Crew badge if applicable
-                if (hasCrew) {
-                    const badge = document.createElement('div');
-                    badge.style.marginTop = '8px';
-                    badge.innerHTML = `<span class="crew-badge"><i class="fas fa-user-friends"></i> ${data.crewCount} Personal Crew</span>`;
-                    sizeBlock.appendChild(badge);
+                // ── Premium Crew Section ─────────────────────────
+                const crewRacers = data.crewRacers || [];
+                const crewCount  = parseInt(data.crewCount) || crewRacers.length;
+
+                if (crewCount > 0) {
+                    // Build per-racer rows
+                    let crewRows = '';
+                    if (crewRacers.length > 0) {
+                        crewRacers.forEach((cr, idx) => {
+                            const isCapt  = cr.role === 'Captain';
+                            const dotCls  = isCapt ? 'crew-role-dot captain' : 'crew-role-dot';
+                            const roleIcon = isCapt ? '★' : '●';
+                            const firstName = cr.name ? cr.name.split(' ')[0] : cr.role;
+                            crewRows += `
+                                <div class="crew-racer-row">
+                                    <div class="crew-racer-left">
+                                        <span class="${dotCls}"></span>
+                                        <div>
+                                            <div class="crew-role-label">${roleIcon} ${cr.role}</div>
+                                            <div class="crew-racer-name">${firstName}</div>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-check-circle crew-check"></i>
+                                </div>`;
+                        });
+                    } else {
+                        // Fallback if crewRacers not saved (old data)
+                        crewRows = `<div class="crew-racer-row">
+                            <div class="crew-racer-left">
+                                <span class="crew-role-dot"></span>
+                                <div class="crew-role-label">${crewCount} Crew Confirmed</div>
+                            </div>
+                            <i class="fas fa-check-circle crew-check"></i>
+                        </div>`;
+                    }
+
+                    const section = document.createElement('div');
+                    section.className = 'crew-section';
+                    section.innerHTML = `
+                        <div class="crew-section-header">
+                            <span><i class="fas fa-user-friends"></i> Personal Crew</span>
+                            <span class="crew-count-pill">${crewCount} Pax</span>
+                        </div>
+                        <div class="crew-racer-list">${crewRows}</div>`;
+                    sizeBlock.appendChild(section);
                 }
 
                 // 3. Generate QR (Clear div first)
