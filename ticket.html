@@ -76,6 +76,15 @@
         .btn-print { background: #28a745; border-color: #28a745; }
         .btn-print:hover { background: #218838; color: #fff; border-color: #218838; }
 
+        /* Shirt size table */
+        .size-table { width: 100%; border-collapse: collapse; margin: 0; font-size: 0.78rem; }
+        .size-table th { background: #000; color: #fff; padding: 5px 8px; font-weight: 800; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px; }
+        .size-table td { padding: 5px 8px; border-bottom: 1px solid #eee; color: #333; font-weight: 600; }
+        .size-table tr:last-child td { border-bottom: none; }
+        .size-table td:last-child { font-weight: 800; color: #000; }
+        .size-solo { font-size: 0.95rem; font-weight: 800; color: #333; padding: 4px 0; }
+        .crew-badge { display: inline-block; background: #4caf6e; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: 5px; text-transform: uppercase; vertical-align: middle; }
+
         @media print {
             body { background: #fff; color: #000; display: block; }
             .action-buttons { display: none; }
@@ -94,8 +103,10 @@
         <div class="ticket-body">
             <div class="runner-name" id="runnerName">...</div>
             <div class="runner-details">
-                <span id="category">...</span> <span style="margin:0 5px; color:#ddd;">|</span> Size: <span id="size">...</span>
+                <span id="category">...</span>
             </div>
+            <!-- Shirt size breakdown per racer -->
+            <div id="sizeBlock" style="margin: 10px 0 15px; width:100%;"></div>
             <span class="badge">OFFICIAL TICKET</span>
         </div>
 
@@ -147,10 +158,48 @@
                 }
 
                 document.getElementById('eventName').innerText = finalEventName;
-                document.getElementById('runnerName').innerText = data.first_name + " " + (data.last_name || "");
-                document.getElementById('category').innerText = data.category || "General";
-                document.getElementById('size').innerText = (data.tshirt_size || "-").toUpperCase();
-                document.getElementById('regId').innerText = "REF: " + userId.substring(0,8).toUpperCase();
+
+                // Team name → show team if available, else captain
+                const displayName = data.teamName || data.captainName || data.first_name || "-";
+                document.getElementById('runnerName').innerText = displayName.toUpperCase();
+                document.getElementById('category').innerText   = data.category || "General";
+                document.getElementById('regId').innerText      = "REF: " + userId.substring(0,8).toUpperCase();
+
+                // ── Shirt Sizes ──────────────────────────────────────
+                const sizeBlock = document.getElementById('sizeBlock');
+                const hasCrew   = data.crewCount && parseInt(data.crewCount) > 0;
+
+                if (data.racers && Array.isArray(data.racers) && data.racers.length > 1) {
+                    // Team — show per-racer breakdown
+                    let rows = data.racers.map((r, idx) => {
+                        const label = idx === 0 ? 'Captain' : `Racer ${idx + 1}`;
+                        const name  = r.name ? r.name.split(' ')[0] : label;
+                        const shirt = (r.shirt || '-').toUpperCase();
+                        return `<tr><td>${label}</td><td>${name}</td><td>${shirt}</td></tr>`;
+                    }).join('');
+                    sizeBlock.innerHTML = `
+                        <table class="size-table">
+                            <tr><th>Role</th><th>Name</th><th>Shirt</th></tr>
+                            ${rows}
+                        </table>`;
+                } else if (data.racers && Array.isArray(data.racers) && data.racers.length === 1) {
+                    // Solo racer
+                    const shirt = (data.racers[0].shirt || data.tshirt_size || '-').toUpperCase();
+                    sizeBlock.innerHTML = `<div class="size-solo">T-Shirt Size: <strong>${shirt}</strong></div>`;
+                } else if (data.tshirt_size) {
+                    // Legacy fallback
+                    sizeBlock.innerHTML = `<div class="size-solo">T-Shirt Size: <strong>${data.tshirt_size.toUpperCase()}</strong></div>`;
+                } else {
+                    sizeBlock.innerHTML = '';
+                }
+
+                // Crew badge if applicable
+                if (hasCrew) {
+                    const badge = document.createElement('div');
+                    badge.style.marginTop = '8px';
+                    badge.innerHTML = `<span class="crew-badge"><i class="fas fa-user-friends"></i> ${data.crewCount} Personal Crew</span>`;
+                    sizeBlock.appendChild(badge);
+                }
 
                 // 3. Generate QR (Clear div first)
                 const qrContainer = document.getElementById("qrcode");
