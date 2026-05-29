@@ -313,13 +313,17 @@
                     Object.keys(participants).forEach(regId => {
                         const data = participants[regId];
 
-                        // ===== CHANGE: Only render tickets that BELONG to this user
-                        // AND have status === "Paid". Pending tickets stay hidden
-                        // here; admin can still see them in the admin panel.
-                        const isOwner = data.userId === user.uid || data.email === user.email;
-                        const isPaid  = data.status && data.status.toLowerCase() === 'paid';
+                        // OWNER CHECK — userId match only (strict)
+                        const isOwner    = data.userId === user.uid;
+                        const isPaid     = data.status && data.status.toLowerCase() === 'paid';
+                        const isBankTx   = data.paymentMethod === 'Bank Transfer';
+                        const isVerified = (data.verificationStatus || '').toLowerCase() === 'verified';
 
-                        if (isOwner && isPaid) {
+                        // Bank Transfer → MUST be verified by admin first
+                        // Other methods (ToyyibPay/manual) → show when Paid
+                        const passesVerification = isBankTx ? isVerified : true;
+
+                        if (isOwner && isPaid && passesVerification) {
                             hasTickets = true;
                             renderTicket(regId, eventId, data, eventDetails);
                         }
