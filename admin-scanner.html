@@ -291,6 +291,8 @@
             <i class="fas fa-image"></i> Scan from Image / Screenshot
         </button>
         <canvas id="fileScanPreview"></canvas>
+        <!-- Separate hidden element for file scan instance -->
+        <div id="fileScanTarget" style="display:none;"></div>
 
     </div>
 
@@ -337,6 +339,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
@@ -348,28 +351,50 @@
         appId: "1:812228825024:web:717049c1a64b39c8a60225"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const adminApp = initializeApp(firebaseConfig, "admin");
+    const auth = getAuth(adminApp);
+    const db   = getDatabase(adminApp);
+    const ALLOWED_ADMIN = "admin@sm.com";
 
     let html5QrCode;
     let isScanning    = true;
     let cameraStarted = false;
     let currentFacing = "environment"; // "environment"=back, "user"=front
 
-    // 1. LOAD EVENTS
-    const eventSelect = document.getElementById('eventSelect');
-    onValue(ref(db, 'events'), (snapshot) => {
-        eventSelect.innerHTML = '<option value="">-- Select Active Event --</option>';
-        const data = snapshot.val();
-        if(data) {
-            Object.keys(data).forEach(key => {
-                eventSelect.innerHTML += `<option value="${key}">${data[key].title}</option>`;
-            });
-        }
+    // 1. AUTH CHECK — same as all admin pages
+    auth.authStateReady().then(() => {
+        onAuthStateChanged(auth, (user) => {
+            if (!user || user.email !== ALLOWED_ADMIN) {
+                alert("Access Denied. Please login as Admin.");
+                window.location.href = "admin-login.html";
+            } else {
+                initPage();
+            }
+        });
     });
 
+    function initPage() {
+        // LOAD EVENTS
+        const eventSelect = document.getElementById('eventSelect');
+        onValue(ref(db, 'events'), (snapshot) => {
+            eventSelect.innerHTML = '<option value="">-- Select Active Event --</option>';
+            const data = snapshot.val();
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    if (!data[key].isArchived) {
+                        eventSelect.innerHTML += `<option value="${key}">${data[key].title}</option>`;
+                    }
+                });
+            }
+        });
+
+        // START CAMERA
+        startCamera();
+    }
+
     // 2. SETUP SCANNER — auto-start back camera
-    html5QrCode = new Html5Qrcode("reader");
+    html5QrCode     = new Html5Qrcode("reader");        // camera instance
+    const fileQrCode = new Html5Qrcode("fileScanTarget"); // file scan instance
 
     function startCamera(facing) {
         if (facing) currentFacing = facing;
@@ -418,8 +443,7 @@
         }
     }
 
-    // Start camera on page load
-    startCamera();
+    // Camera started via initPage() after auth check
 
 
     // 3. VERIFY TICKET LOGIC
@@ -563,10 +587,12 @@
     }
 
     // 6. SCAN FROM FILE / SCREENSHOT
+    // Uses a SEPARATE Html5Qrcode instance (fileQrCode) — camera instance
+    // cannot do scanFile() while camera is running.
     window.scanFromFile = function(input) {
         if (!input.files || !input.files[0]) return;
 
-        const eventId = eventSelect.value;
+        const eventId = document.getElementById('eventSelect').value;
         if (!eventId) {
             alert("Please select an event first!");
             input.value = "";
@@ -575,16 +601,17 @@
 
         const file = input.files[0];
 
-        // Use Html5Qrcode.scanFile — reads QR from image
-        html5QrCode.scanFile(file, false)
+        fileQrCode.scanFile(file, false)
             .then(decodedText => {
-                input.value = ""; // reset input so same file can be reused
+                input.value = "";
                 verifyTicket(eventId, decodedText.trim());
             })
-            .catch(err => {
+            .catch(() => {
                 input.value = "";
-                alert("No QR code found in this image.Make sure the QR code is clear and not blurry.");
-                console.warn("File scan error:", err);
+                alert("No QR code found in this image.
+Tips:
+• Make sure QR is clear & not blurry
+• Try a closer crop of the QR code");
             });
     }
 
