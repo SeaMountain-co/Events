@@ -458,15 +458,23 @@
                 const data = snapshot.val();
                 
                 if(data.status && data.status.toLowerCase() === 'paid') {
-                    // SUCCESS
-                    document.getElementById('beepSound').play();
-                    showResult('success', data);
-                    
-                    // Auto Check-in (Optional)
-                    update(ref(db, `registrations/${eventId}/${regId}`), { checked_in: true, check_in_time: new Date().toLocaleString() });
+                    const isBankTx   = data.paymentMethod === 'Bank Transfer';
+                    const isVerified = (data.verificationStatus || '').toLowerCase() === 'verified';
 
+                    if (isBankTx && !isVerified) {
+                        // Bank Transfer — receipt uploaded but NOT yet verified by admin
+                        showResult('unverified', data);
+                    } else {
+                        // Verified OR non-bank-transfer (ToyyibPay/manual override)
+                        document.getElementById('beepSound').play();
+                        showResult('success', data);
+                        update(ref(db, `registrations/${eventId}/${regId}`), {
+                            checked_in: true,
+                            check_in_time: new Date().toLocaleString()
+                        });
+                    }
                 } else {
-                    // PENDING
+                    // PENDING PAYMENT
                     showResult('pending', data);
                 }
             } else {
@@ -550,6 +558,21 @@
             buildShirtRows(data);
             buildCrewSection(data);
 
+        } else if (type === 'unverified') {
+            // Bank Transfer paid but admin hasn't verified receipt yet
+            icon.className = "status-icon pending";
+            icon.innerHTML = '<i class="fas fa-hourglass-half"></i>';
+            text.innerText = "UNVERIFIED";
+            text.style.color = "#ff9500";
+
+            const displayName = data.teamName || data.captainName || data.first_name || '-';
+            name.innerText   = displayName.toUpperCase();
+            detail.innerText = "Receipt pending admin verification";
+            cat.innerText    = data.category || '-';
+            document.getElementById('rTeamSize').innerText = '-';
+            document.getElementById('rShirtSection').style.display = 'none';
+            document.getElementById('rCrewSection').style.display  = 'none';
+
         } else if (type === 'pending') {
             icon.className = "status-icon pending";
             icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
@@ -608,7 +631,10 @@
             })
             .catch(() => {
                 input.value = "";
-                alert("No QR code found in this image.Tips:• Make sure QR is clear & not blurry• Try a closer crop of the QR code");
+                alert("No QR code found in this image.
+Tips:
+• Make sure QR is clear & not blurry
+• Try a closer crop of the QR code");
             });
     }
 
