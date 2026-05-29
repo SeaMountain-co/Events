@@ -205,6 +205,9 @@
         .float-wa { position: fixed; width: 60px; height: 60px; bottom: 30px; right: 30px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; transition: 0.3s; text-decoration: none; }
         .float-wa:hover { transform: scale(1.1); background-color: #128c7e; }
 
+        /* footer-wrapper definition (missing) */
+        .footer-wrapper { background: linear-gradient(to bottom, #111, #0a0a0a); border-top: 1px solid #222; margin-top: 50px; padding-top: 60px; }
+
         /* --- MOBILE TWEAKS --- */
         @media (max-width: 900px) {
             header { padding: 10px 5%; height: 60px; }
@@ -216,10 +219,10 @@
             .auth-group { margin-left: auto; gap: 8px; }
             .login-btn { padding: 6px 15px; font-size: 0.75rem; }
             .qr-btn { width: 32px; height: 32px; font-size: 1rem; }
-            
+
             /* Ticker Mobile */
             .ticker-heading { font-size: 0.7rem; padding: 0 10px; }
-            
+
             .hero { padding: 60px 5%; }
             .hero h1 { font-size: 2.2rem; }
             .hero-content { flex-direction: column; text-align: center; gap: 30px; }
@@ -231,6 +234,15 @@
             .events-grid { grid-template-columns: 1fr; padding-bottom: 40px; }
             .contact-container { flex-direction: column; gap: 40px; }
             .contact-form { padding: 25px; }
+
+            /* Footer fix — About & Policy lari sebab footer-grid tiada mobile override */
+            .footer-grid { grid-template-columns: 1fr; gap: 25px; }
+            .footer-col { min-width: 0; width: 100%; overflow: hidden; }
+            .footer-spec-list li { font-size: 0.8rem; }
+            .footer-wrapper { padding-top: 40px; margin-top: 30px; }
+            .footer-bottom { padding: 20px 4%; }
+            .footer-links { gap: 12px; }
+            .float-wa { width: 50px; height: 50px; bottom: 20px; right: 15px; font-size: 24px; }
         }
     </style>
 </head>
@@ -595,5 +607,3 @@
     </script>
 </body>
 </html>
-
-
