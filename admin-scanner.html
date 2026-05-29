@@ -213,6 +213,32 @@
             background: #000; color: #fff; border: none; padding: 15px; width: 100%;
             font-weight: 800; font-size: 1rem; border-radius: 50px; cursor: pointer;
         }
+
+        /* Divider */
+        .or-divider {
+            display: flex; align-items: center; gap: 12px;
+            color: #444; font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; margin: 16px 0;
+        }
+        .or-divider::before, .or-divider::after {
+            content: ''; flex: 1; height: 1px; background: #2a2c35;
+        }
+
+        /* File scan button */
+        .btn-file-scan {
+            width: 100%; padding: 14px; border-radius: 10px;
+            background: transparent; border: 1.5px dashed #444; color: #888;
+            font-family: 'Montserrat'; font-size: 0.9rem; font-weight: 700;
+            cursor: pointer; transition: 0.2s; display: flex;
+            align-items: center; justify-content: center; gap: 10px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .btn-file-scan:hover, .btn-file-scan:active {
+            border-color: var(--primary); color: #fff;
+            background: rgba(255,0,0,0.06);
+        }
+        /* Scan result preview image (hidden) */
+        #fileScanPreview { display:none; }
     </style>
 </head>
 <body>
@@ -255,6 +281,16 @@
             <input type="text" id="manualId" class="manual-input" placeholder="Type Registration ID">
             <button onclick="manualCheck()" class="btn-check">CHECK ID</button>
         </div>
+
+        <div class="or-divider">or</div>
+
+        <!-- File / screenshot scan -->
+        <input type="file" id="fileScanInput" accept="image/*" style="display:none;"
+            onchange="scanFromFile(this)">
+        <button class="btn-file-scan" onclick="document.getElementById('fileScanInput').click()">
+            <i class="fas fa-image"></i> Scan from Image / Screenshot
+        </button>
+        <canvas id="fileScanPreview"></canvas>
 
     </div>
 
@@ -526,7 +562,34 @@
         setTimeout(() => { isScanning = true; }, 800); // Small delay before re-scanning
     }
 
-    // 6. MANUAL CHECK
+    // 6. SCAN FROM FILE / SCREENSHOT
+    window.scanFromFile = function(input) {
+        if (!input.files || !input.files[0]) return;
+
+        const eventId = eventSelect.value;
+        if (!eventId) {
+            alert("Please select an event first!");
+            input.value = "";
+            return;
+        }
+
+        const file = input.files[0];
+
+        // Use Html5Qrcode.scanFile — reads QR from image
+        html5QrCode.scanFile(file, false)
+            .then(decodedText => {
+                input.value = ""; // reset input so same file can be reused
+                verifyTicket(eventId, decodedText.trim());
+            })
+            .catch(err => {
+                input.value = "";
+                alert("No QR code found in this image.
+Make sure the QR code is clear and not blurry.");
+                console.warn("File scan error:", err);
+            });
+    }
+
+    // 7. MANUAL CHECK
     window.manualCheck = function() {
         const id = document.getElementById('manualId').value.trim();
         const eventId = eventSelect.value;
