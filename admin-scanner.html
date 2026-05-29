@@ -142,6 +142,73 @@
         .info-label { font-size: 0.7rem; color: #888; font-weight: bold; text-transform: uppercase; }
         .info-val { font-size: 1rem; font-weight: 800; color: #333; }
 
+        /* Shirt size rows */
+        .shirt-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
+        .shirt-row-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 12px; background: #f0f0f0; border-radius: 8px;
+        }
+        .shirt-row-role { font-size: 0.72rem; font-weight: 800; color: #555; text-transform: uppercase; }
+        .shirt-row-name { font-size: 0.78rem; color: #444; }
+        .shirt-row-size { font-size: 1rem; font-weight: 900; color: #000; background: #fff; padding: 2px 10px; border-radius: 6px; border: 1px solid #ddd; }
+
+        /* Crew section */
+        .crew-section { background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 10px; padding: 12px 15px; margin-bottom: 15px; text-align: left; }
+        .crew-title { font-size: 0.68rem; font-weight: 800; color: #388e3c; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .crew-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.8rem; }
+        .crew-item:last-child { border-bottom: none; }
+        .crew-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .crew-dot.capt { background: #ff9500; }
+        .crew-dot.racer { background: #4caf6e; }
+        .crew-role-txt { font-weight: 700; color: #333; }
+        .crew-name-txt { color: #666; font-size: 0.75rem; }
+        .crew-fallback { font-size: 0.85rem; font-weight: 700; color: #388e3c; }
+
+        /* Section label */
+        .section-lbl { font-size: 0.62rem; font-weight: 800; color: #999; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; text-align: left; }
+
+        /* Flip camera button */
+        .btn-flip {
+            position: absolute; bottom: 14px; right: 14px; z-index: 20;
+            width: 48px; height: 48px; border-radius: 50%;
+            background: rgba(0,0,0,0.6); border: 1.5px solid rgba(255,255,255,0.2);
+            color: #fff; font-size: 1.2rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px);
+            transition: background 0.2s, transform 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-flip:active { background: rgba(255,0,0,0.5); transform: scale(0.92); }
+        .btn-flip.spinning i { animation: flipSpin 0.4s ease; }
+        @keyframes flipSpin { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(180deg); } }
+
+        /* Camera status pill */
+        .cam-status {
+            position: absolute; top: 12px; left: 12px; z-index: 20;
+            background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;
+            padding: 5px 12px; font-size: 0.62rem; font-weight: 800;
+            color: #ccc; text-transform: uppercase; letter-spacing: 0.5px;
+            display: flex; align-items: center; gap: 5px;
+            pointer-events: none;
+        }
+        .cam-status .dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+        /* Corner frame overlay */
+        .scan-corners {
+            position: absolute; inset: 0; z-index: 15; pointer-events: none;
+        }
+        .scan-corners::before, .scan-corners::after,
+        .scan-corner-br, .scan-corner-bl {
+            content: ''; position: absolute;
+            width: 28px; height: 28px; border-color: #ff0000; border-style: solid;
+        }
+        .scan-corners::before { top: 18px; left: 18px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+        .scan-corners::after  { top: 18px; right: 18px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+        .scan-corner-br { bottom: 18px; right: 18px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+        .scan-corner-bl { bottom: 18px; left: 18px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+
         .btn-scan-next {
             background: #000; color: #fff; border: none; padding: 15px; width: 100%;
             font-weight: 800; font-size: 1rem; border-radius: 50px; cursor: pointer;
@@ -166,7 +233,19 @@
 
         <div class="scanner-wrapper">
             <div id="reader"></div>
-            <div class="scan-laser"></div> </div>
+            <div class="scan-laser"></div>
+            <div class="scan-corners">
+                <div class="scan-corner-br"></div>
+                <div class="scan-corner-bl"></div>
+            </div>
+            <div class="cam-status">
+                <span class="dot"></span>
+                <span id="camLabel">BACK CAM</span>
+            </div>
+            <button class="btn-flip" id="btnFlip" onclick="flipCamera()" title="Flip Camera">
+                <i class="fas fa-camera-rotate"></i>
+            </button>
+        </div>
         
         <p style="text-align:center; color:#666; font-size:0.8rem; margin-top:-15px; margin-bottom:20px;">
             <i class="fas fa-qrcode"></i> Point camera at Participant's Ticket
@@ -194,8 +273,22 @@
                     <div class="info-val" id="rCat">10KM</div>
                 </div>
                 <div>
-                    <div class="info-label">T-Shirt</div>
-                    <div class="info-val" id="rSize">L</div>
+                    <div class="info-label">Team Size</div>
+                    <div class="info-val" id="rTeamSize">-</div>
+                </div>
+            </div>
+
+            <!-- Per-racer shirt sizes -->
+            <div id="rShirtSection" style="display:none; margin-bottom:5px;">
+                <div class="section-lbl"><i class="fas fa-tshirt" style="margin-right:4px;"></i>T-Shirt Sizes</div>
+                <div class="shirt-rows" id="rShirtRows"></div>
+            </div>
+
+            <!-- Personal crew -->
+            <div id="rCrewSection" style="display:none;">
+                <div class="crew-section">
+                    <div class="crew-title"><i class="fas fa-user-friends"></i> Personal Crew <span id="rCrewCount" style="background:rgba(56,142,60,0.15); padding:1px 8px; border-radius:10px;"></span></div>
+                    <div id="rCrewItems"></div>
                 </div>
             </div>
 
@@ -222,8 +315,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    let html5QrcodeScanner;
-    let isScanning = true;
+    let html5QrCode;
+    let isScanning    = true;
+    let cameraStarted = false;
+    let currentFacing = "environment"; // "environment"=back, "user"=front
 
     // 1. LOAD EVENTS
     const eventSelect = document.getElementById('eventSelect');
@@ -237,32 +332,58 @@
         }
     });
 
-    // 2. SETUP SCANNER
-    function onScanSuccess(decodedText, decodedResult) {
-        if(!isScanning) return; 
+    // 2. SETUP SCANNER — auto-start back camera
+    html5QrCode = new Html5Qrcode("reader");
 
-        const eventId = eventSelect.value;
-        if(!eventId) {
-            alert("Please select an event first!");
-            return;
-        }
-
-        verifyTicket(eventId, decodedText);
+    function startCamera(facing) {
+        if (facing) currentFacing = facing;
+        return html5QrCode.start(
+            { facingMode: currentFacing },
+            { fps: 10, qrbox: { width: 230, height: 230 } },
+            (decodedText) => {
+                if (!isScanning) return;
+                const eventId = eventSelect.value;
+                if (!eventId) { alert("Please select an event first!"); return; }
+                verifyTicket(eventId, decodedText);
+            },
+            () => {}
+        ).then(() => {
+            cameraStarted = true;
+            document.getElementById('camLabel').innerText =
+                currentFacing === 'environment' ? 'BACK CAM' : 'FRONT CAM';
+            // Hide library default UI
+            document.querySelectorAll('#reader__scan_region, #reader__dashboard')
+                .forEach(el => { if(el) el.style.display = 'none'; });
+        }).catch(err => {
+            console.warn("Camera error:", err);
+            document.getElementById('reader').innerHTML =
+                `<div style="color:#ff4d4d; text-align:center; padding:40px 20px; font-size:0.85rem;">
+                    <i class="fas fa-camera-slash" style="font-size:2rem; display:block; margin-bottom:10px;"></i>
+                    Camera access denied.<br>Allow camera permission &amp; reload.
+                </div>`;
+        });
     }
 
-    function onScanFailure(error) {}
+    // Flip camera — stop current, start opposite
+    window.flipCamera = function() {
+        const btn = document.getElementById('btnFlip');
+        btn.classList.add('spinning');
+        setTimeout(() => btn.classList.remove('spinning'), 420);
 
-    // Config Scanner untuk Mobile
-    html5QrcodeScanner = new Html5QrcodeScanner(
-        "reader",
-        { 
-            fps: 10, 
-            qrbox: {width: 250, height: 250}, 
-            aspectRatio: 1.0,
-            disableFlip: false // Penting untuk sesetengah camera phone
-        },
-        false);
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        const nextFacing = currentFacing === 'environment' ? 'user' : 'environment';
+
+        if (cameraStarted) {
+            html5QrCode.stop().then(() => {
+                cameraStarted = false;
+                startCamera(nextFacing);
+            }).catch(() => { startCamera(nextFacing); });
+        } else {
+            startCamera(nextFacing);
+        }
+    }
+
+    // Start camera on page load
+    startCamera();
 
 
     // 3. VERIFY TICKET LOGIC
@@ -300,43 +421,101 @@
         const icon = document.getElementById('statusIcon');
         const text = document.getElementById('statusText');
         
-        const name = document.getElementById('rName');
+        const name   = document.getElementById('rName');
         const detail = document.getElementById('rDetail');
-        const cat = document.getElementById('rCat');
-        const size = document.getElementById('rSize');
+        const cat    = document.getElementById('rCat');
+
+        // ── Shirt sizes helper ──────────────────────────────────
+        function buildShirtRows(data) {
+            const sec  = document.getElementById('rShirtSection');
+            const rows = document.getElementById('rShirtRows');
+            if (!data || !data.racers || !Array.isArray(data.racers)) {
+                sec.style.display = 'none'; return;
+            }
+            sec.style.display = 'block';
+            rows.innerHTML = data.racers.map((r, i) => {
+                const role  = i === 0 ? '★ Captain' : `Racer ${i + 1}`;
+                const fname = r.name ? r.name.split(' ')[0] : role;
+                const shirt = (r.shirt || '-').toUpperCase();
+                return `<div class="shirt-row-item">
+                    <div>
+                        <div class="shirt-row-role">${role}</div>
+                        <div class="shirt-row-name">${fname}</div>
+                    </div>
+                    <div class="shirt-row-size">${shirt}</div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── Crew helper ──────────────────────────────────────────
+        function buildCrewSection(data) {
+            const sec   = document.getElementById('rCrewSection');
+            const items = document.getElementById('rCrewItems');
+            const countEl = document.getElementById('rCrewCount');
+            const crew  = parseInt(data && data.crewCount) || 0;
+            if (crew === 0) { sec.style.display = 'none'; return; }
+            sec.style.display = 'block';
+            countEl.innerText = crew + ' Pax';
+            const crewRacers = data.crewRacers || [];
+            if (crewRacers.length > 0) {
+                items.innerHTML = crewRacers.map(cr => {
+                    const isCapt = cr.role === 'Captain';
+                    const dot    = isCapt ? 'crew-dot capt' : 'crew-dot racer';
+                    const icon   = isCapt ? '★' : '●';
+                    const fname  = cr.name ? cr.name.split(' ')[0] : cr.role;
+                    return `<div class="crew-item">
+                        <span class="${dot}"></span>
+                        <span class="crew-role-txt">${icon} ${cr.role}</span>
+                        <span class="crew-name-txt">— ${fname}</span>
+                    </div>`;
+                }).join('');
+            } else {
+                items.innerHTML = `<div class="crew-fallback">${crew} crew confirmed</div>`;
+            }
+        }
 
         if(type === 'success') {
             icon.className = "status-icon success";
             icon.innerHTML = '<i class="fas fa-check-circle"></i>';
             text.innerText = "VERIFIED";
             text.style.color = "#28a745";
-            
-            name.innerText = data.first_name + " " + (data.last_name || "");
-            detail.innerText = "Paid & Valid";
-            cat.innerText = data.category;
-            size.innerText = data.tshirt_size.toUpperCase();
+
+            const displayName = data.teamName || data.captainName || data.first_name || '-';
+            const racerCount  = (data.racers && Array.isArray(data.racers)) ? data.racers.length : 1;
+            name.innerText    = displayName.toUpperCase();
+            detail.innerText  = "Paid & Valid";
+            cat.innerText     = data.category || '-';
+            document.getElementById('rTeamSize').innerText = racerCount + (racerCount > 1 ? ' Racers' : ' Racer');
+
+            buildShirtRows(data);
+            buildCrewSection(data);
 
         } else if (type === 'pending') {
             icon.className = "status-icon pending";
             icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
             text.innerText = "NOT PAID";
             text.style.color = "#ffc107";
-            
-            name.innerText = data.first_name + " " + (data.last_name || "");
+
+            const displayName = data.teamName || data.captainName || data.first_name || '-';
+            name.innerText   = displayName.toUpperCase();
             detail.innerText = "Status: Pending Payment";
-            cat.innerText = data.category;
-            size.innerText = "-";
+            cat.innerText    = data.category || '-';
+            document.getElementById('rTeamSize').innerText = '-';
+            document.getElementById('rShirtSection').style.display = 'none';
+            document.getElementById('rCrewSection').style.display  = 'none';
 
         } else {
             icon.className = "status-icon error";
             icon.innerHTML = '<i class="fas fa-times-circle"></i>';
             text.innerText = "INVALID";
             text.style.color = "#dc3545";
-            
-            name.innerText = "UNKNOWN USER";
+
+            name.innerText   = "UNKNOWN TICKET";
             detail.innerText = "Data not found in system.";
-            cat.innerText = "-";
-            size.innerText = "-";
+            cat.innerText    = "-";
+            document.getElementById('rTeamSize').innerText = '-';
+            document.getElementById('rShirtSection').style.display = 'none';
+            document.getElementById('rCrewSection').style.display  = 'none';
         }
     }
 
@@ -344,7 +523,7 @@
     window.resetScanner = function() {
         document.getElementById('resultModal').style.display = 'none';
         document.getElementById('manualId').value = "";
-        setTimeout(() => { isScanning = true; }, 500);
+        setTimeout(() => { isScanning = true; }, 800); // Small delay before re-scanning
     }
 
     // 6. MANUAL CHECK
