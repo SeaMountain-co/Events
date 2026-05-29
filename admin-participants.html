@@ -339,8 +339,11 @@
                 `;
             }
 
-            // 3. Medical Data
-            const med = data.medical || {};
+            // 3. Medical Data — handle BOTH array (new) and object (legacy)
+            // register-event.html saves medical as array [{racer,blood,...}, ...]
+            // so we read index [0] for the first racer; legacy saves as plain object
+            const medRaw = data.medical;
+            const med = Array.isArray(medRaw) ? (medRaw[0] || {}) : (medRaw || {});
             document.getElementById('editMedBlood').value = med.blood || "";
             document.getElementById('editMedCondition').value = med.condition || "";
             document.getElementById('editMedMeds').value = med.meds || "";
