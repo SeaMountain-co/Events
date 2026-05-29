@@ -5,156 +5,331 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Analytics - Sea Mountain</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        :root { --brand-red: #ff0000; --bg-dark: #0f1014; --card-bg: #1a1c23; --text: #ffffff; }
-        
-        body { background-color: var(--bg-dark); color: var(--text); font-family: 'Montserrat', sans-serif; padding: 20px; margin: 0; }
-        .container { max-width: 1200px; margin: 0 auto; }
-
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
-        .event-title { font-family: 'Russo One'; color: var(--brand-red); font-size: 1.5rem; text-transform: uppercase; margin: 0; }
-        .back-btn { color: #888; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
-        .back-btn:hover { color: #fff; }
-
-        /* STATS CARDS */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .stat-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid #333; position: relative; }
-        .stat-card h4 { margin: 0 0 10px 0; font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
-        .stat-value { font-size: 2rem; font-weight: 800; color: #fff; }
-        .stat-sub { font-size: 0.8rem; color: #555; margin-top: 5px; }
-        .icon-bg { position: absolute; top: 20px; right: 20px; font-size: 2rem; color: #252830; }
-
-        /* CHARTS SECTION (FIXED LAYOUT) */
-        .charts-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .chart-card { background: var(--card-bg); padding: 20px; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; }
-        .chart-header { margin-bottom: 15px; font-weight: 700; color: #ccc; font-size: 0.9rem; text-transform: uppercase; display: flex; justify-content: space-between; }
-        
-        /* WRAPPER PENTING UNTUK FIX BUG CHART LARI */
-        .chart-box-wrapper {
-            position: relative;
-            height: 250px; /* Tetapkan tinggi supaya chart tak tarik ke bawah */
-            width: 100%;
+        :root {
+            --red:    #ff0000;
+            --green:  #00cc66;
+            --blue:   #4a8acc;
+            --orange: #ff9500;
+            --yellow: #ffcc00;
+            --purple: #9b59b6;
+            --bg:     #080a0d;
+            --bg2:    #0f1117;
+            --card:   #131720;
+            --card2:  #1a1f2e;
+            --border: rgba(255,255,255,0.07);
+            --text:   #ffffff;
+            --muted:  #6b7280;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            background-image:
+                radial-gradient(ellipse at 0% 0%, rgba(255,0,0,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 100% 100%, rgba(74,138,204,0.04) 0%, transparent 50%);
         }
 
-        .no-data-msg { text-align: center; color: #555; font-style: italic; margin-top: 80px; }
+        /* ── HEADER ── */
+        .header {
+            padding: 20px 30px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(8,10,13,0.9); backdrop-filter: blur(12px);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .header-left small { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 4px; }
+        .event-title { font-family: 'Russo One'; color: var(--red); font-size: 1.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .back-btn {
+            color: var(--muted); text-decoration: none; font-weight: 600; font-size: 0.8rem;
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 16px; border: 1px solid var(--border); border-radius: 30px;
+            transition: 0.2s;
+        }
+        .back-btn:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
 
-        /* TABLE SECTION */
-        .table-card { background: var(--card-bg); padding: 25px; border-radius: 12px; border: 1px solid #333; }
-        .table-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-csv { background: #28a745; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-        .btn-csv:hover { background: #218838; }
+        .page-body { max-width: 1400px; margin: 0 auto; padding: 28px 24px; }
 
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 15px; color: #888; border-bottom: 2px solid #333; font-size: 0.8rem; text-transform: uppercase; }
-        td { padding: 15px; border-bottom: 1px solid #2a2c35; font-size: 0.9rem; vertical-align: middle; }
-        
-        .badge { padding: 5px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
-        .badge-paid { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
-        .badge-pending { background: rgba(241, 196, 15, 0.2); color: #f1c40f; border: 1px solid #f1c40f; }
+        /* ── STATS ROW ── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: 0.25s;
+        }
+        .stat-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.12); }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            border-radius: 14px 14px 0 0;
+        }
+        .sc-red::before    { background: var(--red); }
+        .sc-green::before  { background: var(--green); }
+        .sc-blue::before   { background: var(--blue); }
+        .sc-orange::before { background: var(--orange); }
+        .sc-yellow::before { background: var(--yellow); }
+        .sc-purple::before { background: var(--purple); }
+        .stat-label { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+        .stat-label i { font-size: 0.7rem; }
+        .stat-value { font-family: 'Russo One'; font-size: 1.9rem; line-height: 1; }
+        .sc-red    .stat-value { color: #ff4444; }
+        .sc-green  .stat-value { color: var(--green); }
+        .sc-blue   .stat-value { color: var(--blue); }
+        .sc-orange .stat-value { color: var(--orange); }
+        .sc-yellow .stat-value { color: var(--yellow); }
+        .sc-purple .stat-value { color: var(--purple); }
+        .stat-sub  { font-size: 0.68rem; color: var(--muted); margin-top: 6px; }
 
-        @media (max-width: 1000px) { 
-            .charts-grid { grid-template-columns: 1fr; } 
-            .chart-box-wrapper { height: 300px; } /* Lebih tinggi sikit di mobile */
+        /* Quota bar */
+        .quota-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 4px; margin-top: 10px; overflow: hidden; }
+        .quota-fill { height: 100%; background: var(--orange); border-radius: 4px; transition: width 0.8s ease; }
+
+        /* ── CHARTS GRID ── */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .chart-card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: 14px; padding: 20px;
+            display: flex; flex-direction: column;
+        }
+        .chart-title {
+            font-size: 0.72rem; font-weight: 800; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .chart-title span { color: #fff; font-size: 0.8rem; }
+        .chart-wrap { position: relative; flex: 1; min-height: 200px; }
+        .no-data { text-align: center; color: #444; font-size: 0.8rem; padding-top: 60px; }
+        .no-data i { font-size: 2rem; display: block; margin-bottom: 8px; opacity: 0.3; }
+
+        /* Shirt size visual list */
+        .shirt-list { display: flex; flex-direction: column; gap: 8px; }
+        .shirt-row { display: flex; align-items: center; gap: 10px; }
+        .shirt-label { font-size: 0.72rem; font-weight: 800; color: #ccc; width: 30px; text-align: right; font-family: monospace; }
+        .shirt-bar-wrap { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+        .shirt-bar-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+        .shirt-count { font-size: 0.68rem; color: var(--muted); width: 24px; text-align: right; font-weight: 700; }
+
+        /* Crew mini list */
+        .crew-summary { display: flex; flex-direction: column; gap: 8px; }
+        .crew-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(76,175,110,0.07); border-radius: 8px; border: 1px solid rgba(76,175,110,0.15); }
+        .crew-row .cr-role { font-size: 0.73rem; font-weight: 700; color: #ccc; }
+        .crew-row .cr-name { font-size: 0.68rem; color: var(--muted); }
+        .crew-row .cr-badge { background: rgba(76,175,110,0.2); color: #4caf6e; font-size: 0.62rem; font-weight: 800; padding: 2px 8px; border-radius: 10px; }
+
+        /* ── TOOLBAR ── */
+        .toolbar {
+            display: flex; gap: 12px; align-items: center;
+            margin-bottom: 16px; flex-wrap: wrap;
+        }
+        .toolbar-title { font-family: 'Russo One'; font-size: 1rem; text-transform: uppercase; flex: 1; color: #fff; }
+        .search-input {
+            padding: 9px 14px; background: var(--card2); border: 1px solid var(--border);
+            border-radius: 8px; color: #fff; font-family: 'Montserrat'; font-size: 0.85rem;
+            outline: none; width: 220px; transition: 0.2s;
+        }
+        .search-input:focus { border-color: rgba(255,0,0,0.4); }
+        .search-input::placeholder { color: #444; }
+        .btn-csv {
+            background: var(--green); color: #fff; border: none;
+            padding: 9px 18px; border-radius: 8px; cursor: pointer;
+            font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; gap: 7px;
+            font-family: 'Montserrat'; transition: 0.2s;
+        }
+        .btn-csv:hover { background: #00b358; transform: translateY(-1px); }
+
+        /* ── TABLE ── */
+        .table-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        thead th {
+            padding: 13px 16px; background: rgba(255,255,255,0.03);
+            color: var(--muted); font-size: 0.65rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            border-bottom: 1px solid var(--border); white-space: nowrap;
+            text-align: left;
+        }
+        tbody td { padding: 13px 16px; border-bottom: 1px solid var(--border); font-size: 0.85rem; vertical-align: middle; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+        .td-num { color: var(--muted); font-size: 0.75rem; font-weight: 700; width: 40px; }
+        .td-team { font-weight: 700; color: #fff; }
+        .td-captain { font-size: 0.75rem; color: var(--muted); }
+        .td-email { font-size: 0.78rem; color: var(--muted); }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid; white-space: nowrap; }
+        .badge-paid    { background: rgba(0,204,102,0.1); color: var(--green); border-color: var(--green); }
+        .badge-pending { background: rgba(255,204,0,0.1); color: var(--yellow); border-color: var(--yellow); }
+        .badge-rejected { background: rgba(255,77,77,0.1); color: #ff4d4d; border-color: #ff4d4d; }
+        .badge-awaiting { background: rgba(255,149,0,0.1); color: var(--orange); border-color: var(--orange); }
+
+        /* Shirt chips */
+        .shirt-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+        .s-chip { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; padding: 2px 7px; font-size: 0.65rem; font-weight: 800; color: #ccc; font-family: monospace; }
+        .s-chip .cnt { color: var(--yellow); margin-right: 2px; }
+
+        /* Crew tag */
+        .crew-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(76,175,110,0.1); border: 1px solid rgba(76,175,110,0.25); color: #4caf6e; border-radius: 20px; padding: 3px 9px; font-size: 0.65rem; font-weight: 800; }
+        .crew-tag-none { color: #333; font-size: 0.75rem; }
+
+        /* Amount */
+        .td-amount { font-weight: 800; color: var(--green); font-family: monospace; font-size: 0.82rem; }
+
+        /* Empty state */
+        .empty-row td { text-align: center; padding: 50px 20px; color: #444; }
+        .empty-row i { font-size: 2rem; display: block; margin-bottom: 10px; opacity: 0.3; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 1100px) {
+            .stats-row { grid-template-columns: repeat(3, 1fr); }
+            .charts-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 700px) {
+            .header { padding: 14px 16px; }
+            .page-body { padding: 16px; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .charts-grid { grid-template-columns: 1fr; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .search-input { width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <div>
-                <div style="font-size:0.8rem; color:#888; margin-bottom:5px;">CLIENT ANALYTICS DASHBOARD</div>
-                <h1 id="eventTitleDisplay" class="event-title">Loading Event...</h1>
-            </div>
-            <a href="client-landing.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Events</a>
+<div class="header">
+    <div class="header-left">
+        <small><i class="fas fa-chart-line" style="margin-right:4px;"></i>Event Analytics Dashboard</small>
+        <h1 id="eventTitleDisplay" class="event-title">Loading...</h1>
+    </div>
+    <a href="client-landing.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+</div>
+
+<div class="page-body">
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-card sc-red">
+            <div class="stat-label"><i class="fas fa-users"></i> Total Teams</div>
+            <div class="stat-value" id="statTeams">0</div>
+            <div class="stat-sub" id="statRacers">0 racers total</div>
+        </div>
+        <div class="stat-card sc-green">
+            <div class="stat-label"><i class="fas fa-check-circle"></i> Paid</div>
+            <div class="stat-value" id="statPaid">0</div>
+            <div class="stat-sub">Confirmed payments</div>
+        </div>
+        <div class="stat-card sc-yellow">
+            <div class="stat-label"><i class="fas fa-clock"></i> Pending</div>
+            <div class="stat-value" id="statPending">0</div>
+            <div class="stat-sub">Awaiting payment</div>
+        </div>
+        <div class="stat-card sc-blue">
+            <div class="stat-label"><i class="fas fa-wallet"></i> Revenue</div>
+            <div class="stat-value" id="statRevenue">RM 0</div>
+            <div class="stat-sub" id="statRevSub">From paid registrations</div>
+        </div>
+        <div class="stat-card sc-orange">
+            <div class="stat-label"><i class="fas fa-user-friends"></i> Personal Crew</div>
+            <div class="stat-value" id="statCrew">0</div>
+            <div class="stat-sub" id="statCrewRev">RM 0 crew revenue</div>
+        </div>
+        <div class="stat-card sc-purple">
+            <div class="stat-label"><i class="fas fa-ticket-alt"></i> Quota Used</div>
+            <div class="stat-value" id="statQuota">0%</div>
+            <div class="quota-bar"><div class="quota-fill" id="quotaFill" style="width:0%"></div></div>
+            <div class="stat-sub" id="statQuotaSub">of 0 slots</div>
+        </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+        <!-- Category bar chart -->
+        <div class="chart-card">
+            <div class="chart-title">Participants by Category <span id="catTotal"></span></div>
+            <div class="chart-wrap"><canvas id="categoryChart"></canvas></div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <i class="fas fa-users icon-bg"></i>
-                <h4>Total Registered</h4>
-                <div id="totalReg" class="stat-value">0</div>
-                <div class="stat-sub">Participants</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-wallet icon-bg"></i>
-                <h4>Total Revenue (Est.)</h4>
-                <div id="totalRev" class="stat-value" style="color:#2ecc71;">RM 0.00</div>
-                <div id="basePriceDisplay" class="stat-sub">Based on RM 0.00 / pax</div>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-clock icon-bg"></i>
-                <h4>Event Status</h4>
-                <div id="eventStatus" class="stat-value">OPEN</div>
-                <div id="eventDateRange" class="stat-sub">-</div>
+        <!-- T-Shirt sizes visual -->
+        <div class="chart-card">
+            <div class="chart-title">T-Shirt Sizes <span id="shirtTotal"></span></div>
+            <div id="shirtViz" class="shirt-list" style="margin-top:8px;"></div>
+            <div id="shirtNoData" class="no-data" style="display:none;"><i class="fas fa-tshirt"></i>No size data</div>
+        </div>
+
+        <!-- Voucher donut -->
+        <div class="chart-card">
+            <div class="chart-title">Vouchers Used <span id="voucherTotalUsed" style="color:var(--yellow);">0</span></div>
+            <div class="chart-wrap">
+                <canvas id="voucherChart"></canvas>
+                <div id="noVoucherMsg" class="no-data" style="display:none;"><i class="fas fa-tag"></i>No vouchers used</div>
             </div>
         </div>
 
-        <div class="charts-grid">
-            
-            <div class="chart-card">
-                <div class="chart-header">Participants by Category</div>
-                <div class="chart-box-wrapper">
-                    <canvas id="categoryChart"></canvas>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">
-                    <span>Voucher Usage</span>
-                    <span id="voucherTotalUsed" style="color:#aaa; font-size:0.8rem;">0 Used</span>
-                </div>
-                <div class="chart-box-wrapper">
-                    <canvas id="voucherChart"></canvas>
-                    <div id="noVoucherMsg" class="no-data-msg" style="display:none;">No vouchers used yet.</div>
-                </div>
-            </div>
-
-            <div class="chart-card">
-                <div class="chart-header">T-Shirt Sizes</div>
-                <div class="chart-box-wrapper">
-                    <canvas id="tshirtChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="table-card">
-            <div class="table-header-row">
-                <div class="chart-header" style="margin:0;">Participant List</div>
-                <button onclick="exportCSV()" class="btn-csv"><i class="fas fa-file-csv"></i> Export CSV</button>
-            </div>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Category</th>
-                            <th>T-Shirt</th>
-                            <th>Voucher</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="participantTable">
-                        <tr><td colspan="7" style="text-align:center; padding:20px; color:#666;">Loading data...</td></tr>
-                    </tbody>
-                </table>
+        <!-- Personal Crew chart -->
+        <div class="chart-card">
+            <div class="chart-title">Crew by Category <span id="crewTotal" style="color:var(--green);"></span></div>
+            <div class="chart-wrap">
+                <canvas id="crewChart"></canvas>
+                <div id="noCrewMsg" class="no-data" style="display:none;"><i class="fas fa-user-friends"></i>No crew registered</div>
             </div>
         </div>
     </div>
+
+    <!-- Table -->
+    <div class="toolbar">
+        <div class="toolbar-title">Participant List</div>
+        <input type="text" id="tableSearch" class="search-input" placeholder="Search team, email, ref...">
+        <button onclick="exportCSV()" class="btn-csv"><i class="fas fa-file-csv"></i> Export CSV</button>
+    </div>
+
+    <div class="table-card">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Team / Captain</th>
+                        <th>Contact</th>
+                        <th>Category</th>
+                        <th>T-Shirt</th>
+                        <th>Crew</th>
+                        <th>Amount</th>
+                        <th>Voucher</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="participantTable">
+                    <tr class="empty-row"><td colspan="9"><i class="fas fa-spinner fa-spin"></i>Loading data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // CONFIG
     const firebaseConfig = {
         apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
         authDomain: "sea-mountain.firebaseapp.com",
@@ -165,206 +340,364 @@
         appId: "1:812228825024:web:717049c1a64b39c8a60225"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const app  = initializeApp(firebaseConfig);
+    const db   = getDatabase(app);
     const auth = getAuth(app);
 
     const urlParams = new URLSearchParams(window.location.search);
-    const eventId = urlParams.get('id');
+    const eventId   = urlParams.get('id');
 
     let allParticipants = [];
 
-    // CHECK AUTH
+    // ── AUTH ──────────────────────────────────────────────────────
     onAuthStateChanged(auth, (user) => {
         if (!user) {
             window.location.href = "client-login.html";
         } else {
-            if(eventId) {
-                loadAnalytics(eventId);
-            } else {
-                alert("No Event Selected");
-                window.location.href = "client-landing.html";
-            }
+            if (eventId) loadAnalytics(eventId);
+            else { alert("No Event Selected"); window.location.href = "client-landing.html"; }
         }
     });
 
-    async function loadAnalytics(id) {
-        const eventSnap = await get(ref(db, `events/${id}`));
-        const eventInfo = eventSnap.val();
+    // ── HELPERS ──────────────────────────────────────────────────
+    // Aggregate shirt sizes from racers[] array
+    function getShirtSizes(r) {
+        if (r.racers && Array.isArray(r.racers) && r.racers.length > 0) {
+            const counts = {};
+            r.racers.forEach(racer => {
+                const s = (racer.shirt || '').toUpperCase().trim();
+                if (s) counts[s] = (counts[s] || 0) + 1;
+            });
+            return counts;
+        }
+        if (r.tshirt_size) return { [r.tshirt_size.toUpperCase()]: 1 };
+        return {};
+    }
 
-        if(!eventInfo) return;
+    function shirtChipsHTML(counts) {
+        const order = ['XS','S','M','L','XL','XXL','XXXL'];
+        const sorted = Object.keys(counts).sort((a,b) => {
+            const ai = order.indexOf(a), bi = order.indexOf(b);
+            if (ai===-1 && bi===-1) return a.localeCompare(b);
+            if (ai===-1) return 1; if (bi===-1) return -1;
+            return ai - bi;
+        });
+        if (!sorted.length) return '<span style="color:#333;">-</span>';
+        return sorted.map(s =>
+            `<span class="s-chip"><span class="cnt">${counts[s]}×</span>${s}</span>`
+        ).join('');
+    }
+
+    function getStatus(r) {
+        const st  = (r.status || '').toLowerCase();
+        const vs  = (r.verificationStatus || '').toLowerCase();
+        const isBT = r.paymentMethod === 'Bank Transfer';
+        if (st === 'rejected' || vs === 'rejected') return 'rejected';
+        if (st === 'paid') {
+            if (isBT && r.receiptImage && vs !== 'verified') return 'awaiting';
+            return 'paid';
+        }
+        return 'pending';
+    }
+
+    function statusBadge(r) {
+        const s = getStatus(r);
+        const map = {
+            paid:     ['badge-paid',     '<i class="fas fa-check-circle"></i> Paid'],
+            awaiting: ['badge-awaiting', '<i class="fas fa-hourglass-half"></i> Verifying'],
+            rejected: ['badge-rejected', '<i class="fas fa-times-circle"></i> Rejected'],
+            pending:  ['badge-pending',  '<i class="fas fa-clock"></i> Pending'],
+        };
+        const [cls, html] = map[s] || map.pending;
+        return `<span class="badge ${cls}">${html}</span>`;
+    }
+
+    // ── LOAD DATA ────────────────────────────────────────────────
+    async function loadAnalytics(id) {
+        const [eventSnap, regSnap] = await Promise.all([
+            get(ref(db, `events/${id}`)),
+            get(ref(db, `registrations/${id}`))
+        ]);
+
+        const eventInfo = eventSnap.val();
+        if (!eventInfo) return;
 
         document.getElementById('eventTitleDisplay').innerText = eventInfo.title;
-        document.getElementById('basePriceDisplay').innerText = `Based on ${eventInfo.price} / pax`;
-        document.getElementById('eventDateRange').innerText = eventInfo.date;
+        const quota     = parseInt(eventInfo.quota) || 0;
+        const basePrice = parseFloat(String(eventInfo.price || '0').replace(/[^0-9.]/g, '')) || 0;
 
-        let basePrice = parseFloat(String(eventInfo.price).replace(/[^0-9.]/g, '')) || 0;
-
-        const regSnap = await get(ref(db, `registrations/${id}`));
         const registrations = regSnap.val();
-
         if (!registrations) {
-            document.getElementById('participantTable').innerHTML = "<tr><td colspan='7' style='text-align:center; padding:20px;'>No participants yet.</td></tr>";
+            document.getElementById('participantTable').innerHTML =
+                '<tr class="empty-row"><td colspan="9"><i class="fas fa-inbox"></i>No participants yet.</td></tr>';
             return;
         }
 
-        let totalCount = 0;
-        let totalRevenue = 0;
-        
-        let categoryCount = {};
-        let tshirtCount = {};
-        let voucherCount = {};
+        // ── Aggregation ───────────────────────────────────────
+        let teamCount = 0, racerCount = 0, paidCount = 0, pendingCount = 0;
+        let totalRevenue = 0, crewRevenue = 0, crewTotal = 0;
+        let categoryCount = {}, shirtCount = {}, voucherCount = {}, crewByCat = {};
 
-        let tableHTML = "";
-        let index = 1;
+        allParticipants = [];
 
         Object.keys(registrations).forEach(key => {
             const r = registrations[key];
-            totalCount++;
-            
-            allParticipants.push(r);
+            allParticipants.push({ ...r, _key: key });
 
-            if (r.status && r.status.toLowerCase() === 'paid') {
-                let paidAmount = r.amountPaid !== undefined ? parseFloat(r.amountPaid) : basePrice;
-                totalRevenue += paidAmount;
+            teamCount++;
+            const racers = (r.racers && Array.isArray(r.racers)) ? r.racers.length : 1;
+            racerCount += racers;
+
+            const status = getStatus(r);
+            if (status === 'paid') {
+                paidCount++;
+                totalRevenue += parseFloat(r.amountPaid || basePrice) || 0;
+            } else {
+                pendingCount++;
             }
 
-            let cat = r.category || 'Unknown';
+            // Crew
+            const crew = parseInt(r.crewCount) || 0;
+            if (crew > 0) {
+                crewTotal += crew;
+                crewRevenue += parseFloat(r.crewFee || 0) || 0;
+                const cat = r.category || 'Unknown';
+                crewByCat[cat] = (crewByCat[cat] || 0) + crew;
+            }
+
+            // Category
+            const cat = r.category || 'Unknown';
             categoryCount[cat] = (categoryCount[cat] || 0) + 1;
 
-            let size = r.tshirt_size || 'Unknown';
-            tshirtCount[size] = (tshirtCount[size] || 0) + 1;
+            // Shirt sizes from racers[]
+            const sizes = getShirtSizes(r);
+            Object.entries(sizes).forEach(([s, c]) => {
+                shirtCount[s] = (shirtCount[s] || 0) + c;
+            });
 
-            if(r.voucherUsed && r.voucherUsed !== "NONE") {
+            // Vouchers
+            if (r.voucherUsed && r.voucherUsed !== 'NONE') {
                 voucherCount[r.voucherUsed] = (voucherCount[r.voucherUsed] || 0) + 1;
             }
-
-            let badgeClass = (r.status && r.status.toLowerCase() === 'paid') ? 'badge-paid' : 'badge-pending';
-            let vCodeDisplay = (r.voucherUsed && r.voucherUsed !== "NONE") ? `<span style="color:#f1c40f; font-family:monospace;">${r.voucherUsed}</span>` : "-";
-
-            tableHTML += `
-                <tr>
-                    <td>${index++}</td>
-                    <td><b>${r.first_name} ${r.last_name || ''}</b></td>
-                    <td>${r.email}</td>
-                    <td>${r.category}</td>
-                    <td style="text-transform:uppercase;">${r.tshirt_size}</td>
-                    <td>${vCodeDisplay}</td>
-                    <td><span class="badge ${badgeClass}">${r.status}</span></td>
-                </tr>
-            `;
         });
 
-        document.getElementById('totalReg').innerText = totalCount;
-        document.getElementById('totalRev').innerText = "RM " + totalRevenue.toFixed(2);
-        document.getElementById('participantTable').innerHTML = tableHTML;
+        // ── Stats ─────────────────────────────────────────────
+        document.getElementById('statTeams').innerText   = teamCount;
+        document.getElementById('statRacers').innerText  = `${racerCount} racers total`;
+        document.getElementById('statPaid').innerText    = paidCount;
+        document.getElementById('statPending').innerText = pendingCount;
+        document.getElementById('statRevenue').innerText = `RM ${totalRevenue.toFixed(0)}`;
+        document.getElementById('statRevSub').innerText  = `RM ${totalRevenue.toFixed(2)} total`;
+        document.getElementById('statCrew').innerText    = crewTotal;
+        document.getElementById('statCrewRev').innerText = `RM ${crewRevenue.toFixed(2)} crew revenue`;
 
-        renderCharts(categoryCount, tshirtCount, voucherCount);
+        if (quota > 0) {
+            const pct = Math.min(100, Math.round(teamCount / quota * 100));
+            document.getElementById('statQuota').innerText     = pct + '%';
+            document.getElementById('statQuotaSub').innerText  = `${teamCount} of ${quota} slots`;
+            document.getElementById('quotaFill').style.width   = pct + '%';
+        } else {
+            document.getElementById('statQuota').innerText    = teamCount;
+            document.getElementById('statQuotaSub').innerText = 'teams registered';
+        }
+
+        // ── Charts ────────────────────────────────────────────
+        renderCharts(categoryCount, shirtCount, voucherCount, crewByCat);
+
+        // ── Table ─────────────────────────────────────────────
+        renderTable(allParticipants);
     }
 
-    function renderCharts(categories, sizes, vouchers) {
-        
-        // Bar Chart (Category)
+    // ── RENDER TABLE ─────────────────────────────────────────────
+    function renderTable(data) {
+        const tbody = document.getElementById('participantTable');
+        if (!data.length) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="9"><i class="fas fa-inbox"></i>No records</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = data.map((r, i) => {
+            const teamName  = r.teamName || r.captainName || r.first_name || '-';
+            const captain   = r.captainName || r.first_name || '';
+            const email     = r.email || r.captainEmail || '-';
+            const shirtCounts = getShirtSizes(r);
+            const crew      = parseInt(r.crewCount) || 0;
+            const amount    = parseFloat(r.amountPaid || 0);
+            const voucher   = (r.voucherUsed && r.voucherUsed !== 'NONE')
+                ? `<span style="color:var(--yellow);font-family:monospace;font-size:0.78rem;">${r.voucherUsed}</span>` : '-';
+
+            const crewHTML  = crew > 0
+                ? `<span class="crew-tag"><i class="fas fa-user-friends"></i> ${crew} Pax</span>`
+                : `<span class="crew-tag-none">—</span>`;
+
+            return `<tr>
+                <td class="td-num">${i + 1}</td>
+                <td>
+                    <div class="td-team">${teamName}</div>
+                    ${captain && captain !== teamName ? `<div class="td-captain">${captain}</div>` : ''}
+                </td>
+                <td class="td-email">${email}</td>
+                <td style="font-size:0.8rem; color:#ccc;">${r.category || '-'}</td>
+                <td><div class="shirt-chips">${shirtChipsHTML(shirtCounts)}</div></td>
+                <td>${crewHTML}</td>
+                <td class="td-amount">${amount > 0 ? 'RM ' + amount.toFixed(2) : '-'}</td>
+                <td>${voucher}</td>
+                <td>${statusBadge(r)}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ── SEARCH ───────────────────────────────────────────────────
+    document.getElementById('tableSearch').addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+        const filtered = allParticipants.filter(r => {
+            const hay = [r.teamName, r.captainName, r.first_name, r.email, r.captainEmail, r.paymentRef, r.category]
+                .filter(Boolean).join(' ').toLowerCase();
+            return hay.includes(q);
+        });
+        renderTable(filtered);
+    });
+
+    // ── CHARTS ───────────────────────────────────────────────────
+    const COLORS = ['#ff0000','#ff9500','#ffcc00','#00cc66','#4a8acc','#9b59b6','#e74c3c','#1abc9c'];
+    const CHART_DEFAULTS = {
+        color: '#6b7280',
+        font: { family: 'Montserrat', size: 11 }
+    };
+
+    function renderCharts(categories, sizes, vouchers, crewByCat) {
+        Chart.defaults.color = CHART_DEFAULTS.color;
+        Chart.defaults.font  = CHART_DEFAULTS.font;
+
+        // ── Category bar ──────────────────────────────────────
+        const catKeys = Object.keys(categories);
+        document.getElementById('catTotal').innerText = `${Object.values(categories).reduce((a,b)=>a+b,0)} teams`;
         new Chart(document.getElementById('categoryChart'), {
             type: 'bar',
             data: {
-                labels: Object.keys(categories),
+                labels: catKeys.map(k => k.length > 20 ? k.substring(0,18)+'…' : k),
                 datasets: [{
-                    label: 'Pax',
+                    label: 'Teams',
                     data: Object.values(categories),
-                    backgroundColor: '#ff0000',
-                    borderRadius: 4
+                    backgroundColor: catKeys.map((_, i) => COLORS[i % COLORS.length] + 'cc'),
+                    borderColor:     catKeys.map((_, i) => COLORS[i % COLORS.length]),
+                    borderWidth: 1,
+                    borderRadius: 5,
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false, // PENTING
-                plugins: { legend: { display: false } },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { callbacks: {
+                    label: ctx => ` ${ctx.raw} team${ctx.raw !== 1 ? 's' : ''}`
+                }}},
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#333' } },
-                    x: { grid: { display: false } }
+                    y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { grid: { display: false }, ticks: { maxRotation: 30 } }
                 }
             }
         });
 
-        // Donut Chart (Voucher)
-        const voucherKeys = Object.keys(vouchers);
-        const voucherCanvas = document.getElementById('voucherChart');
-        const noVoucherMsg = document.getElementById('noVoucherMsg');
-        const voucherTotalLabel = document.getElementById('voucherTotalUsed');
+        // ── T-Shirt sizes — horizontal bar list ───────────────
+        const sizeOrder = ['XS','S','M','L','XL','XXL','XXXL'];
+        const sortedSizes = Object.keys(sizes).sort((a,b) => {
+            const ai = sizeOrder.indexOf(a), bi = sizeOrder.indexOf(b);
+            return (ai===-1?99:ai) - (bi===-1?99:bi);
+        });
+        const maxCount = Math.max(...Object.values(sizes), 1);
+        const sizeColors = ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#3498db','#9b59b6','#1abc9c'];
+        const shirtViz = document.getElementById('shirtViz');
+        const totalShirts = Object.values(sizes).reduce((a,b)=>a+b,0);
+        document.getElementById('shirtTotal').innerText = `${totalShirts} pcs`;
 
-        if(voucherKeys.length > 0) {
-            let totalUsed = Object.values(vouchers).reduce((a, b) => a + b, 0);
-            voucherTotalLabel.innerText = `${totalUsed} Used`;
-            noVoucherMsg.style.display = 'none';
-            
-            new Chart(voucherCanvas, {
+        if (sortedSizes.length > 0) {
+            shirtViz.innerHTML = sortedSizes.map((s, i) => `
+                <div class="shirt-row">
+                    <span class="shirt-label">${s}</span>
+                    <div class="shirt-bar-wrap">
+                        <div class="shirt-bar-fill" style="width:${(sizes[s]/maxCount*100).toFixed(0)}%; background:${sizeColors[i % sizeColors.length]};"></div>
+                    </div>
+                    <span class="shirt-count">${sizes[s]}</span>
+                </div>`).join('');
+        } else {
+            document.getElementById('shirtNoData').style.display = 'block';
+        }
+
+        // ── Voucher donut ─────────────────────────────────────
+        const vKeys = Object.keys(vouchers);
+        const totalVouchers = vKeys.reduce((s,k) => s + vouchers[k], 0);
+        document.getElementById('voucherTotalUsed').innerText = totalVouchers + ' used';
+        if (vKeys.length > 0) {
+            new Chart(document.getElementById('voucherChart'), {
                 type: 'doughnut',
                 data: {
-                    labels: voucherKeys,
-                    datasets: [{
-                        data: Object.values(vouchers),
-                        backgroundColor: ['#f1c40f', '#e67e22', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71'],
-                        borderWidth: 0
-                    }]
+                    labels: vKeys,
+                    datasets: [{ data: Object.values(vouchers), backgroundColor: COLORS, borderWidth: 0 }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // PENTING
-                    plugins: { 
-                        legend: { position: 'right', labels: { color: '#fff', boxWidth: 10, font: {size:10} } } 
-                    },
-                    cutout: '60%'
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: '#9ca3af', boxWidth: 10, padding: 10, font: { size: 10 } } } },
+                    cutout: '65%'
                 }
             });
         } else {
-            voucherCanvas.style.display = 'none';
-            noVoucherMsg.style.display = 'block';
+            document.getElementById('voucherChart').style.display = 'none';
+            document.getElementById('noVoucherMsg').style.display = 'block';
         }
 
-        // Donut Chart (T-Shirt)
-        new Chart(document.getElementById('tshirtChart'), {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(sizes),
-                datasets: [{
-                    data: Object.values(sizes),
-                    backgroundColor: ['#e74c3c', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6', '#fff'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false, // PENTING
-                plugins: { 
-                    legend: { position: 'right', labels: { color: '#fff', boxWidth: 10, font: {size:10} } } 
+        // ── Crew by category ──────────────────────────────────
+        const crewKeys = Object.keys(crewByCat);
+        const totalCrew = crewKeys.reduce((s,k) => s + crewByCat[k], 0);
+        document.getElementById('crewTotal').innerText = totalCrew ? `${totalCrew} pax` : '';
+        if (crewKeys.length > 0) {
+            new Chart(document.getElementById('crewChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: crewKeys.map(k => k.length > 18 ? k.substring(0,16)+'…' : k),
+                    datasets: [{ data: Object.values(crewByCat), backgroundColor: ['#4caf6e','#00cc66','#2ecc71','#1abc9c'], borderWidth: 0 }]
                 },
-                cutout: '60%'
-            }
-        });
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: '#9ca3af', boxWidth: 10, padding: 10, font: { size: 10 } } } },
+                    cutout: '65%'
+                }
+            });
+        } else {
+            document.getElementById('crewChart').style.display = 'none';
+            document.getElementById('noCrewMsg').style.display = 'block';
+        }
     }
 
-    // Export CSV
+    // ── EXPORT CSV ───────────────────────────────────────────────
     window.exportCSV = function() {
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "First Name,Last Name,Email,Category,Size,Voucher,Status,Date\n";
+        let csv = 'data:text/csv;charset=utf-8,';
+        csv += 'No,Team,Captain,Email,Category,Shirts,Crew,Amount,Voucher,Status,Date\n';
 
-        allParticipants.forEach(row => {
-            let rowData = [
-                row.first_name, row.last_name, row.email,
-                row.category, row.tshirt_size, (row.voucherUsed || '-'), row.status, 
-                (row.registration_time || '').replace(',', '')
-            ];
-            csvContent += rowData.join(",") + "\n";
+        allParticipants.forEach((r, i) => {
+            const shirtCounts = getShirtSizes(r);
+            const sizeStr = Object.entries(shirtCounts).map(([s,c]) => `${c}x${s}`).join(' ') || '-';
+            const row = [
+                i + 1,
+                r.teamName || r.captainName || r.first_name || '',
+                r.captainName || r.first_name || '',
+                r.email || r.captainEmail || '',
+                r.category || '',
+                sizeStr,
+                r.crewCount || 0,
+                r.amountPaid || '',
+                r.voucherUsed || 'NONE',
+                r.status || '',
+                (r.registration_time || '').replace(',', ' ')
+            ].map(v => `"${v}"`);
+            csv += row.join(',') + '\n';
         });
 
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "participants_data.csv");
+        const link = document.createElement('a');
+        link.setAttribute('href', encodeURI(csv));
+        link.setAttribute('download', `analytics_${eventId || 'export'}.csv`);
         document.body.appendChild(link);
         link.click();
-    }
+        link.remove();
+    };
 </script>
 
 </body>
