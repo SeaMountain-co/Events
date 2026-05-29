@@ -361,36 +361,36 @@
     let cameraStarted = false;
     let currentFacing = "environment"; // "environment"=back, "user"=front
 
-    // 1. AUTH CHECK — same as all admin pages
+    // ── Top-level so all functions can access ──────────────────────
+    const eventSelect = document.getElementById('eventSelect');
+
+    // 1. LOAD EVENTS IMMEDIATELY — no auth needed (events are public data)
+    //    Don't wait for auth here — loads instantly when page opens
+    onValue(ref(db, 'events'), (snapshot) => {
+        eventSelect.innerHTML = '<option value="">-- Select Active Event --</option>';
+        const data = snapshot.val();
+        if (data) {
+            Object.keys(data).forEach(key => {
+                if (!data[key].isArchived) {
+                    eventSelect.innerHTML += `<option value="${key}">${data[key].title}</option>`;
+                }
+            });
+        } else {
+            eventSelect.innerHTML = '<option value="">No events found</option>';
+        }
+    });
+
+    // 2. AUTH CHECK — camera only starts after admin verified
     auth.authStateReady().then(() => {
         onAuthStateChanged(auth, (user) => {
             if (!user || user.email !== ALLOWED_ADMIN) {
                 alert("Access Denied. Please login as Admin.");
                 window.location.href = "admin-login.html";
             } else {
-                initPage();
+                startCamera(); // camera starts after auth confirmed
             }
         });
     });
-
-    function initPage() {
-        // LOAD EVENTS
-        const eventSelect = document.getElementById('eventSelect');
-        onValue(ref(db, 'events'), (snapshot) => {
-            eventSelect.innerHTML = '<option value="">-- Select Active Event --</option>';
-            const data = snapshot.val();
-            if (data) {
-                Object.keys(data).forEach(key => {
-                    if (!data[key].isArchived) {
-                        eventSelect.innerHTML += `<option value="${key}">${data[key].title}</option>`;
-                    }
-                });
-            }
-        });
-
-        // START CAMERA
-        startCamera();
-    }
 
     // 2. SETUP SCANNER — auto-start back camera
     html5QrCode     = new Html5Qrcode("reader");        // camera instance
@@ -608,10 +608,7 @@
             })
             .catch(() => {
                 input.value = "";
-                alert("No QR code found in this image.
-Tips:
-• Make sure QR is clear & not blurry
-• Try a closer crop of the QR code");
+                alert("No QR code found in this image.Tips:• Make sure QR is clear & not blurry• Try a closer crop of the QR code");
             });
     }
 
