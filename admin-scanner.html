@@ -77,8 +77,9 @@
             aspect-ratio: 1 / 1; /* Kotak Segiempat Sama */
         }
 
-        #reader { width: 100%; height: 100%; }
-        #reader video { object-fit: cover; width: 100% !important; height: 100% !important; border-radius: 18px; }
+        #reader { width: 100%; height: 100%; position: relative; }
+        #reader video { object-fit: cover; width: 100% !important; height: 100% !important; border-radius: 18px; display: block; }
+        #reader > div { width: 100% !important; height: 100% !important; padding: 0 !important; border: none !important; }
 
         /* ANIMASI LASER SCANNER */
         .scan-laser {
@@ -351,9 +352,14 @@
         appId: "1:812228825024:web:717049c1a64b39c8a60225"
     };
 
-    const adminApp = initializeApp(firebaseConfig, "admin");
-    const auth = getAuth(adminApp);
-    const db   = getDatabase(adminApp);
+    // Two apps:
+    // publicApp → read events (no auth, same as index.html)
+    // adminApp  → auth + read/write registrations
+    const publicApp = initializeApp(firebaseConfig, "scanner-public");
+    const adminApp  = initializeApp(firebaseConfig, "admin");
+    const auth      = getAuth(adminApp);
+    const db        = getDatabase(adminApp);      // registrations
+    const publicDb  = getDatabase(publicApp);     // events
     const ALLOWED_ADMIN = "admin@sm.com";
 
     let html5QrCode;
@@ -366,7 +372,7 @@
 
     // 1. LOAD EVENTS IMMEDIATELY — no auth needed (events are public data)
     //    Don't wait for auth here — loads instantly when page opens
-    onValue(ref(db, 'events'), (snapshot) => {
+    onValue(ref(publicDb, 'events'), (snapshot) => {
         eventSelect.innerHTML = '<option value="">-- Select Active Event --</option>';
         const data = snapshot.val();
         if (data) {
@@ -398,30 +404,50 @@
 
     function startCamera(facing) {
         if (facing) currentFacing = facing;
-        return html5QrCode.start(
-            { facingMode: currentFacing },
-            { fps: 10, qrbox: { width: 230, height: 230 } },
-            (decodedText) => {
-                if (!isScanning) return;
-                const eventId = eventSelect.value;
-                if (!eventId) { alert("Please select an event first!"); return; }
-                verifyTicket(eventId, decodedText);
-            },
-            () => {}
-        ).then(() => {
+
+        const constraint = currentFacing === 'environment'
+            ? { facingMode: { ideal: "environment" } }
+            : { facingMode: { ideal: "user" } };
+
+        const onDecode = (decodedText) => {
+            if (!isScanning) return;
+            const eventId = document.getElementById('eventSelect').value;
+            if (!eventId) { alert("Please select an event first!"); return; }
+            verifyTicket(eventId, decodedText);
+        };
+
+        const config = { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1.0 };
+
+        html5QrCode.start(constraint, config, onDecode, () => {})
+        .then(() => {
             cameraStarted = true;
             document.getElementById('camLabel').innerText =
                 currentFacing === 'environment' ? 'BACK CAM' : 'FRONT CAM';
-            // Hide library default UI
-            document.querySelectorAll('#reader__scan_region, #reader__dashboard')
-                .forEach(el => { if(el) el.style.display = 'none'; });
-        }).catch(err => {
-            console.warn("Camera error:", err);
-            document.getElementById('reader').innerHTML =
-                `<div style="color:#ff4d4d; text-align:center; padding:40px 20px; font-size:0.85rem;">
-                    <i class="fas fa-camera-slash" style="font-size:2rem; display:block; margin-bottom:10px;"></i>
-                    Camera access denied.<br>Allow camera permission &amp; reload.
-                </div>`;
+            setTimeout(() => {
+                const vid = document.querySelector('#reader video');
+                if (vid) {
+                    vid.style.cssText = 'width:100%!important;height:100%!important;object-fit:cover!important;position:absolute;top:0;left:0;border-radius:18px;display:block;';
+                }
+                ['#reader__scan_region img','#reader__dashboard','#reader__header_message']
+                    .forEach(s => document.querySelectorAll(s).forEach(el => el.style.display='none'));
+            }, 600);
+        })
+        .catch(() => {
+            if (currentFacing === 'environment') {
+                html5QrCode.start({ facingMode: "user" }, config, onDecode, () => {})
+                .then(() => {
+                    cameraStarted = true; currentFacing = 'user';
+                    document.getElementById('camLabel').innerText = 'FRONT CAM';
+                    setTimeout(() => {
+                        const vid = document.querySelector('#reader video');
+                        if (vid) vid.style.cssText = 'width:100%!important;height:100%!important;object-fit:cover!important;position:absolute;top:0;left:0;';
+                    }, 600);
+                })
+                .catch(() => {
+                    document.getElementById('reader').innerHTML =
+                        '<div style="color:#ff4d4d;text-align:center;padding:40px 20px;font-size:0.85rem;"><i class="fas fa-camera-slash" style="font-size:2rem;display:block;margin-bottom:10px;"></i>Camera not available.<br>Allow permission &amp; reload.</div>';
+                });
+            }
         });
     }
 
