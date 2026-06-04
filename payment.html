@@ -108,6 +108,18 @@
         .spinner { display:inline-block; width:20px; height:20px; border:3px solid rgba(255,255,255,0.15); border-top-color:#fff; border-radius:50%; animation:spin 0.8s linear infinite; vertical-align:middle; margin-right:8px; }
         @keyframes spin { to { transform:rotate(360deg); } }
         @media (max-width:768px) { .payment-container { flex-direction:column; } .order-summary { border-right:none; border-bottom:1px solid rgba(255,255,255,0.05); } .step-label { display:none; } }
+
+        
+        .method-card.coming-soon { cursor:not-allowed; }
+        .method-card.coming-soon:hover { border-color:#2e3040 !important; background:#22242e !important; transform:none !important; box-shadow:none !important; }
+        .method-card.coming-soon:hover .method-arrow { opacity:0 !important; transform:translateX(-5px) !important; }
+        .cs-overlay { position:absolute; inset:0; background:rgba(8,8,18,0.72); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; z-index:5; }
+        .cs-badge { display:flex; align-items:center; gap:9px; background:rgba(255,0,0,0.08); border:1px solid rgba(255,0,0,0.45); padding:9px 20px; border-radius:30px; animation:cs-pulse 2.5s ease-in-out infinite; }
+        .cs-badge i { color:var(--brand-red); font-size:0.9rem; }
+        .cs-badge span { font-size:0.8rem; font-weight:800; color:#fff; text-transform:uppercase; letter-spacing:2.5px; font-family:'Russo One',sans-serif; }
+        .cs-sub { font-size:0.62rem; color:#777; letter-spacing:2px; text-transform:uppercase; }
+        @keyframes cs-pulse { 0%,100% { box-shadow:0 0 0 0 rgba(255,0,0,0); border-color:rgba(255,0,0,0.35); } 50% { box-shadow:0 0 14px 4px rgba(255,0,0,0.18); border-color:rgba(255,0,0,0.75); } }
+    
     </style>
 </head>
 <body>
@@ -137,9 +149,18 @@
                     </div>
                     <i class="fas fa-chevron-right method-arrow"></i>
                 </div>
-                <div class="method-card" onclick="selectMethod('toyyibpay')">
-                    <div class="method-icon tp"><i class="fas fa-bolt"></i></div>
-                    <div class="method-info">
+
+                 <!-- remove bawah ni nak tukar text kanan ni-> class="method-card" onclick="selectMethod('toyyibpay')"> -->
+                <div class="method-card coming-soon">
+                    <div class="cs-overlay">
+                        <div class="cs-badge"><i class="fas fa-lock"></i><span>Coming Soon</span></div>
+                        <div class="cs-sub">Payment Gateway</div>
+                    </div>
+                    <!-- remove div atas ni -->
+                     
+                    <!--Dan tukar 3 elemen balik (buang style="opacity:0.35;"):-->
+                    <div class="method-icon tp" style="opacity:0.35;"><i class="fas fa-bolt"></i></div>
+                    <div class="method-info" style="opacity:0.35;">
                         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><h3>Pay Online</h3><span class="method-badge badge-auto">Auto Verify</span></div>
                         <p>Pay instantly online via ToyyibPay.</p>
                         <div class="method-tags">
@@ -148,7 +169,7 @@
                             <span class="method-tag" style="color:#00cc88;border-color:#1a3a25;">&#10003; E-Wallet</span>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right method-arrow"></i>
+                    <i class="fas fa-chevron-right method-arrow" style="opacity:0.35;"></i>
                 </div>
             </div>
         </div>
