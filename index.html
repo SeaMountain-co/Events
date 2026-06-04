@@ -205,6 +205,19 @@
         .float-wa { position: fixed; width: 60px; height: 60px; bottom: 30px; right: 30px; background-color: #25d366; color: #FFF; border-radius: 50px; text-align: center; font-size: 30px; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; transition: 0.3s; text-decoration: none; }
         .float-wa:hover { transform: scale(1.1); background-color: #128c7e; }
 
+        /* ===== INTRO VIDEO POPUP ===== */
+        .intro-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 99999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px; padding: 20px; animation: introFadeIn 0.6s ease; }
+        .intro-overlay.hidden { display: none; }
+        @keyframes introFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .intro-logo { font-family: 'Russo One', sans-serif; font-size: 1rem; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 3px; }
+        .intro-logo span { color: var(--brand-orange); }
+        .intro-video-wrap { position: relative; width: 100%; max-width: 880px; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
+        .intro-video-wrap video { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .intro-video-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+        .intro-skip-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.4); padding: 11px 28px; border-radius: 30px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; cursor: not-allowed; font-family: 'Montserrat', sans-serif; transition: all 0.35s; }
+        .intro-skip-btn.ready { cursor: pointer; background: var(--brand-orange); border-color: var(--brand-orange); color: #000; }
+        .intro-skip-btn.ready:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,0,0,0.45); }
+
         /* footer-wrapper definition (missing) */
         .footer-wrapper { background: linear-gradient(to bottom, #111, #0a0a0a); border-top: 1px solid #222; margin-top: 50px; padding-top: 60px; }
 
@@ -398,10 +411,19 @@
    <i class="fab fa-whatsapp"></i>
     </a>
 
+<!-- ===== INTRO VIDEO POPUP ===== -->
+<div id="introOverlay" class="intro-overlay hidden">
+    <div class="intro-logo">SEA<span>MOUNTAIN</span></div>
+    <div class="intro-video-wrap" id="introVideoWrap"></div>
+    <button id="introSkipBtn" class="intro-skip-btn" onclick="skipIntro()" disabled>
+        Skip in <span id="introCountdown">5</span>s
+    </button>
+</div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, runTransaction, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         // CONFIG FIREBASE
         const firebaseConfig = {
@@ -599,7 +621,62 @@
             } else { container.style.display = 'none'; }
         });
 
-        // --- 6. WHATSAPP ---
+        // --- 6. INTRO VIDEO POPUP ---
+        (async function initIntroPopup() {
+            // Skip if visitor already watched in this session
+            if (sessionStorage.getItem('sm_intro_seen')) return;
+
+            try {
+                const snap = await get(ref(db, 'site_config/intro_video'));
+                if (!snap.exists()) return;
+                const cfg = snap.val();
+                if (!cfg.enabled || !cfg.video_url) return;
+
+                const overlay = document.getElementById('introOverlay');
+                const wrap    = document.getElementById('introVideoWrap');
+                const skipBtn = document.getElementById('introSkipBtn');
+                const countdown = document.getElementById('introCountdown');
+                const skipAfter = parseInt(cfg.skip_after) || 5;
+
+                // Build video element — YouTube or direct file
+                const url = cfg.video_url.trim();
+                const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+                if (ytMatch) {
+                    const embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&mute=1&controls=0&rel=0&modestbranding=1`;
+                    wrap.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+                } else {
+                    wrap.innerHTML = `<video src="${url}" autoplay muted playsinline></video>`;
+                }
+
+                overlay.classList.remove('hidden');
+
+                // Skip countdown
+                let remaining = skipAfter;
+                countdown.textContent = remaining;
+                const timer = setInterval(() => {
+                    remaining--;
+                    countdown.textContent = remaining;
+                    if (remaining <= 0) {
+                        clearInterval(timer);
+                        skipBtn.textContent = 'Skip ›';
+                        skipBtn.classList.add('ready');
+                        skipBtn.disabled = false;
+                    }
+                }, 1000);
+
+                window.skipIntro = function() {
+                    if (!skipBtn.classList.contains('ready')) return;
+                    clearInterval(timer);
+                    overlay.classList.add('hidden');
+                    wrap.innerHTML = ''; // stop video/audio
+                    sessionStorage.setItem('sm_intro_seen', '1');
+                };
+            } catch (e) {
+                console.warn('Intro popup skipped:', e.message);
+            }
+        })();
+
+        // --- 7. WHATSAPP ---
         document.getElementById('waForm').addEventListener('submit', function(e) {
             e.preventDefault();
             let name = document.getElementById('waName').value;
