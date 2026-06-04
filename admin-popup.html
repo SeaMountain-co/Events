@@ -126,13 +126,13 @@
 
         <!-- STATUS -->
         <div class="section-card">
-            <div class="section-title"><i class="fas fa-circle-dot"></i> Status Semasa</div>
-            <div class="section-desc">Popup video akan muncul kepada pelawat baru sahaja. Pelawat yang dah tengok tak akan kena tunjuk balik dalam session yang sama.</div>
+            <div class="section-title"><i class="fas fa-circle-dot"></i> Current Status</div>
+            <div class="section-desc">The intro video popup will only appear to first-time visitors per session. Returning visitors who have already watched it will not see it again.</div>
 
             <div class="toggle-row">
                 <div>
-                    <div class="toggle-label">Aktifkan Intro Video Popup</div>
-                    <div class="toggle-sub">Bila ON — video akan papar kepada semua pelawat baru index.html</div>
+                    <div class="toggle-label">Enable Intro Video Popup</div>
+                    <div class="toggle-sub">When ON — the video will appear to all new visitors on index.html</div>
                 </div>
                 <label class="toggle-switch">
                     <input type="checkbox" id="toggleEnabled">
@@ -148,34 +148,34 @@
 
         <!-- VIDEO SETTINGS -->
         <div class="section-card">
-            <div class="section-title"><i class="fas fa-video"></i> Tetapan Video</div>
+            <div class="section-title"><i class="fas fa-video"></i> Video Settings</div>
 
             <div class="info-box">
-                <i class="fas fa-lightbulb"></i> Paste URL YouTube (contoh: <code style="color:#ffcc00;">https://www.youtube.com/watch?v=xxxxx</code>) atau URL video terus (.mp4). Video YouTube akan dimute secara automatik untuk autoplay.
+                <i class="fas fa-lightbulb"></i> Paste a YouTube URL (e.g. <code style="color:#ffcc00;">https://www.youtube.com/watch?v=xxxxx</code>) or a direct video URL (.mp4). YouTube videos will be automatically muted for autoplay.
             </div>
 
             <div class="form-row">
-                <label class="form-label">URL Video</label>
+                <label class="form-label">Video URL</label>
                 <input type="url" id="videoUrl" class="form-input" placeholder="https://www.youtube.com/watch?v=...">
-                <p class="form-hint">Sokong: YouTube URL, YouTube Embed URL, atau direct video (.mp4 / .webm)</p>
+                <p class="form-hint">Supports: YouTube URL, YouTube Embed URL, or direct video file (.mp4 / .webm)</p>
             </div>
 
             <div class="form-row">
-                <label class="form-label">Skip selepas (saat)</label>
+                <label class="form-label">Skip After (seconds)</label>
                 <div class="skip-row">
                     <input type="number" id="skipAfter" class="form-input" value="5" min="1" max="60">
-                    <span>saat — selepas ini butang "Skip" akan aktif</span>
+                    <span>seconds — the Skip button will become active after this delay</span>
                 </div>
             </div>
         </div>
 
         <!-- PREVIEW -->
         <div class="section-card">
-            <div class="section-title"><i class="fas fa-eye"></i> Preview Video</div>
+            <div class="section-title"><i class="fas fa-eye"></i> Video Preview</div>
             <div class="preview-wrap" id="previewWrap">
                 <div class="preview-empty">
                     <i class="fas fa-film"></i>
-                    <span>Masukkan URL dan klik Preview</span>
+                    <span>Enter a URL and click Preview</span>
                 </div>
             </div>
             <button class="btn-preview" onclick="loadPreview()"><i class="fas fa-play"></i> Load Preview</button>
@@ -183,7 +183,7 @@
 
         <!-- SAVE -->
         <button class="btn-save" id="btnSave" onclick="saveConfig()">
-            <i class="fas fa-save"></i> Simpan Tetapan
+            <i class="fas fa-save"></i> Save Settings
         </button>
 
     </div>
@@ -243,7 +243,7 @@
         const pill = document.getElementById('statusPill');
         if (on) {
             pill.className = 'status-pill status-on';
-            pill.innerHTML = '<i class="fas fa-circle" style="font-size:0.5rem;"></i> ON — Aktif';
+            pill.innerHTML = '<i class="fas fa-circle" style="font-size:0.5rem;"></i> ON — Active';
         } else {
             pill.className = 'status-pill status-off';
             pill.innerHTML = '<i class="fas fa-circle" style="font-size:0.5rem;"></i> Off';
@@ -254,7 +254,7 @@
     window.saveConfig = async function() {
         const btn = document.getElementById('btnSave');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Menyimpan...';
+        btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Saving...';
 
         const config = {
             enabled:    document.getElementById('toggleEnabled').checked,
@@ -265,12 +265,12 @@
 
         try {
             await set(ref(db, 'site_config/intro_video'), config);
-            showToast('✓ Tetapan berjaya disimpan!');
+            showToast('✓ Settings saved successfully!');
         } catch (e) {
-            showToast('✗ Gagal simpan: ' + e.message);
+            showToast('✗ Failed to save: ' + e.message);
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-save"></i> Simpan Tetapan';
+            btn.innerHTML = '<i class="fas fa-save"></i> Save Settings';
         }
     };
 
@@ -278,7 +278,7 @@
     window.loadPreview = function() {
         const url = document.getElementById('videoUrl').value.trim();
         const wrap = document.getElementById('previewWrap');
-        if (!url) { wrap.innerHTML = '<div class="preview-empty"><i class="fas fa-exclamation-triangle" style="color:#ff9500;"></i><span>Masukkan URL video dahulu</span></div>'; return; }
+        if (!url) { wrap.innerHTML = '<div class="preview-empty"><i class="fas fa-exclamation-triangle" style="color:#ff9500;"></i><span>Please enter a video URL first</span></div>'; return; }
 
         const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
         if (ytMatch) {
