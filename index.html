@@ -223,39 +223,75 @@
 
         /* --- MOBILE TWEAKS --- */
         @media (max-width: 900px) {
-            header { padding: 10px 5%; height: 60px; }
+            /* Header */
+            header { padding: 10px 4%; height: 60px; }
             .logo { font-size: 1rem; }
             .logo img { height: 28px; }
-            .menu-toggle { display: block; margin-left: 15px; font-size: 1.2rem; }
-            .nav-links { position: absolute; top: 60px; left: 0; width: 100%; background: rgba(15, 16, 20, 0.98); flex-direction: column; align-items: center; padding: 20px 0; display: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+            .menu-toggle { display: block; margin-left: 12px; font-size: 1.2rem; }
+            .nav-links { position: absolute; top: 60px; left: 0; width: 100%; background: rgba(15,16,20,0.98); flex-direction: column; align-items: center; padding: 20px 0; gap: 5px; display: none; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 1001; }
             .nav-links.active { display: flex; }
+            .nav-links a { padding: 10px 20px; width: 100%; text-align: center; font-size: 0.9rem; }
             .auth-group { margin-left: auto; gap: 8px; }
-            .login-btn { padding: 6px 15px; font-size: 0.75rem; }
+            .login-btn { padding: 6px 14px; font-size: 0.75rem; }
             .qr-btn { width: 32px; height: 32px; font-size: 1rem; }
 
-            /* Ticker Mobile */
+            /* Ticker */
             .ticker-heading { font-size: 0.7rem; padding: 0 10px; }
+            .ticker-content { font-size: 0.78rem; }
 
-            .hero { padding: 60px 5%; }
-            .hero h1 { font-size: 2.2rem; }
-            .hero-content { flex-direction: column; text-align: center; gap: 30px; }
-            .hero-text { border-left: none; }
-            .hero p { padding-left: 0; }
-            .featured-image img { transform: none; width: 100%; }
-            .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .view-all { align-self: flex-end; }
-            .events-grid { grid-template-columns: 1fr; padding-bottom: 40px; }
-            .contact-container { flex-direction: column; gap: 40px; }
-            .contact-form { padding: 25px; }
+            /* Hero */
+            .hero { padding: 40px 4% 50px; min-height: auto; }
+            .hero h1 { font-size: 1.9rem; line-height: 1.15; }
+            .hero-content { flex-direction: column; text-align: center; gap: 25px; }
+            .hero-text { border-left: none; max-width: 100%; }
+            .hero p { padding-left: 0; border-left: none; font-size: 0.95rem; }
+            .featured-image { width: 100%; max-width: 100%; }
+            .featured-image img { transform: none; width: 100%; border-radius: 10px; }
+            .cta-btn { clip-path: none; border-radius: 8px; padding: 14px 30px; display: inline-block; margin: 0 auto; }
+            .badge-featured { font-size: 0.72rem; }
 
-            /* Footer fix — About & Policy lari sebab footer-grid tiada mobile override */
-            .footer-grid { grid-template-columns: 1fr; gap: 25px; }
+            /* Search */
+            .search-container { padding: 0 4%; margin-top: -15px; }
+            .search-box input { font-size: 0.95rem; }
+
+            /* Section headers & grid */
+            .section-header { flex-direction: column; align-items: flex-start; gap: 8px; padding: 28px 4% 15px; }
+            .section-title h2 { font-size: 1.5rem; }
+            .view-all { align-self: flex-end; font-size: 0.82rem; }
+            .events-grid { grid-template-columns: 1fr; padding: 0 4% 40px; gap: 16px; }
+            .card-title { font-size: 1rem; }
+
+            /* Contact */
+            .contact-container { flex-direction: column; gap: 30px; padding: 0 4% 40px; }
+            .contact-info h2 { font-size: 1.5rem; }
+            .contact-info p { font-size: 0.88rem; margin-bottom: 20px; }
+            .contact-form { padding: 22px; }
+            .branch-addr { font-size: 0.82rem; }
+
+            /* Footer */
+            .footer-grid { grid-template-columns: 1fr; gap: 25px; padding: 0 4% 30px; }
             .footer-col { min-width: 0; width: 100%; overflow: hidden; }
             .footer-spec-list li { font-size: 0.8rem; }
-            .footer-wrapper { padding-top: 40px; margin-top: 30px; }
+            .app-buttons { flex-direction: column; gap: 8px; max-width: 220px; }
+            .footer-wrapper { padding-top: 35px; margin-top: 20px; }
             .footer-bottom { padding: 20px 4%; }
-            .footer-links { gap: 12px; }
-            .float-wa { width: 50px; height: 50px; bottom: 20px; right: 15px; font-size: 24px; }
+            .footer-links { gap: 12px; font-size: 0.8rem; }
+            .visitor-counter { font-size: 0.7rem; }
+
+            /* Float WhatsApp */
+            .float-wa { width: 50px; height: 50px; bottom: 20px; right: 15px; font-size: 22px; }
+        }
+
+        /* Small phones */
+        @media (max-width: 420px) {
+            .hero h1 { font-size: 1.55rem; }
+            .hero p { font-size: 0.88rem; }
+            .cta-btn { width: 100%; text-align: center; font-size: 0.9rem; padding: 13px 20px; }
+            .section-title h2 { font-size: 1.3rem; }
+            .contact-info h2 { font-size: 1.3rem; }
+            .card-body { padding: 15px; }
+            .card-btn { padding: 10px; font-size: 0.82rem; }
+            .contact-form { padding: 18px; }
         }
     </style>
 </head>
