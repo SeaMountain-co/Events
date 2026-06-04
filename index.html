@@ -623,14 +623,25 @@
 
         // --- 6. INTRO VIDEO POPUP ---
         (async function initIntroPopup() {
-            // Skip if visitor already watched in this session
-            if (sessionStorage.getItem('sm_intro_seen')) return;
-
             try {
                 const snap = await get(ref(db, 'site_config/intro_video'));
                 if (!snap.exists()) return;
                 const cfg = snap.val();
                 if (!cfg.enabled || !cfg.video_url) return;
+
+                const mode       = cfg.show_mode  || 'once_session';
+                const maxTimes   = parseInt(cfg.show_times) || 3;
+                const SEEN_KEY   = 'sm_intro_seen';
+                const COUNT_KEY  = 'sm_intro_count';
+
+                // Check frequency rules
+                if (mode === 'once_session' && sessionStorage.getItem(SEEN_KEY)) return;
+                if (mode === 'once_ever'    && localStorage.getItem(SEEN_KEY))    return;
+                if (mode === 'x_times') {
+                    const seen = parseInt(localStorage.getItem(COUNT_KEY) || '0');
+                    if (seen >= maxTimes) return;
+                }
+                // mode === 'every' → always show, no check
 
                 const overlay = document.getElementById('introOverlay');
                 const wrap    = document.getElementById('introVideoWrap');
@@ -668,8 +679,13 @@
                     if (!skipBtn.classList.contains('ready')) return;
                     clearInterval(timer);
                     overlay.classList.add('hidden');
-                    wrap.innerHTML = ''; // stop video/audio
-                    sessionStorage.setItem('sm_intro_seen', '1');
+                    wrap.innerHTML = '';
+                    if (mode === 'once_session') sessionStorage.setItem(SEEN_KEY, '1');
+                    if (mode === 'once_ever')    localStorage.setItem(SEEN_KEY, '1');
+                    if (mode === 'x_times') {
+                        const seen = parseInt(localStorage.getItem(COUNT_KEY) || '0');
+                        localStorage.setItem(COUNT_KEY, seen + 1);
+                    }
                 };
             } catch (e) {
                 console.warn('Intro popup skipped:', e.message);
