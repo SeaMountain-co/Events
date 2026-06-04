@@ -733,14 +733,15 @@
             } else if (currentCardBody) {
                 // For checkbox: skip outer label (text is already inside the checkbox label)
                 const outerLabel = q.type === 'checkbox' ? '' : `<label>${q.question_text}</label>`;
-                let html = `<div class="form-group">${outerLabel}`;
+                const fgShowIf = q.show_if_value ? `data-show-if="${q.show_if_value}"` : '';
+                let html = `<div class="form-group" ${fgShowIf}>${outerLabel}`;
                 if (q.type === 'text') {
                     html += `<input type="text" id="customQ_${index}" class="form-control" ${q.required ? 'required' : ''}>`;
                 } else if (q.type === 'datetime' || q.type === 'date') {
                     let type = q.type === 'datetime' ? 'datetime-local' : 'date';
                     html += `<input type="${type}" id="customQ_${index}" class="form-control" ${q.required ? 'required' : ''}>`;
                 } else if (q.type === 'select') {
-                    html += `<select id="customQ_${index}" class="form-control" ${q.required ? 'required' : ''}><option value="">Select...</option>`;
+                    html += `<select id="customQ_${index}" class="form-control" ${q.required ? 'required' : ''} onchange="handleConditional(${index})"><option value="">Select...</option>`;
                     q.options.forEach(opt => { html += `<option value="${opt}">${opt}</option>`; });
                     html += `</select>`;
                 } else if (q.type === 'checkbox') {
@@ -783,8 +784,9 @@
                                 </div>
                             </div>`;
                     } else {
-                        // Original (no attachment) — unchanged
-                        html += `<div class="checkbox-group"><label class="checkbox-item"><input type="checkbox" id="customQ_${index}" ${q.required ? 'required' : ''}> ${q.question_text}</label></div>`;
+                        // Original (no attachment) — with conditional support
+                        const showIfAttr = q.show_if_value ? `data-show-if="${q.show_if_value}"` : '';
+                        html += `<div class="checkbox-group" ${showIfAttr}><label class="checkbox-item"><input type="checkbox" id="customQ_${index}" ${q.required ? 'required' : ''}> ${q.question_text}</label></div>`;
                     }
                 }
                 html += `</div>`;
@@ -797,6 +799,8 @@
         totalSteps = finalStepNum;
         setupFixedEndSteps(mediaStepNum, finalStepNum);
         renderStepper(totalSteps);
+        // Hide all conditional fields initially
+        setTimeout(initConditionals, 50);
     }
 
     function setupFixedEndSteps(mediaNum, finalNum) {
@@ -815,6 +819,43 @@
             let activeClass = i === 1 ? 'active' : '';
             wrapper.innerHTML += `<div class="step-item ${activeClass}"><div class="step-circle">${i}</div></div>`;
         }
+    }
+
+    // ── Conditional question visibility ──────────────────────────
+    // Called when a select (dropdown) question changes.
+    // Finds all checkbox form-groups in the same card that have
+    // data-show-if attribute and shows/hides them accordingly.
+    window.handleConditional = function(selectIndex) {
+        const selectEl = document.getElementById(`customQ_${selectIndex}`);
+        if (!selectEl) return;
+        const val = selectEl.value.toLowerCase();
+
+        // Find the parent card body
+        const card = selectEl.closest('.form-card-body');
+        if (!card) return;
+
+        // Find all form-groups with data-show-if in this card
+        card.querySelectorAll('[data-show-if]').forEach(el => {
+            const condition = el.getAttribute('data-show-if').toLowerCase().trim();
+            const shouldShow = !condition || val.includes(condition);
+            el.style.display = shouldShow ? '' : 'none';
+            // Also toggle required on inputs inside
+            el.querySelectorAll('input[required], select[required]').forEach(inp => {
+                if (shouldShow) {
+                    inp.setAttribute('required', '');
+                } else {
+                    inp.removeAttribute('required');
+                    if (inp.type === 'checkbox') inp.checked = false;
+                }
+            });
+        });
+    }
+
+    // Run conditional on step render (initial state)
+    function initConditionals() {
+        document.querySelectorAll('[data-show-if]').forEach(el => {
+            el.style.display = 'none'; // hidden by default until select is changed
+        });
     }
 
     window.changeStep = function(n) {
