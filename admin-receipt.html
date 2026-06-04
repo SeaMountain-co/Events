@@ -184,8 +184,18 @@
             max-width: 1000px; width: 100%; max-height: 92vh; overflow-y: auto;
             border: 1px solid #333; display: grid; grid-template-columns: 1.4fr 1fr;
         }
-        .modal-image-side { background: #0a0b0e; padding: 25px; display: flex; align-items: center; justify-content: center; min-height: 400px; }
-        .modal-image-side img { max-width: 100%; max-height: 75vh; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        .modal-image-side { background: #0a0b0e; padding: 25px; display: flex; align-items: center; justify-content: center; min-height: 400px; position: relative; flex-direction: column; gap: 10px; }
+        .modal-image-side img { max-width: 100%; max-height: 70vh; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); cursor: zoom-in; transition: opacity 0.2s; }
+        .modal-image-side img:hover { opacity: 0.9; }
+        .modal-img-hint { font-size: 0.68rem; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+        .modal-img-hint i { color: #444; }
+        /* ===== LIGHTBOX ===== */
+        .img-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 99999; display: none; align-items: center; justify-content: center; flex-direction: column; cursor: zoom-out; padding: 20px; }
+        .img-lightbox.active { display: flex; }
+        .img-lightbox img { max-width: 95vw; max-height: 90vh; object-fit: contain; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); cursor: default; }
+        .lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 2; }
+        .lightbox-close:hover { background: var(--brand-red); border-color: var(--brand-red); transform: rotate(90deg); }
+        .lightbox-hint { color: #444; font-size: 0.72rem; margin-top: 14px; text-transform: uppercase; letter-spacing: 1.5px; }
         .modal-info-side { padding: 30px; overflow-y: auto; }
         .modal-close {
             position: absolute; top: 20px; right: 20px;
@@ -298,7 +308,8 @@
     <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
     <div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-image-side">
-            <img id="modalImage" src="" alt="Receipt">
+            <img id="modalImage" src="" alt="Receipt" onclick="openLightbox(this.src)">
+            <p class="modal-img-hint"><i class="fas fa-search-plus"></i> Click image to enlarge</p>
         </div>
         <div class="modal-info-side">
             <h2 class="modal-title" id="modalTitle">Receipt Details</h2>
@@ -311,6 +322,7 @@
             <div class="detail-row"><span class="lbl">Category</span><span class="val" id="m-cat">-</span></div>
             <div class="detail-row"><span class="lbl">Ref No.</span><span class="val ref" id="m-ref">-</span></div>
             <div class="detail-row"><span class="lbl">Amount Paid</span><span class="val highlight" id="m-amount">-</span></div>
+            <div class="detail-row" id="m-crew-row" style="display:none;"><span class="lbl">Crew Fee</span><span class="val" id="m-crew" style="color:#4caf6e;">-</span></div>
             <div class="detail-row"><span class="lbl">Method</span><span class="val" id="m-method">-</span></div>
             <div class="detail-row"><span class="lbl">WhatsApp Sent</span><span class="val" id="m-wa">-</span></div>
             <div class="detail-row"><span class="lbl">Registered</span><span class="val" id="m-time">-</span></div>
@@ -322,6 +334,13 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- ===== IMAGE LIGHTBOX ===== -->
+<div id="imgLightbox" class="img-lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+    <img id="lightboxImg" src="" alt="Receipt Full View" onclick="event.stopPropagation()">
+    <p class="lightbox-hint">Click anywhere or press ESC to close</p>
 </div>
 
 <script type="module">
@@ -588,6 +607,18 @@
         document.getElementById('m-cat').textContent    = d.category || '-';
         document.getElementById('m-ref').textContent    = d.paymentRef || '-';
         document.getElementById('m-amount').textContent = 'RM ' + (d.amountPaid || '0.00');
+
+        // Crew fee row — only show if crew was added
+        const crewRow = document.getElementById('m-crew-row');
+        const crewCount = parseInt(d.crewCount || 0);
+        if (crewCount > 0 && d.crewFee) {
+            const perPax = (parseFloat(d.crewFee) / crewCount).toFixed(2);
+            document.getElementById('m-crew').textContent = `${crewCount} person × RM ${perPax} = RM ${parseFloat(d.crewFee).toFixed(2)}`;
+            crewRow.style.display = 'flex';
+        } else {
+            crewRow.style.display = 'none';
+        }
+
         document.getElementById('m-method').textContent = d.paymentMethod || '-';
         document.getElementById('m-time').textContent   = fmtTime(d.registration_time);
 
@@ -727,9 +758,22 @@
     document.getElementById('filterStatus').addEventListener('change', renderUI);
     document.getElementById('filterSearch').addEventListener('input', renderUI);
 
-    // ESC closes modal
+    // ===== LIGHTBOX =====
+    window.openLightbox = function(src) {
+        if (!src) return;
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('imgLightbox').classList.add('active');
+    };
+    window.closeLightbox = function() {
+        document.getElementById('imgLightbox').classList.remove('active');
+    };
+
+    // ESC closes lightbox first, then modal
     document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeModal();
+        if (e.key === 'Escape') {
+            if (document.getElementById('imgLightbox').classList.contains('active')) closeLightbox();
+            else closeModal();
+        }
     });
 </script>
 
