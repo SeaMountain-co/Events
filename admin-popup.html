@@ -167,6 +167,25 @@
                     <span>seconds — the Skip button will become active after this delay</span>
                 </div>
             </div>
+
+            <div class="form-row">
+                <label class="form-label">Display Frequency</label>
+                <select id="showMode" class="form-input" onchange="toggleTimesInput()">
+                    <option value="once_session">Once per session (resets when tab closes)</option>
+                    <option value="once_ever">Once ever (never shows again after first watch)</option>
+                    <option value="x_times">Limited — show X times total, then stop</option>
+                    <option value="every">Every visit (always shows on every page load)</option>
+                </select>
+                <p class="form-hint">Controls how often the popup appears to each visitor.</p>
+            </div>
+
+            <div class="form-row" id="timesRow" style="display:none;">
+                <label class="form-label">Number of Times to Show</label>
+                <div class="skip-row">
+                    <input type="number" id="showTimes" class="form-input" value="3" min="1" max="99">
+                    <span>times — after this count the visitor will never see it again</span>
+                </div>
+            </div>
         </div>
 
         <!-- PREVIEW -->
@@ -230,9 +249,17 @@
             document.getElementById('toggleEnabled').checked = !!cfg.enabled;
             document.getElementById('videoUrl').value  = cfg.video_url  || '';
             document.getElementById('skipAfter').value = cfg.skip_after || 5;
+            document.getElementById('showMode').value  = cfg.show_mode  || 'once_session';
+            document.getElementById('showTimes').value = cfg.show_times || 3;
+            toggleTimesInput();
             updateStatusPill(!!cfg.enabled);
         }
     }
+
+    window.toggleTimesInput = function() {
+        const mode = document.getElementById('showMode').value;
+        document.getElementById('timesRow').style.display = mode === 'x_times' ? 'block' : 'none';
+    };
 
     // Toggle listener
     document.getElementById('toggleEnabled').addEventListener('change', function() {
@@ -260,6 +287,8 @@
             enabled:    document.getElementById('toggleEnabled').checked,
             video_url:  document.getElementById('videoUrl').value.trim(),
             skip_after: parseInt(document.getElementById('skipAfter').value) || 5,
+            show_mode:  document.getElementById('showMode').value,
+            show_times: parseInt(document.getElementById('showTimes').value) || 3,
             updated_at: new Date().toLocaleString()
         };
 
