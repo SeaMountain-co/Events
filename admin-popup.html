@@ -214,7 +214,6 @@
     auth.authStateReady().then(() => {
         onAuthStateChanged(auth, (user) => {
             if (!user || user.email !== ALLOWED_ADMIN) {
-                alert("Please login as Admin.");
                 window.location.href = "admin-login.html";
             } else {
                 document.getElementById('adminEmail').textContent = user.email;
