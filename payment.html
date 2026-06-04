@@ -338,7 +338,7 @@
         refCode = "SM-" + Math.floor(10000 + Math.random() * 90000);
     }
 
-    document.getElementById("display-name").textContent    = regData.first_name + " " + regData.last_name;
+    document.getElementById("display-name").textContent    = regData.first_name;
     document.getElementById("display-event").textContent   = regData.event_name;
     document.getElementById("display-cat").textContent     = regData.category;
     document.getElementById("display-voucher").textContent = regData.voucherUsed !== "NONE" ? regData.voucherUsed : "-";
@@ -357,7 +357,7 @@
         document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
         document.getElementById('screen-'+screen).classList.add('active');
         if (screen==='toyyibpay') {
-            document.getElementById('tp-name').textContent  = regData.first_name+" "+regData.last_name;
+            document.getElementById('tp-name').textContent  = regData.first_name;
             document.getElementById('tp-event').textContent = regData.event_name;
             document.getElementById('tp-cat').textContent   = regData.category;
             document.getElementById('tp-ref').textContent   = refCode;
@@ -378,7 +378,7 @@
             if(i<3) document.getElementById('line-'+i).classList.toggle('done',i<step);
         }
         if(step===3){
-            document.getElementById('confirm-name').textContent  = regData.first_name+" "+regData.last_name;
+            document.getElementById('confirm-name').textContent  = regData.first_name;
             document.getElementById('confirm-cat').textContent   = regData.category;
             document.getElementById('confirm-ref').textContent   = refCode;
             document.getElementById('confirm-total').textContent = "RM "+regData.amountPaid;
@@ -513,7 +513,7 @@
         formData.append('billPriceSetting',1); formData.append('billPayorInfo',1);
         formData.append('billAmount',amountInSen); formData.append('billReturnUrl',TP_RETURN_URL);
         formData.append('billCallbackUrl',TP_CALLBACK_URL); formData.append('billExternalReferenceNo',refCode);
-        formData.append('billTo',`${regData.first_name} ${regData.last_name}`);
+        formData.append('billTo',`${regData.first_name}`);
         formData.append('billEmail',regData.email); formData.append('billPhone',regData.phone||'');
         formData.append('billSplitPayment',0); formData.append('billSplitPaymentArgs','');
         formData.append('billPaymentChannel',2);
@@ -545,7 +545,7 @@
             runTransaction(ref(db,'events/'+data.event_code+'/registered'),c=>(c||0)+1);
             if(data.voucherUsed&&data.voucherUsed!=="NONE") runTransaction(ref(db,'vouchers/'+data.voucherUsed+'/used'),c=>(c||0)+1);
             emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
-                to_name:data.first_name+" "+data.last_name, to_email:data.email,
+                to_name:data.first_name, to_email:data.email,
                 event_name:data.event_name, amount:data.amountPaid, date:data.registration_time,
                 category:data.category, tshirt:data.tshirt_size, voucher:data.voucherUsed,
                 reg_id:newRegKey, reply_to:"support@seamountain.com"
