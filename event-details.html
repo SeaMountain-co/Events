@@ -152,45 +152,72 @@
 
         /* --- MOBILE TWEAKS --- */
         @media (max-width: 900px) {
-            header { padding: 10px 5%; height: 60px; }
-            .logo { font-size: 1rem; }
+            /* Header */
+            header { padding: 10px 4%; height: 60px; }
+            .logo { font-size: 1rem; width: auto; }
             .logo img { height: 28px; }
-            .menu-toggle { display: block; margin-left: 15px; font-size: 1.2rem; }
-            .nav-links { position: absolute; top: 60px; left: 0; width: 100%; background: rgba(15, 16, 20, 0.98); flex-direction: column; align-items: center; padding: 20px 0; display: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+            .menu-toggle { display: block; margin-left: 10px; font-size: 1.2rem; }
+            .nav-links { position: absolute; top: 60px; left: 0; width: 100%; background: rgba(15,16,20,0.98); flex-direction: column; align-items: center; padding: 15px 0; gap: 4px; display: none; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 1001; }
             .nav-links.active { display: flex; }
-            .auth-group { margin-left: auto; gap: 8px; }
-            .login-btn { padding: 6px 15px; font-size: 0.75rem; }
+            .nav-links a { padding: 10px 20px; width: 100%; text-align: center; }
+            .header-right { width: auto; gap: 8px; }
+            .login-btn { padding: 6px 14px; font-size: 0.75rem; }
             .qr-btn { width: 32px; height: 32px; font-size: 1rem; }
 
-            /* Ticker Mobile */
-            .ticker-heading { font-size: 0.7rem; padding: 0 10px; }
+            /* Main container */
+            .main-container { padding: 0 4%; margin: 20px auto 0; }
+            .back-btn { margin-bottom: 15px; font-size: 0.85rem; }
 
-            .hero { padding: 60px 5%; }
-            .hero h1 { font-size: 2.2rem; }
-            .hero-content { flex-direction: column; text-align: center; gap: 30px; }
-            .hero-text { border-left: none; }
-            .hero p { padding-left: 0; }
-            .featured-image img { transform: none; width: 100%; }
-            .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .view-all { align-self: flex-end; }
-            .events-grid { grid-template-columns: 1fr; padding-bottom: 40px; }
-            .contact-container { flex-direction: column; gap: 40px; }
-            .contact-form { padding: 25px; }
+            /* ── Event detail card: stack image above info ── */
+            .event-detail-wrapper { flex-direction: column; margin-bottom: 30px; border-radius: 12px; }
+            .detail-image-col { min-height: 220px; max-height: 260px; flex: none; width: 100%; }
+            .detail-image-col img { width: 100%; height: 100%; object-fit: cover; }
+            .detail-info-col { padding: 22px 20px; }
+            .event-title { font-size: 1.3rem; margin-bottom: 18px; }
+            .info-item { margin-bottom: 14px; gap: 12px; }
+            .info-text { font-size: 0.85rem; }
+            .action-btn { padding: 13px; font-size: 0.88rem; margin-top: 20px; }
 
-            /* Footer fix */
+            /* ── Countdown: smaller numbers ── */
+            .countdown-section { margin-bottom: 35px; }
+            .timer-container { gap: 12px; }
+            .timer-number { font-size: 2.2rem; }
+            .timer-label { font-size: 0.65rem; letter-spacing: 1px; margin-top: 6px; }
+            .timer-block:not(:last-child)::after { right: -9px; font-size: 1.8rem; }
+
+            /* ── Tabs: sidebar becomes horizontal scroll row ── */
+            .info-tabs-wrapper { flex-direction: column; gap: 0; margin-bottom: 40px; }
+            .tabs-sidebar { flex-direction: row; overflow-x: auto; gap: 0; scrollbar-width: none; border-bottom: 2px solid #2a2d36; padding-bottom: 0; }
+            .tabs-sidebar::-webkit-scrollbar { display: none; }
+            .tab-btn { white-space: nowrap; padding: 12px 16px; font-size: 0.8rem; border-radius: 0; border-left: none; border-bottom: 3px solid transparent; flex-shrink: 0; }
+            .tab-btn:hover { padding-left: 16px; }
+            .tab-btn.active { background: transparent; border-left: none; border-bottom: 3px solid var(--brand-red); color: var(--brand-red); padding-left: 16px; }
+            .tabs-content-area { border-radius: 0 0 10px 10px; padding: 20px 16px; }
+
+            /* Footer */
             .footer-grid { grid-template-columns: 1fr; gap: 25px; padding: 0 4% 30px; }
             .footer-col { min-width: 0; width: 100%; overflow: hidden; }
             .footer-spec-list li { font-size: 0.8rem; }
             .footer-spec-list { margin-top: 8px; }
-            .footer-wrapper { padding-top: 40px; margin-top: 30px; }
-            .footer-bottom { text-align: center; padding: 20px 4%; color: #444; font-size: 0.8rem; }
-            .footer-links { margin-bottom: 12px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-            .footer-links a { color: #666; font-weight: 600; text-decoration: none; transition: 0.3s; }
-            .footer-links a:hover { color: #fff; }
-            .app-buttons { flex-wrap: wrap; gap: 8px; }
+            .footer-wrapper { padding-top: 35px; margin-top: 20px; }
+            .footer-bottom { padding: 20px 4%; font-size: 0.8rem; }
+            .footer-links { margin-bottom: 12px; gap: 12px; flex-wrap: wrap; }
+            .app-buttons { flex-direction: column; max-width: 200px; gap: 8px; }
             .social-icons { flex-wrap: wrap; }
             .visitor-counter { font-size: 0.68rem; padding: 4px 12px; }
-            .float-wa { width: 50px; height: 50px; bottom: 20px; right: 15px; font-size: 24px; }
+        }
+
+        /* Small phones */
+        @media (max-width: 420px) {
+            .detail-image-col { max-height: 200px; }
+            .event-title { font-size: 1.15rem; }
+            .timer-number { font-size: 1.8rem; }
+            .timer-container { gap: 8px; }
+            .timer-block:not(:last-child)::after { right: -7px; font-size: 1.5rem; }
+            .detail-info-col { padding: 18px 16px; }
+            .tabs-content-area { padding: 16px 14px; }
+            .contact-row { font-size: 0.85rem; }
+            .contact-row span { width: 100px; }
         }
     </style>
 </head>
