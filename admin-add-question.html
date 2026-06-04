@@ -31,6 +31,9 @@
         .form-input.q-pdf-link { border-color: #2a4a6a; }
         .form-input.q-pdf-link:focus { border-color: #4a8acc; box-shadow: 0 0 0 2px rgba(74, 138, 204, 0.2); }
         .form-input.q-pdf-link::placeholder { color: #557; font-style: italic; }
+        .form-input.q-show-if { border-color: #3a5a2a; margin-top:6px; font-size:0.82rem; }
+        .form-input.q-show-if::placeholder { color: #4a6a3a; font-style: italic; }
+        .show-if-label { font-size:0.6rem; color:#66bb44; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-top:8px; }
 
         /* ROW STYLE */
         .question-builder-row { 
@@ -221,9 +224,10 @@
                     if(Array.isArray(qs)) {
                         qs.forEach(q => {
                             const opts = Array.isArray(q.options) ? q.options.join(',') : "";
-                            const pdfLink = q.pdf_link || ""; // NEW: read pdf_link if present
-                            const isMin = q.type !== 'header'; 
-                            addQuestionRow(q.question_text, q.type, opts, q.required, isMin, pdfLink);
+                            const pdfLink = q.pdf_link || "";
+                            const showIf  = q.show_if_value || "";
+                            const isMin = q.type !== 'header';
+                            addQuestionRow(q.question_text, q.type, opts, q.required, isMin, pdfLink, showIf);
                         });
                         refreshGroupStyling();
                     }
@@ -234,7 +238,7 @@
         }
 
         // ===== addQuestionRow now accepts qPdfLink param =====
-        window.addQuestionRow = function(qText="", qType="text", qOptions="", qReq=true, minimized=false, qPdfLink="") {
+        window.addQuestionRow = function(qText="", qType="text", qOptions="", qReq=true, minimized=false, qPdfLink="", qShowIf="") {
             const container = document.getElementById('questionBuilderContainer');
             if(container.innerHTML.includes('<p')) container.innerHTML = "";
 
@@ -313,6 +317,13 @@
                         placeholder="PDF: https://...waiver.pdf  •  Folder: https://drive.google.com/drive/folders/..."
                         value="${qPdfLink}"
                         style="${pdfStyle}">
+                    <div class="show-if-label" style="${isCheckbox ? 'display:block' : 'display:none'}">
+                        <i class="fas fa-eye" style="margin-right:3px;"></i> Show only when dropdown contains:
+                    </div>
+                    <input type="text" class="form-input q-show-if"
+                        placeholder="e.g. yes  or  no  (blank = always show)"
+                        value="${qShowIf}"
+                        style="${isCheckbox ? 'display:block' : 'display:none'}">
                 </div>
 
                 <div class="col-req" style="text-align:center; visibility:${isHeader ? 'hidden' : 'visible'}">
@@ -372,6 +383,8 @@
             const row         = selectElem.parentElement.parentElement;
             const optionInput = row.querySelector('.q-options');
             const pdfInput    = row.querySelector('.q-pdf-link');
+            const showIfInput = row.querySelector('.q-show-if');
+            const showIfLabel = row.querySelector('.show-if-label');
             const colLabel    = row.querySelector('.q-col-label');
             const colOptions  = row.querySelector('.col-options');
             const reqDiv      = row.querySelector('.col-req');
@@ -389,11 +402,15 @@
                     // Switch column to PDF link mode
                     colLabel.innerHTML        = '<i class="fas fa-paperclip"></i> PDF / FOLDER LINK (OPTIONAL)';
                     colLabel.classList.add('is-pdf');
+                    if (showIfInput) showIfInput.style.display = 'block';
+                    if (showIfLabel) showIfLabel.style.display = 'block';
                     optionInput.style.display = 'none';
                     pdfInput.style.display    = 'block';
                 } else if (newType === 'select') {
                     colLabel.textContent      = 'OPTIONS (Comma split)';
                     colLabel.classList.remove('is-pdf');
+                    if (showIfInput) showIfInput.style.display = 'none';
+                    if (showIfLabel) showIfLabel.style.display = 'none';
                     optionInput.style.display = 'block';
                     optionInput.disabled      = false;
                     optionInput.style.opacity = '1';
@@ -402,6 +419,8 @@
                 } else {
                     colLabel.textContent      = 'OPTIONS (Comma split)';
                     colLabel.classList.remove('is-pdf');
+                    if (showIfInput) showIfInput.style.display = 'none';
+                    if (showIfLabel) showIfLabel.style.display = 'none';
                     optionInput.style.display = 'block';
                     optionInput.disabled      = true;
                     optionInput.style.opacity = '0.3';
@@ -480,6 +499,10 @@
                     // Only attach pdf_link for checkbox type, and only if non-empty
                     if (qType === 'checkbox' && qPdfLink) {
                         questionObj.pdf_link = qPdfLink;
+                    }
+                    const showIfVal = (row.querySelector('.q-show-if') || {}).value || '';
+                    if (qType === 'checkbox' && showIfVal.trim()) {
+                        questionObj.show_if_value = showIfVal.trim().toLowerCase();
                     }
 
                     questionsData.push(questionObj);
