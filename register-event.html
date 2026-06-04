@@ -49,6 +49,20 @@
         .form-group label { display: block; margin-bottom: 10px; font-weight: 700; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .form-control { width: 100%; height: 50px; padding: 0 20px; background: var(--input-bg); border: 1px solid #444; color: #fff; border-radius: 8px; font-size: 0.95rem; font-family: 'Montserrat', sans-serif; outline: none; transition: border-color 0.3s; }
         .form-control:focus { border-color: var(--brand-yellow); }
+        .cs-wrap { position:relative; width:100%; }
+        .cs-trigger { display:flex; align-items:center; justify-content:space-between; width:100%; height:50px; padding:0 15px 0 20px; background:var(--input-bg); border:1px solid #444; color:#fff; border-radius:8px; font-size:0.95rem; font-family:'Montserrat',sans-serif; cursor:pointer; transition:border-color 0.3s; user-select:none; }
+        .cs-wrap.open .cs-trigger { border-color:var(--brand-yellow); }
+        .cs-chevron { color:#888; font-size:0.85rem; transition:transform 0.2s; flex-shrink:0; }
+        .cs-wrap.open .cs-chevron { transform:rotate(180deg); }
+        .cs-placeholder-text { color:#555; font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+        .cs-selected-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+        .cs-panel { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:#1e2029; border:1px solid #444; border-radius:8px; z-index:200; max-height:300px; overflow-y:auto; box-shadow:0 8px 24px rgba(0,0,0,0.5); }
+        .cs-wrap.open .cs-panel { display:block; }
+        .cs-opt { padding:13px 20px; cursor:pointer; font-size:0.88rem; color:#ccc; border-bottom:1px solid #2a2d36; line-height:1.55; transition:background 0.15s; word-break:break-word; white-space:normal; }
+        .cs-opt:last-child { border-bottom:none; }
+        .cs-opt:hover { background:#252830; color:#fff; }
+        .cs-opt.cs-opt-selected { color:var(--brand-yellow); background:rgba(255,190,0,0.06); }
+        .cs-opt.cs-opt-placeholder { color:#555; font-style:italic; }
         
         .checkbox-group { display: flex; flex-direction: column; gap: 15px; background: #15161b; padding: 20px; border-radius: 8px; border: 1px solid #333; }
         .checkbox-item { display: flex; align-items: flex-start; gap: 12px; font-size: 0.95rem; color: #ddd; cursor: pointer; line-height: 1.4; }
@@ -741,9 +755,16 @@
                     let type = q.type === 'datetime' ? 'datetime-local' : 'date';
                     html += `<input type="${type}" id="customQ_${index}" class="form-control" ${q.required ? 'required' : ''}>`;
                 } else if (q.type === 'select') {
-                    html += `<select id="customQ_${index}" class="form-control" ${q.required ? 'required' : ''} onchange="handleConditional(${index})"><option value="">Select...</option>`;
-                    q.options.forEach(opt => { html += `<option value="${opt}">${opt}</option>`; });
+                    window._csOpts = window._csOpts || {};
+                    window._csOpts[index] = q.options;
+                    // Hidden native select — keeps value + required validation
+                    html += `<select id="customQ_${index}" style="display:none" ${q.required ? 'required' : ''}><option value=""></option>`;
+                    q.options.forEach(opt => { html += `<option value="${opt}"></option>`; });
                     html += `</select>`;
+                    // Custom visual dropdown
+                    html += `<div class="cs-wrap" id="csw_${index}"><div class="cs-trigger" data-action="cs-toggle" data-qidx="${index}"><span id="cslbl_${index}" class="cs-placeholder-text">Select...</span><i class="fas fa-chevron-down cs-chevron"></i></div><div class="cs-panel" id="cspanel_${index}"><div class="cs-opt cs-opt-placeholder" data-action="cs-pick" data-qidx="${index}" data-optidx="-1">Select...</div>`;
+                    q.options.forEach((opt, i) => { html += `<div class="cs-opt" data-action="cs-pick" data-qidx="${index}" data-optidx="${i}">${opt}</div>`; });
+                    html += `</div></div>`;
                 } else if (q.type === 'checkbox') {
                     // =====================================================
                     // CHANGE 5: Checkbox can carry an optional pdf_link.
@@ -820,6 +841,45 @@
             wrapper.innerHTML += `<div class="step-item ${activeClass}"><div class="step-circle">${i}</div></div>`;
         }
     }
+
+    // ── Custom dropdown event delegation ─────────────────────────
+    window._csOpts = window._csOpts || {};
+    document.addEventListener('click', function(e) {
+        const el = e.target.closest('[data-action]');
+        if (!el) {
+            document.querySelectorAll('.cs-wrap.open').forEach(w => w.classList.remove('open'));
+            return;
+        }
+        const action = el.dataset.action;
+        const idx = el.dataset.qidx;
+        if (action === 'cs-toggle') {
+            const wrap = document.getElementById('csw_' + idx);
+            const isOpen = wrap.classList.contains('open');
+            document.querySelectorAll('.cs-wrap.open').forEach(w => w.classList.remove('open'));
+            if (!isOpen) wrap.classList.add('open');
+            e.stopPropagation();
+        } else if (action === 'cs-pick') {
+            const optIdx = parseInt(el.dataset.optidx);
+            const wrap = document.getElementById('csw_' + idx);
+            const lbl = document.getElementById('cslbl_' + idx);
+            const native = document.getElementById('customQ_' + idx);
+            if (optIdx === -1) {
+                lbl.textContent = 'Select...';
+                lbl.className = 'cs-placeholder-text';
+                native.value = '';
+            } else {
+                const val = (window._csOpts[idx] || [])[optIdx] || '';
+                lbl.textContent = val;
+                lbl.className = 'cs-selected-text';
+                native.value = val;
+            }
+            wrap.querySelectorAll('.cs-opt').forEach(o => o.classList.remove('cs-opt-selected'));
+            el.classList.add('cs-opt-selected');
+            wrap.classList.remove('open');
+            handleConditional(parseInt(idx));
+            e.stopPropagation();
+        }
+    });
 
     // ── Conditional question visibility ──────────────────────────
     // Called when a select (dropdown) question changes.
