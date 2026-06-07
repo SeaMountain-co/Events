@@ -468,7 +468,7 @@
                 document.getElementById('kitDate').innerText = data.kit_date || "To be announced";
 
                 const entText = document.getElementById('entitlementList');
-                if (entText) entText.innerText = data.entitlements || "Event Tee, Finisher Medal, E-Certificate, Bib Number.";
+                if (entText) entText.innerText = data.entitlements || "-";
 
                 const entImg = document.getElementById('entitlementImg');
                 if (data.entitlement_image) {
