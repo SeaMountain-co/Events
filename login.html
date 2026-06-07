@@ -58,6 +58,14 @@
             100% { transform: translate(-4%, -5%) scale(1.06); }
         }
 
+        /* Particle canvas */
+        #particleCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
         /* Grid dot pattern */
         .bg-grid {
             position: fixed;
@@ -71,6 +79,7 @@
         /* Card */
         .card {
             position: relative;
+            z-index: 1;
             width: 100%;
             max-width: 420px;
             background: rgba(18, 19, 26, 0.85);
@@ -95,28 +104,24 @@
         /* Brand */
         .brand {
             margin-bottom: 36px;
-        }
-
-        .brand-logo {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #dc2626, #991b1b);
-            border-radius: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.35);
+            gap: 12px;
         }
 
-        .brand-logo i {
-            font-size: 1.6rem;
-            color: #fff;
+        .brand-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+            flex-shrink: 0;
         }
 
         .brand-name {
             font-family: 'Russo One', sans-serif;
-            font-size: 1.5rem;
+            font-size: 1.45rem;
             letter-spacing: 0.06em;
             color: #fff;
             line-height: 1;
@@ -248,27 +253,26 @@
                 border-radius: 20px;
             }
 
-            .brand-name { font-size: 1.3rem; }
-            .card-title { font-size: 1.2rem; }
-
-            .features { gap: 12px; }
-            .feature-label { font-size: 0.65rem; }
+            .brand-img { width: 38px; height: 38px; }
+            .brand-name { font-size: 1.25rem; }
         }
 
         @media (max-width: 360px) {
             .card { padding: 28px 18px 26px; }
-            .features { gap: 8px; }
+            .brand-img { width: 34px; height: 34px; }
         }
     </style>
 </head>
 <body>
 
+    <canvas id="particleCanvas"></canvas>
     <div class="bg-grid"></div>
 
     <div class="card">
 
         <!-- Brand -->
         <div class="brand">
+            <img src="seaMLogo.png" alt="Sea Mountain" class="brand-img">
             <div class="brand-name">SEA<span>MOUNTAIN</span></div>
         </div>
 
@@ -294,6 +298,86 @@
         </div>
 
     </div>
+
+    <script>
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const COLORS = ['rgba(255,255,255,', 'rgba(239,68,68,', 'rgba(139,92,246,'];
+        let particles = [];
+
+        function resize() {
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', () => { resize(); init(); });
+
+        function rand(min, max) { return Math.random() * (max - min) + min; }
+
+        function createParticle() {
+            const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+            return {
+                x:     rand(0, canvas.width),
+                y:     rand(0, canvas.height),
+                r:     rand(0.8, 2.2),
+                vx:    rand(-0.25, 0.25),
+                vy:    rand(-0.35, -0.08),
+                alpha: rand(0.2, 0.7),
+                da:    rand(0.003, 0.007) * (Math.random() < 0.5 ? 1 : -1),
+                color
+            };
+        }
+
+        function init() {
+            const count = Math.floor((canvas.width * canvas.height) / 9000);
+            particles = Array.from({ length: Math.min(count, 100) }, createParticle);
+        }
+        init();
+
+        function drawLine(a, b, dist, maxDist) {
+            const alpha = (1 - dist / maxDist) * 0.12;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+        }
+
+        function loop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const maxDist = 130;
+
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+
+                p.x  += p.vx;
+                p.y  += p.vy;
+                p.alpha += p.da;
+                if (p.alpha <= 0.1 || p.alpha >= 0.75) p.da *= -1;
+
+                if (p.y < -10) { p.y = canvas.height + 10; p.x = rand(0, canvas.width); }
+                if (p.x < -10) p.x = canvas.width + 10;
+                if (p.x > canvas.width + 10) p.x = -10;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color + p.alpha + ')';
+                ctx.fill();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    const q = particles[j];
+                    const dx = p.x - q.x, dy = p.y - q.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < maxDist) drawLine(p, q, dist, maxDist);
+                }
+            }
+
+            requestAnimationFrame(loop);
+        }
+        loop();
+    </script>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
