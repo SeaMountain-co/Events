@@ -709,6 +709,7 @@
                 }
 
                 overlay.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
 
                 // Skip countdown
                 let remaining = skipAfter;
@@ -728,6 +729,7 @@
                     if (!skipBtn.classList.contains('ready')) return;
                     clearInterval(timer);
                     overlay.classList.add('hidden');
+                    document.body.style.overflow = '';
                     wrap.innerHTML = '';
                     if (mode === 'once_session') sessionStorage.setItem(SEEN_KEY, '1');
                     if (mode === 'once_ever')    localStorage.setItem(SEEN_KEY, '1');
