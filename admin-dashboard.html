@@ -159,6 +159,50 @@
             td { padding: 10px 12px; font-size: 0.82rem; }
         }
 
+        /* Sidebar maintenance toggle */
+        .sidebar-maint {
+            margin: 8px 10px 0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #222;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+        }
+
+        .sidebar-maint.active-mode {
+            border-color: rgba(255,77,77,0.4);
+            background: rgba(255,77,77,0.08);
+        }
+
+        .sidebar-maint i { width: 20px; text-align: center; color: #aaa; font-size: 0.9rem; transition: 0.2s; }
+        .sidebar-maint.active-mode i { color: #ff4d4d; }
+
+        .maint-text { flex: 1; }
+        .maint-text-title { font-size: 0.85rem; color: #aaa; font-weight: 500; transition: 0.2s; }
+        .maint-text-sub { font-size: 0.68rem; color: #555; margin-top: 1px; transition: 0.2s; }
+        .sidebar-maint.active-mode .maint-text-title { color: #ff4d4d; }
+        .sidebar-maint.active-mode .maint-text-sub   { color: rgba(255,77,77,0.6); }
+
+        /* Toggle switch */
+        .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; inset: 0;
+            background: #333; border-radius: 22px;
+            cursor: pointer; transition: 0.3s;
+            border: 1px solid #444;
+        }
+        .toggle-slider::before {
+            content: ''; position: absolute;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: #666; left: 3px; top: 3px;
+            transition: 0.3s;
+        }
+        .toggle input:checked + .toggle-slider { background: rgba(255,77,77,0.2); border-color: #ff4d4d; }
+        .toggle input:checked + .toggle-slider::before { background: #ff4d4d; transform: translateX(18px); }
+
         /* Small phones */
         @media (max-width: 480px) {
             .stats-container { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -205,6 +249,19 @@
             <a href="admin-scanner.html" class="btn-nav"><i class="fas fa-qrcode"></i> QR Scanner</a>
             <a href="timing-login.html" class="btn-nav"><i class="fas fa-stopwatch"></i> Timing System</a>
             <a href="client-login.html" class="btn-nav"><i class="fas fa-user-tie"></i> Client View</a>
+
+            <div class="nav-label">Site</div>
+            <div class="sidebar-maint" id="maintCard">
+                <i class="fas fa-tools"></i>
+                <div class="maint-text">
+                    <div class="maint-text-title">Maintenance</div>
+                    <div class="maint-text-sub" id="maintStatusText">Site is Live</div>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="maintToggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
         </div>
     </nav>
 
@@ -227,7 +284,7 @@
         </div>
 
         <div class="content-scroll">
-            
+
             <div class="stats-container">
                 <div class="stat-card" style="border-color: #3498db;">
                     <h3>Total Registrations</h3>
@@ -329,11 +386,39 @@
             if (user && user.email === ALLOWED_ADMIN) {
                 document.getElementById('adminDisplay').innerHTML = `<i class="fas fa-user-shield"></i> <span style="margin-left:5px;">${user.email}</span>`;
                 loadData();
+                initMaintenanceControl();
             } else {
                 alert("ACCESS DENIED");
-                window.location.href = "admin-login.html"; 
+                window.location.href = "admin-login.html";
             }
         });
+
+        function initMaintenanceControl() {
+            const settingsRef = ref(db, 'settings');
+            const toggle = document.getElementById('maintToggle');
+            const card   = document.getElementById('maintCard');
+            const status = document.getElementById('maintStatusText');
+
+            onValue(settingsRef, (snap) => {
+                const s = snap.val() || {};
+                const isOn = s.maintenance === true;
+                toggle.checked = isOn;
+                card.classList.toggle('active-mode', isOn);
+                status.textContent = isOn ? 'Maintenance ON' : 'Site is Live';
+            });
+
+            toggle.addEventListener('change', () => {
+                const isOn = toggle.checked;
+                if (isOn) {
+                    if (!confirm('Turn ON maintenance mode?\n\nThe public site will show the maintenance page immediately.')) {
+                        toggle.checked = false;
+                        return;
+                    }
+                }
+                update(ref(db, 'settings'), { maintenance: isOn })
+                    .catch(err => alert('Error: ' + err.message));
+            });
+        }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             if(confirm("Log out form dashboard?")) {
