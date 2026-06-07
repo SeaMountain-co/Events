@@ -203,6 +203,71 @@
         .toggle input:checked + .toggle-slider { background: rgba(255,77,77,0.2); border-color: #ff4d4d; }
         .toggle input:checked + .toggle-slider::before { background: #ff4d4d; transform: translateX(18px); }
 
+        /* Clickable part of maint row */
+        .maint-clickable {
+            display: flex; align-items: center; gap: 12px; flex: 1;
+            cursor: pointer; border-radius: 6px; padding: 2px 4px; margin: -2px -4px;
+            transition: background 0.15s;
+        }
+        .maint-clickable:hover { background: rgba(255,255,255,0.05); }
+        .maint-edit-hint {
+            font-size: 0.6rem; color: #444; margin-top: 2px; letter-spacing: 0.03em;
+        }
+        .sidebar-maint.active-mode .maint-edit-hint { color: rgba(255,77,77,0.4); }
+
+        /* Maintenance edit modal */
+        .maint-modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9000;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .maint-modal-overlay.open { display: flex; }
+
+        .maint-modal {
+            background: #1a1c23; border: 1px solid #2d2f3b;
+            border-radius: 16px; padding: 28px 28px 24px;
+            width: 100%; max-width: 400px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.7);
+            animation: modalIn 0.2s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.94) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .maint-modal h3 {
+            margin: 0 0 20px; font-size: 1rem; font-weight: 600; color: #fff;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .maint-modal h3 i { color: #ff4d4d; font-size: 0.9rem; }
+
+        .maint-field { margin-bottom: 16px; }
+        .maint-field label { display: block; font-size: 0.72rem; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 7px; font-weight: 600; }
+        .maint-field textarea,
+        .maint-field input[type="text"] {
+            width: 100%; background: #111; border: 1px solid #333; color: #e0e0e0;
+            border-radius: 8px; padding: 10px 12px; font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem; outline: none; transition: border 0.2s; resize: vertical;
+        }
+        .maint-field textarea { min-height: 80px; }
+        .maint-field textarea:focus,
+        .maint-field input[type="text"]:focus { border-color: #ff4d4d; }
+        .maint-field .field-hint { font-size: 0.68rem; color: #555; margin-top: 5px; }
+
+        .maint-modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-maint-save {
+            flex: 1; background: #ff4d4d; color: #fff; border: none;
+            padding: 10px 16px; border-radius: 8px; font-weight: 700;
+            font-size: 0.85rem; cursor: pointer; transition: 0.2s; font-family: 'Montserrat', sans-serif;
+        }
+        .btn-maint-save:hover { background: #ff2222; }
+        .btn-maint-cancel {
+            background: transparent; color: #888; border: 1px solid #333;
+            padding: 10px 16px; border-radius: 8px; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; transition: 0.2s; font-family: 'Montserrat', sans-serif;
+        }
+        .btn-maint-cancel:hover { border-color: #555; color: #ccc; }
+
         /* Small phones */
         @media (max-width: 480px) {
             .stats-container { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -252,10 +317,13 @@
 
             <div class="nav-label">Site</div>
             <div class="sidebar-maint" id="maintCard">
-                <i class="fas fa-tools"></i>
-                <div class="maint-text">
-                    <div class="maint-text-title">Maintenance</div>
-                    <div class="maint-text-sub" id="maintStatusText">Site is Live</div>
+                <div class="maint-clickable" id="maintEditBtn">
+                    <i class="fas fa-tools"></i>
+                    <div class="maint-text">
+                        <div class="maint-text-title">Maintenance</div>
+                        <div class="maint-text-sub" id="maintStatusText">Site is Live</div>
+                        <div class="maint-edit-hint">click to edit message</div>
+                    </div>
                 </div>
                 <label class="toggle">
                     <input type="checkbox" id="maintToggle">
@@ -395,13 +463,18 @@
 
         function initMaintenanceControl() {
             const settingsRef = ref(db, 'settings');
-            const toggle = document.getElementById('maintToggle');
-            const card   = document.getElementById('maintCard');
-            const status = document.getElementById('maintStatusText');
+            const toggle  = document.getElementById('maintToggle');
+            const card    = document.getElementById('maintCard');
+            const status  = document.getElementById('maintStatusText');
+            const overlay = document.getElementById('maintModalOverlay');
+            const msgInput = document.getElementById('maintMsgInput');
+            const etaInput = document.getElementById('maintEtaInput');
+
+            let currentSettings = {};
 
             onValue(settingsRef, (snap) => {
-                const s = snap.val() || {};
-                const isOn = s.maintenance === true;
+                currentSettings = snap.val() || {};
+                const isOn = currentSettings.maintenance === true;
                 toggle.checked = isOn;
                 card.classList.toggle('active-mode', isOn);
                 status.textContent = isOn ? 'Maintenance ON' : 'Site is Live';
@@ -417,6 +490,42 @@
                 }
                 update(ref(db, 'settings'), { maintenance: isOn })
                     .catch(err => alert('Error: ' + err.message));
+            });
+
+            /* Open modal */
+            document.getElementById('maintEditBtn').addEventListener('click', () => {
+                msgInput.value = currentSettings.maintenanceMessage || '';
+                etaInput.value = currentSettings.maintenanceETA     || '';
+                overlay.classList.add('open');
+                msgInput.focus();
+            });
+
+            /* Close modal */
+            document.getElementById('maintModalCancel').addEventListener('click', () => {
+                overlay.classList.remove('open');
+            });
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('open');
+            });
+
+            /* Save */
+            document.getElementById('maintModalSave').addEventListener('click', () => {
+                const saveBtn = document.getElementById('maintModalSave');
+                saveBtn.textContent = 'Saving…';
+                saveBtn.disabled = true;
+
+                update(ref(db, 'settings'), {
+                    maintenanceMessage: msgInput.value.trim() || null,
+                    maintenanceETA:     etaInput.value.trim() || null
+                })
+                .then(() => {
+                    overlay.classList.remove('open');
+                })
+                .catch(err => alert('Error: ' + err.message))
+                .finally(() => {
+                    saveBtn.textContent = 'Save Changes';
+                    saveBtn.disabled = false;
+                });
             });
         }
 
@@ -756,5 +865,29 @@
         }
 
     </script>
+
+    <!-- Maintenance edit modal -->
+    <div class="maint-modal-overlay" id="maintModalOverlay">
+        <div class="maint-modal">
+            <h3><i class="fas fa-tools"></i> Maintenance Settings</h3>
+
+            <div class="maint-field">
+                <label>Message</label>
+                <textarea id="maintMsgInput" placeholder="e.g. We're upgrading our servers. Back soon!"></textarea>
+                <div class="field-hint">Shown to visitors on the maintenance page.</div>
+            </div>
+
+            <div class="maint-field">
+                <label>Estimated Time (ETA)</label>
+                <input type="text" id="maintEtaInput" placeholder="e.g. 2:00 PM today, ~30 minutes">
+                <div class="field-hint">Leave blank to hide the ETA box.</div>
+            </div>
+
+            <div class="maint-modal-actions">
+                <button class="btn-maint-cancel" id="maintModalCancel">Cancel</button>
+                <button class="btn-maint-save" id="maintModalSave">Save Changes</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
