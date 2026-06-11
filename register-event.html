@@ -1108,7 +1108,7 @@
 
             // Check category restriction
             if (v.categoryId && v.categoryId !== 'ALL' && v.categoryId !== selectedCat) {
-                showVoucherError(`This voucher is only valid for the "${v.categoryId}" category.`);
+                showVoucherError(`This voucher is only valid.`);
                 return;
             }
 
