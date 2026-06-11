@@ -964,7 +964,28 @@
         const price = parseFloat(selectedOpt.dataset.price) || 0;
         originalPrice = price;
         finalAmount = price;
-        if (currentVoucherCode) removeVoucher(); else updatePriceUI();
+
+        // Re-validate applied voucher against new category
+        if (currentVoucherCode) {
+            get(ref(db, 'vouchers/' + currentVoucherCode)).then(snap => {
+                if (!snap.exists()) { removeVoucher(); return; }
+                const v = snap.val();
+                const newCat = catSelect.value;
+                if (v.categoryId && v.categoryId !== 'ALL' && v.categoryId !== newCat) {
+                    removeVoucher();
+                    showVoucherError(`Voucher removed — "${currentVoucherCode || v.code}" is not valid for "${newCat}".`);
+                } else {
+                    // Still valid — recalculate discount with new price
+                    let disc = (v.type === 'percent') ? originalPrice * (v.value / 100) : parseFloat(v.value);
+                    if (disc > originalPrice) disc = originalPrice;
+                    finalAmount = originalPrice - disc;
+                    document.getElementById('discountVal').innerText = disc.toFixed(2);
+                    updatePriceUI();
+                }
+            });
+        } else {
+            updatePriceUI();
+        }
 
         const catName = catSelect.value;
         const container = document.getElementById('racersContainer');
@@ -1043,27 +1064,66 @@
         updateMedicalForms(count);
     }
 
+    function showVoucherError(msg) {
+        const el = document.getElementById('voucherMsg');
+        el.style.display = 'block';
+        el.innerText = msg;
+    }
+
     document.getElementById('btnApply').addEventListener('click', () => {
         const code = document.getElementById('voucherCode').value.trim().toUpperCase();
         if (!code) return;
+
+        const selectedCat = document.getElementById('raceCategory').value;
+        if (!selectedCat) {
+            showVoucherError("Please select a race category first.");
+            return;
+        }
+
         get(ref(db, 'vouchers/' + code)).then((snap) => {
-            if (snap.exists()) {
-                const v = snap.val();
-                let disc = (v.type === 'percent') ? originalPrice * (v.value / 100) : parseFloat(v.value);
-                if (disc > originalPrice) disc = originalPrice;
-                finalAmount = originalPrice - disc;
-                document.getElementById('voucherInputGroup').style.display = 'none';
-                document.getElementById('activeVoucherBadge').style.display = 'flex';
-                document.getElementById('appliedCodeDisplay').innerText = code;
-                document.getElementById('rowDiscount').style.display = 'flex';
-                document.getElementById('discountVal').innerText = disc.toFixed(2);
-                document.getElementById('voucherMsg').style.display = 'none';
-                currentVoucherCode = code;
-                updatePriceUI();
-            } else {
-                document.getElementById('voucherMsg').style.display = 'block';
-                document.getElementById('voucherMsg').innerText = "Invalid Code";
+            if (!snap.exists()) {
+                showVoucherError("Invalid code. Please try again.");
+                return;
             }
+
+            const v = snap.val();
+
+            // Check expiry
+            if (v.expiry && v.expiry !== "9999-12-31" && new Date(v.expiry) < new Date()) {
+                showVoucherError("This voucher has expired.");
+                return;
+            }
+
+            // Check usage limit
+            if (v.limit > 0 && v.used >= v.limit) {
+                showVoucherError("This voucher has reached its usage limit.");
+                return;
+            }
+
+            // Check event restriction
+            if (v.eventId && v.eventId !== 'ALL' && v.eventId !== eventId) {
+                showVoucherError("This voucher is not valid for this event.");
+                return;
+            }
+
+            // Check category restriction
+            if (v.categoryId && v.categoryId !== 'ALL' && v.categoryId !== selectedCat) {
+                showVoucherError(`This voucher is only valid for the "${v.categoryId}" category.`);
+                return;
+            }
+
+            // All checks passed — apply discount
+            let disc = (v.type === 'percent') ? originalPrice * (v.value / 100) : parseFloat(v.value);
+            if (disc > originalPrice) disc = originalPrice;
+            finalAmount = originalPrice - disc;
+            document.getElementById('voucherInputGroup').style.display = 'none';
+            document.getElementById('activeVoucherBadge').style.display = 'flex';
+            document.getElementById('appliedCodeDisplay').innerText = code;
+            document.getElementById('rowDiscount').style.display = 'flex';
+            document.getElementById('discountVal').innerText = disc.toFixed(2);
+            document.getElementById('voucherMsg').style.display = 'none';
+            currentVoucherCode = code;
+            updatePriceUI();
         });
     });
 
