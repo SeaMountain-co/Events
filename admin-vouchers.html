@@ -27,6 +27,64 @@
         input:focus, select:focus { border-color: #28a745; }
 
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+        .cat-tag { font-size: 0.75rem; background: #6f42c1; color: white; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 3px; }
+
+        /* ── Custom category picker ── */
+        .cat-picker { position: relative; width: 100%; }
+        .cat-trigger {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 15px; background: #0a0b0e; border: 1px solid #444;
+            border-radius: 6px; cursor: pointer; transition: border-color 0.2s;
+            user-select: none; min-height: 46px;
+        }
+        .cat-trigger:hover { border-color: #666; }
+        .cat-trigger.open { border-color: #28a745; }
+        .cat-trigger.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+        .cat-trigger-text { font-size: 0.88rem; color: #555; font-style: italic; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cat-trigger-text.has-value { color: #fff; font-style: normal; }
+        .cat-chevron { color: #666; font-size: 0.8rem; margin-left: 10px; transition: transform 0.2s; flex-shrink: 0; }
+        .cat-trigger.open .cat-chevron { transform: rotate(180deg); }
+
+        .cat-panel {
+            display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+            background: #1a1c23; border: 1px solid #3a3c45; border-radius: 8px;
+            z-index: 200; max-height: 300px; overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+        .cat-picker.open .cat-panel { display: block; }
+        .cat-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #252830;
+            transition: background 0.15s; gap: 12px;
+        }
+        .cat-item:last-child { border-bottom: none; }
+        .cat-item:hover { background: #252830; }
+        .cat-item.selected { background: rgba(40,167,69,0.08); }
+        .cat-item-name { font-size: 0.85rem; color: #ddd; flex: 1; line-height: 1.4; word-break: break-word; white-space: normal; }
+        .cat-item-price { font-size: 0.8rem; color: #28a745; font-weight: 700; white-space: nowrap; flex-shrink: 0; background: rgba(40,167,69,0.1); padding: 3px 8px; border-radius: 4px; }
+        .cat-item.cat-all .cat-item-name { color: #777; font-style: italic; }
+        .cat-item.cat-all .cat-item-price { display: none; }
+
+        /* ── Price preview ── */
+        .price-preview {
+            display: none; background: #0d0e12; border: 1px solid #2a2d36;
+            border-radius: 10px; padding: 16px 20px; margin-top: 16px;
+        }
+        .price-preview.visible { display: block; }
+        .price-preview-title {
+            font-size: 0.65rem; color: #555; text-transform: uppercase;
+            letter-spacing: 0.1em; font-weight: 700; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .price-preview-title i { color: #28a745; }
+        .pp-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; font-size: 0.83rem; }
+        .pp-row .lbl { color: #666; }
+        .pp-row .val { font-weight: 600; color: #aaa; }
+        .pp-row.pp-discount .val { color: #28a745; }
+        .pp-row.pp-total { border-top: 1px solid #222; padding-top: 10px; margin-top: 6px; }
+        .pp-row.pp-total .lbl { color: #ddd; font-weight: 700; font-size: 0.9rem; }
+        .pp-row.pp-total .val { color: #28a745; font-weight: 800; font-size: 1.05rem; }
+        .pp-row.pp-free .val { color: #ffcc00; }
 
         .btn-save { background: #28a745; color: #fff; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
         .btn-save:hover { background: #218838; transform: translateY(-2px); }
@@ -40,8 +98,30 @@
         .event-tag { font-size: 0.8rem; background: #007bff; color: white; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 5px; }
         .event-tag.all { background: #6c757d; } /* Kelabu untuk All Events */
 
-        .btn-del { background: transparent; color: #d9534f; border: 1px solid #d9534f; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.3s; font-size: 0.8rem; }
+        .btn-del { background: transparent; color: #d9534f; border: 1px solid #d9534f; padding: 6px 10px; border-radius: 4px; cursor: pointer; transition: 0.3s; font-size: 0.8rem; }
         .btn-del:hover { background: #d9534f; color: white; }
+        .btn-edit { background: transparent; color: #fd7e14; border: 1px solid #fd7e14; padding: 6px 10px; border-radius: 4px; cursor: pointer; transition: 0.3s; font-size: 0.8rem; margin-right: 6px; }
+        .btn-edit:hover { background: #fd7e14; color: white; }
+
+        /* Discount cell card */
+        .disc-card { background: #0d0e12; border: 1px solid #2a2d36; border-radius: 8px; padding: 10px 14px; display: inline-block; min-width: 160px; }
+        .disc-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 0.82rem; }
+        .disc-label { color: #555; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; width: 44px; flex-shrink: 0; }
+        .disc-before-val { color: #888; text-decoration: line-through; font-weight: 600; }
+        .disc-after-val  { color: #28a745; font-weight: 800; font-size: 0.92rem; }
+        .disc-after-val.free { color: #ffcc00; }
+        .disc-sep { height: 1px; background: #1e2028; margin: 6px 0; }
+        .disc-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 700; padding: 3px 9px; border-radius: 4px; background: rgba(40,167,69,0.12); color: #28a745; border: 1px solid rgba(40,167,69,0.25); }
+        .disc-badge-plain { display: inline-flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 700; color: #28a745; }
+
+        /* Edit mode banner */
+        .edit-banner { display: none; background: rgba(253,126,20,0.12); border: 1px solid rgba(253,126,20,0.4); border-radius: 8px; padding: 10px 16px; margin-bottom: 18px; font-size: 0.85rem; color: #fd7e14; align-items: center; gap: 10px; }
+        .edit-banner.show { display: flex; }
+        .edit-banner i { font-size: 1rem; }
+        .btn-cancel-edit { margin-left: auto; background: transparent; border: 1px solid #fd7e14; color: #fd7e14; padding: 5px 14px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 700; transition: 0.2s; font-family: 'Montserrat', sans-serif; }
+        .btn-cancel-edit:hover { background: #fd7e14; color: #fff; }
+        .btn-save.edit-mode { background: #fd7e14; }
+        .btn-save.edit-mode:hover { background: #e8690a; }
     </style>
 </head>
 <body>
@@ -56,7 +136,12 @@
     </div>
 
     <div class="card">
-        <h3><i class="fas fa-plus-circle"></i> Create Voucher</h3>
+        <h3 id="formTitle"><i class="fas fa-plus-circle"></i> Create Voucher</h3>
+        <div class="edit-banner" id="editBanner">
+            <i class="fas fa-pen"></i>
+            <span>Editing: <strong id="editingCode">—</strong> — changes will overwrite this voucher</span>
+            <button type="button" class="btn-cancel-edit" onclick="cancelEdit()">Cancel</button>
+        </div>
         <form id="voucherForm">
             <div class="form-row">
                 <div class="form-group" style="flex: 1;">
@@ -73,17 +158,41 @@
             </div>
 
             <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label>Applicable Category <small style="color:#888;">(Optional — select event first)</small></label>
+                    <!-- hidden native select carries the real value -->
+                    <select id="vCategory" style="display:none;"></select>
+                    <div class="cat-picker disabled" id="catPicker">
+                        <div class="cat-trigger disabled" id="catTrigger">
+                            <span class="cat-trigger-text" id="catTriggerText">-- Select event first --</span>
+                            <i class="fas fa-chevron-down cat-chevron"></i>
+                        </div>
+                        <div class="cat-panel" id="catPanel"></div>
+                    </div>
+                </div>
+                <div class="form-group" style="flex: 1;"></div>
+            </div>
+
+            <div class="form-row">
                 <div class="form-group">
                     <label>Discount Type</label>
-                    <select id="vType">
+                    <select id="vType" onchange="updatePreview()">
                         <option value="fixed">RM (Ringgit)</option>
                         <option value="percent">% (Percent)</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>Value</label>
-                    <input type="number" id="vAmount" placeholder="10" required>
+                    <input type="number" id="vAmount" placeholder="10" required oninput="updatePreview()">
                 </div>
+            </div>
+
+            <!-- Price preview -->
+            <div class="price-preview" id="pricePreview">
+                <div class="price-preview-title"><i class="fas fa-calculator"></i> Price Preview</div>
+                <div class="pp-row"><span class="lbl">Original Price</span><span class="val" id="ppOriginal">RM 0.00</span></div>
+                <div class="pp-row pp-discount"><span class="lbl">Discount Applied</span><span class="val" id="ppDiscount">- RM 0.00</span></div>
+                <div class="pp-row pp-total"><span class="lbl">Price After Voucher</span><span class="val" id="ppFinal">RM 0.00</span></div>
             </div>
 
             <div class="form-row">
@@ -144,131 +253,386 @@
 
     // --- 1. LOAD EVENTS INTO DROPDOWN ---
     const eventSelect = document.getElementById('vEvent');
+    const catSelect   = document.getElementById('vCategory');   // hidden native
+    const catPicker   = document.getElementById('catPicker');
+    const catTrigger  = document.getElementById('catTrigger');
+    const catTriggerText = document.getElementById('catTriggerText');
+    const catPanel    = document.getElementById('catPanel');
+    let   eventsCache = {};
+    let   selectedCatPrice = null;  // price of currently chosen category
+
     onValue(ref(db, 'events'), (snapshot) => {
         eventSelect.innerHTML = '<option value="ALL">-- All Events (Global) --</option>';
+        eventsCache = {};
         const data = snapshot.val();
-        if(data) {
+        if (data) {
             Object.keys(data).forEach(key => {
-                const event = data[key];
+                eventsCache[key] = data[key];
                 const option = document.createElement("option");
-                option.value = key; 
-                option.text = event.title;
+                option.value = key;
+                option.text = data[key].title;
                 eventSelect.appendChild(option);
             });
         }
     });
 
-    // --- 2. ADD VOUCHER ---
+    // Toggle picker open/close
+    catTrigger.addEventListener('click', () => {
+        if (catTrigger.classList.contains('disabled')) return;
+        const isOpen = catPicker.classList.contains('open');
+        catPicker.classList.toggle('open', !isOpen);
+        catTrigger.classList.toggle('open', !isOpen);
+    });
+
+    // Pick category from panel
+    catPanel.addEventListener('click', (e) => {
+        const item = e.target.closest('.cat-item');
+        if (!item) return;
+        const val   = item.dataset.val;
+        const price = item.dataset.price;
+
+        // Update hidden select
+        catSelect.value = val;
+
+        // Update trigger text
+        if (val === 'ALL') {
+            catTriggerText.textContent = '-- All Categories --';
+            catTriggerText.className = 'cat-trigger-text';
+            selectedCatPrice = null;
+        } else {
+            catTriggerText.textContent = item.querySelector('.cat-item-name').textContent;
+            catTriggerText.className = 'cat-trigger-text has-value';
+            selectedCatPrice = parseFloat(price) || null;
+        }
+
+        // Highlight selected
+        catPanel.querySelectorAll('.cat-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add('selected');
+
+        catPicker.classList.remove('open');
+        catTrigger.classList.remove('open');
+        updatePreview();
+    });
+
+    // Close picker on outside click
+    document.addEventListener('click', (e) => {
+        if (!catPicker.contains(e.target)) {
+            catPicker.classList.remove('open');
+            catTrigger.classList.remove('open');
+        }
+    });
+
+    // --- PRICE PREVIEW ---
+    window.updatePreview = function() {
+        const preview = document.getElementById('pricePreview');
+        if (selectedCatPrice === null) { preview.classList.remove('visible'); return; }
+
+        const type   = document.getElementById('vType').value;
+        const amount = parseFloat(document.getElementById('vAmount').value) || 0;
+
+        let disc = type === 'percent'
+            ? selectedCatPrice * (amount / 100)
+            : amount;
+        if (disc > selectedCatPrice) disc = selectedCatPrice;
+        const final = selectedCatPrice - disc;
+
+        document.getElementById('ppOriginal').textContent = `RM ${selectedCatPrice.toFixed(2)}`;
+        document.getElementById('ppDiscount').textContent = `- RM ${disc.toFixed(2)}`;
+
+        const finalEl = document.getElementById('ppFinal');
+        finalEl.textContent = final <= 0 ? 'FREE' : `RM ${final.toFixed(2)}`;
+        finalEl.closest('.pp-row').classList.toggle('pp-free', final <= 0);
+
+        preview.classList.add('visible');
+    };
+
+    // --- EDIT MODE STATE ---
+    let editMode    = false;
+    let editOldCode = null;
+    let editUsed    = 0;
+
+    function resetForm() {
+        editMode = false; editOldCode = null; editUsed = 0;
+        document.getElementById('voucherForm').reset();
+        document.getElementById('vCode').readOnly = false;
+        document.getElementById('editBanner').classList.remove('show');
+        document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Create Voucher';
+        document.getElementById('voucherForm').querySelector('.btn-save').textContent = 'Save Voucher';
+        document.getElementById('voucherForm').querySelector('.btn-save').classList.remove('edit-mode');
+        catTriggerText.textContent = '-- Select event first --';
+        catTriggerText.className = 'cat-trigger-text';
+        catPicker.classList.add('disabled');
+        catTrigger.classList.add('disabled');
+        catPanel.innerHTML = '';
+        selectedCatPrice = null;
+        document.getElementById('pricePreview').classList.remove('visible');
+    }
+
+    window.cancelEdit = resetForm;
+
+    // Reusable: build category panel for a given eventId and optionally pre-select a category
+    function buildCatPanel(eid, preselect) {
+        catPanel.innerHTML = '';
+        catSelect.innerHTML = '<option value="ALL">-- All Categories --</option>';
+
+        if (eid === 'ALL') {
+            catPicker.classList.add('disabled');
+            catTrigger.classList.add('disabled');
+            catTriggerText.textContent = '-- Select event first --';
+            catTriggerText.className = 'cat-trigger-text';
+            selectedCatPrice = null;
+            return;
+        }
+
+        catPicker.classList.remove('disabled');
+        catTrigger.classList.remove('disabled');
+
+        catPanel.innerHTML = `<div class="cat-item cat-all${!preselect || preselect === 'ALL' ? ' selected' : ''}" data-val="ALL" data-price="">
+            <span class="cat-item-name">-- All Categories --</span>
+        </div>`;
+
+        const ev = eventsCache[eid];
+        if (ev && ev.categories_data) {
+            const now2      = new Date();
+            const earlyEnd2 = ev.early_bird_end ? new Date(ev.early_bird_end) : null;
+            const isEarly2  = earlyEnd2 && now2 <= earlyEnd2;
+
+            ev.categories_data.forEach(cat => {
+                const price = (isEarly2 && cat.early_bird) ? cat.early_bird : (cat.price || 0);
+                const sel   = preselect === cat.name ? ' selected' : '';
+                catPanel.innerHTML += `<div class="cat-item${sel}" data-val="${cat.name}" data-price="${price}">
+                    <span class="cat-item-name">${cat.name}</span>
+                    <span class="cat-item-price">RM ${parseFloat(price).toFixed(2)}</span>
+                </div>`;
+                const opt = document.createElement('option');
+                opt.value = cat.name;
+                opt.text  = cat.name;
+                catSelect.appendChild(opt);
+            });
+        }
+
+        if (preselect && preselect !== 'ALL') {
+            catSelect.value = preselect;
+            catTriggerText.textContent = preselect;
+            catTriggerText.className = 'cat-trigger-text has-value';
+            // Set price
+            const found = catPanel.querySelector(`.cat-item[data-val="${preselect}"]`);
+            selectedCatPrice = found ? (parseFloat(found.dataset.price) || null) : null;
+        } else {
+            catSelect.value = 'ALL';
+            catTriggerText.textContent = '-- All Categories --';
+            catTriggerText.className = 'cat-trigger-text';
+            selectedCatPrice = null;
+        }
+    }
+
+    // Update event cascade to use shared buildCatPanel
+    eventSelect.addEventListener('change', () => {
+        buildCatPanel(eventSelect.value, null);
+        updatePreview();
+    });
+
+    // --- 2. SAVE / UPDATE VOUCHER ---
     document.getElementById('voucherForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        const code = document.getElementById('vCode').value.trim().toUpperCase();
-        const eventId = document.getElementById('vEvent').value;
-        const type = document.getElementById('vType').value;
-        const amount = parseFloat(document.getElementById('vAmount').value);
-        
-        let limitInput = document.getElementById('vLimit').value;
-        const limit = limitInput ? parseInt(limitInput) : 0; 
+        const code     = document.getElementById('vCode').value.trim().toUpperCase();
+        const eventId  = document.getElementById('vEvent').value;
+        const type     = document.getElementById('vType').value;
+        const amount   = parseFloat(document.getElementById('vAmount').value);
+        const limit    = parseInt(document.getElementById('vLimit').value) || 0;
+        const expiry   = document.getElementById('vExpiry').value || "9999-12-31";
+        const catId    = document.getElementById('vCategory').value || 'ALL';
 
-        let expiryInput = document.getElementById('vExpiry').value;
-        const expiry = expiryInput ? expiryInput : "9999-12-31";
+        if (!code || !amount) return alert("Please fill Code and Value");
 
-        if(!code || !amount) return alert("Please fill Code and Value");
+        const payload = {
+            code,
+            eventId,
+            categoryId:    catId,
+            categoryPrice: selectedCatPrice || 0,
+            type,
+            value:  amount,
+            limit,
+            used:   editMode ? editUsed : 0,
+            expiry
+        };
 
-        set(ref(db, 'vouchers/' + code), {
-            code: code,
-            eventId: eventId,
-            type: type,
-            value: amount,
-            limit: limit, 
-            used: 0, // Mula dengan 0
-            expiry: expiry
-        }).then(() => {
-            alert("Voucher Created Successfully!");
-            document.getElementById('voucherForm').reset();
+        set(ref(db, 'vouchers/' + code), payload).then(() => {
+            alert(editMode ? "Voucher Updated!" : "Voucher Created!");
+            resetForm();
         });
     });
 
     // --- 3. LOAD VOUCHERS LIST ---
     let eventMap = {}; 
     
-    // Kita ambil eventMap dulu, lepas tu baru load voucher table
     get(ref(db, 'events')).then((snapshot) => {
         const data = snapshot.val();
-        if(data) {
+        if (data) {
             Object.keys(data).forEach(key => {
-                eventMap[key] = data[key].title;
+                eventMap[key]   = data[key].title;
+                eventsCache[key] = data[key];   // ensure price lookup works in table
             });
         }
-        // Panggil function load table
         loadVoucherTable();
     });
 
     function loadVoucherTable() {
         onValue(ref(db, 'vouchers'), (snapshot) => {
-            const data = snapshot.val();
+            const data  = snapshot.val();
             const tbody = document.getElementById('voucherTable');
             tbody.innerHTML = "";
 
-            if(data) {
-                Object.values(data).forEach(v => {
-                    let displayVal = v.type === 'percent' ? `${v.value}%` : `RM ${v.value}`;
-                    
-                    // PASTIKAN USED ADALAH NOMBOR (Fix Bug)
-                    const usedCount = v.used ? parseInt(v.used) : 0;
-                    const limitCount = v.limit ? parseInt(v.limit) : 0;
-
-                    let usageDisplay;
-                    if (limitCount > 0) {
-                        let isFull = usedCount >= limitCount ? '<span style="color:red; font-weight:bold;">(FULL)</span>' : '';
-                        usageDisplay = `${usedCount} / ${limitCount} ${isFull}`;
-                    } else {
-                        usageDisplay = `${usedCount} / <span style="font-size:1.2rem;">∞</span>`;
-                    }
-
-                    let expiryDisplay;
-                    if (v.expiry === "9999-12-31") {
-                        expiryDisplay = '<span style="color:#28a745; font-weight:bold;">∞ Lifetime</span>';
-                    } else {
-                        expiryDisplay = v.expiry;
-                    }
-
-                    let eventNameDisplay = "";
-                    if (!v.eventId || v.eventId === "ALL") {
-                        eventNameDisplay = `<span class="event-tag all">ALL EVENTS</span>`;
-                    } else {
-                        const name = eventMap[v.eventId] || "Unknown Event";
-                        eventNameDisplay = `<span class="event-tag">${name}</span>`;
-                    }
-
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>
-                                <span class="code-tag">${v.code}</span><br>
-                                ${eventNameDisplay}
-                            </td>
-                            <td style="color:#28a745; font-weight:bold;">${displayVal} OFF</td>
-                            <td>${usageDisplay}</td>
-                            <td style="color:#ccc;">${expiryDisplay}</td>
-                            <td style="text-align:right;">
-                                <button onclick="window.delVoucher('${v.code}')" class="btn-del">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            } else {
+            if (!data) {
                 tbody.innerHTML = "<tr><td colspan='5' align='center' style='color:#555; padding:20px;'>No vouchers active.</td></tr>";
+                return;
             }
+
+            Object.values(data).forEach(v => {
+                const usedCount  = parseInt(v.used)  || 0;
+                const limitCount = parseInt(v.limit) || 0;
+
+                // Resolve category price: saved value OR live lookup from eventsCache
+                let catPrice = parseFloat(v.categoryPrice) || 0;
+                if (!catPrice && v.eventId && v.eventId !== 'ALL' && v.categoryId && v.categoryId !== 'ALL') {
+                    const ev = eventsCache[v.eventId];
+                    if (ev && ev.categories_data) {
+                        const found     = ev.categories_data.find(c => c.name === v.categoryId);
+                        const now       = new Date();
+                        const earlyEnd  = ev.early_bird_end ? new Date(ev.early_bird_end) : null;
+                        const isEarly   = earlyEnd && now <= earlyEnd;
+                        if (found) catPrice = (isEarly && found.early_bird)
+                            ? parseFloat(found.early_bird)
+                            : parseFloat(found.price) || 0;
+                    }
+                }
+
+                // ── Discount column ──
+                let discountHtml = '';
+                if (catPrice > 0) {
+                    let disc = v.type === 'percent'
+                        ? catPrice * (v.value / 100)
+                        : parseFloat(v.value);
+                    if (disc > catPrice) disc = catPrice;
+                    const after     = catPrice - disc;
+                    const afterText = after <= 0 ? 'FREE' : `RM ${after.toFixed(2)}`;
+                    const isFree    = after <= 0;
+                    const badgeText = v.type === 'percent'
+                        ? `${v.value}% OFF &nbsp;·&nbsp; save RM ${disc.toFixed(2)}`
+                        : `RM ${parseFloat(v.value).toFixed(2)} OFF`;
+
+                    discountHtml = `
+                        <div class="disc-card">
+                            <div class="disc-row">
+                                <span class="disc-label">Before</span>
+                                <span class="disc-before-val">RM ${catPrice.toFixed(2)}</span>
+                            </div>
+                            <div class="disc-row">
+                                <span class="disc-label">After</span>
+                                <span class="disc-after-val${isFree ? ' free' : ''}">${afterText}</span>
+                            </div>
+                            <div class="disc-sep"></div>
+                            <span class="disc-badge"><i class="fas fa-tag"></i> ${badgeText}</span>
+                        </div>`;
+                } else {
+                    const badgeText = v.type === 'percent'
+                        ? `${v.value}% OFF`
+                        : `RM ${parseFloat(v.value).toFixed(2)} OFF`;
+                    discountHtml = `<span class="disc-badge-plain"><i class="fas fa-tag"></i> ${badgeText}</span>`;
+                }
+
+                // ── Usage ──
+                let usageDisplay;
+                if (limitCount > 0) {
+                    const isFull = usedCount >= limitCount ? ' <span style="color:red; font-weight:bold;">(FULL)</span>' : '';
+                    usageDisplay = `${usedCount} / ${limitCount}${isFull}`;
+                } else {
+                    usageDisplay = `${usedCount} / <span style="font-size:1.2rem;">∞</span>`;
+                }
+
+                // ── Expiry ──
+                const expiryDisplay = v.expiry === "9999-12-31"
+                    ? '<span style="color:#28a745; font-weight:bold;">∞ Lifetime</span>'
+                    : v.expiry;
+
+                // ── Event & category tags ──
+                const eventName = (!v.eventId || v.eventId === "ALL")
+                    ? `<span class="event-tag all">ALL EVENTS</span>`
+                    : `<span class="event-tag">${eventMap[v.eventId] || "Unknown Event"}</span>`;
+
+                const catTag = (v.categoryId && v.categoryId !== "ALL")
+                    ? `<br><span class="cat-tag"><i class="fas fa-tag" style="margin-right:3px;"></i>${v.categoryId}</span>`
+                    : '';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <span class="code-tag">${v.code}</span><br>
+                            ${eventName}${catTag}
+                        </td>
+                        <td>${discountHtml}</td>
+                        <td>${usageDisplay}</td>
+                        <td style="color:#ccc;">${expiryDisplay}</td>
+                        <td style="text-align:right; white-space:nowrap;">
+                            <button onclick="window.editVoucher('${v.code}')" class="btn-edit">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button onclick="window.delVoucher('${v.code}')" class="btn-del">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
         });
     }
 
-    // --- 4. DELETE FUNCTION ---
+    // --- EDIT FUNCTION ---
+    window.editVoucher = (code) => {
+        get(ref(db, 'vouchers/' + code)).then(snap => {
+            if (!snap.exists()) return;
+            const v = snap.val();
+
+            editMode    = true;
+            editOldCode = code;
+            editUsed    = parseInt(v.used) || 0;
+
+            // Fill form fields
+            const codeInput = document.getElementById('vCode');
+            codeInput.value    = v.code;
+            codeInput.readOnly = true;
+
+            // Event dropdown
+            eventSelect.value = v.eventId || 'ALL';
+
+            // Rebuild category picker (waits for eventsCache, which is already loaded)
+            buildCatPanel(v.eventId || 'ALL', v.categoryId || 'ALL');
+            selectedCatPrice = parseFloat(v.categoryPrice) || null;
+
+            document.getElementById('vType').value   = v.type   || 'fixed';
+            document.getElementById('vAmount').value = v.value  || '';
+            document.getElementById('vLimit').value  = v.limit  || '';
+            document.getElementById('vExpiry').value = (v.expiry === '9999-12-31') ? '' : (v.expiry || '');
+
+            // Switch UI to edit mode
+            document.getElementById('editingCode').textContent = code;
+            document.getElementById('editBanner').classList.add('show');
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-pen"></i> Edit Voucher';
+            const saveBtn = document.getElementById('voucherForm').querySelector('.btn-save');
+            saveBtn.textContent = 'Update Voucher';
+            saveBtn.classList.add('edit-mode');
+
+            updatePreview();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    };
+
+    // --- DELETE FUNCTION ---
     window.delVoucher = (code) => {
-        if(confirm("Delete voucher " + code + "?")) {
+        if (confirm("Delete voucher " + code + "?")) {
             remove(ref(db, 'vouchers/' + code));
         }
-    }
+    };
 </script>
 </body>
 </html>
