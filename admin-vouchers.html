@@ -122,6 +122,17 @@
         .btn-cancel-edit:hover { background: #fd7e14; color: #fff; }
         .btn-save.edit-mode { background: #fd7e14; }
         .btn-save.edit-mode:hover { background: #e8690a; }
+
+        /* Filter / sort bar */
+        .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+        .filter-search { flex: 1; min-width: 160px; position: relative; }
+        .filter-search input { padding-left: 34px; background: #0d0e12; border: 1px solid #333; color: #fff; border-radius: 6px; height: 38px; font-size: 0.85rem; }
+        .filter-search input:focus { border-color: #555; }
+        .filter-search i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #555; font-size: 0.85rem; pointer-events: none; }
+        .filter-select { background: #0d0e12; border: 1px solid #333; color: #aaa; border-radius: 6px; height: 38px; padding: 0 10px; font-size: 0.82rem; min-width: 140px; font-family: 'Montserrat', sans-serif; }
+        .filter-select:focus { border-color: #555; outline: none; }
+        .filter-count { font-size: 0.75rem; color: #555; white-space: nowrap; margin-left: auto; }
+        .filter-count span { color: #aaa; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -211,9 +222,32 @@
     </div>
 
     <div class="card">
-        <h3 style="color:#fff; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 10px;">
+        <h3 style="color:#fff; border-bottom: 1px solid #333; padding-bottom: 15px; margin-bottom: 16px;">
             <i class="fas fa-list-ul"></i> Active Vouchers
         </h3>
+
+        <div class="filter-bar">
+            <div class="filter-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="filterSearch" placeholder="Search code..." oninput="renderTable()">
+            </div>
+            <select class="filter-select" id="filterEvent" onchange="renderTable(); populateCatFilter()">
+                <option value="">All Events</option>
+            </select>
+            <select class="filter-select" id="filterCat" onchange="renderTable()">
+                <option value="">All Categories</option>
+            </select>
+            <select class="filter-select" id="filterSort" onchange="renderTable()">
+                <option value="code_az">Code A → Z</option>
+                <option value="code_za">Code Z → A</option>
+                <option value="disc_high">Discount (High → Low)</option>
+                <option value="disc_low">Discount (Low → High)</option>
+                <option value="expiry_asc">Expiry (Soonest)</option>
+                <option value="expiry_desc">Expiry (Latest)</option>
+            </select>
+            <div class="filter-count">Showing <span id="filterCountNum">0</span> vouchers</div>
+        </div>
+
         <div class="table-responsive">
             <table>
                 <thead>
@@ -477,18 +511,82 @@
         loadVoucherTable();
     });
 
+    let allVouchers = [];   // cache for filter/sort
+
     function loadVoucherTable() {
         onValue(ref(db, 'vouchers'), (snapshot) => {
-            const data  = snapshot.val();
-            const tbody = document.getElementById('voucherTable');
-            tbody.innerHTML = "";
+            const data = snapshot.val();
+            allVouchers = data ? Object.values(data) : [];
 
-            if (!data) {
-                tbody.innerHTML = "<tr><td colspan='5' align='center' style='color:#555; padding:20px;'>No vouchers active.</td></tr>";
-                return;
+            // Populate event filter dropdown (once)
+            const evSel = document.getElementById('filterEvent');
+            const existing = Array.from(evSel.options).map(o => o.value);
+            allVouchers.forEach(v => {
+                if (v.eventId && v.eventId !== 'ALL' && !existing.includes(v.eventId)) {
+                    const opt = document.createElement('option');
+                    opt.value = v.eventId;
+                    opt.text  = eventMap[v.eventId] || v.eventId;
+                    evSel.appendChild(opt);
+                    existing.push(v.eventId);
+                }
+            });
+
+            populateCatFilter();
+            renderTable();
+        });
+    }
+
+    function populateCatFilter() {
+        const evFilter = document.getElementById('filterEvent').value;
+        const catSel   = document.getElementById('filterCat');
+        catSel.innerHTML = '<option value="">All Categories</option>';
+
+        const cats = new Set();
+        allVouchers.forEach(v => {
+            if (v.categoryId && v.categoryId !== 'ALL') {
+                if (!evFilter || v.eventId === evFilter) cats.add(v.categoryId);
             }
+        });
+        cats.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c; opt.text = c;
+            catSel.appendChild(opt);
+        });
+    }
 
-            Object.values(data).forEach(v => {
+    window.renderTable = function() {
+        const tbody     = document.getElementById('voucherTable');
+        const search    = document.getElementById('filterSearch').value.trim().toUpperCase();
+        const evFilter  = document.getElementById('filterEvent').value;
+        const catFilter = document.getElementById('filterCat').value;
+        const sort      = document.getElementById('filterSort').value;
+
+        let list = allVouchers.filter(v => {
+            if (search    && !v.code.toUpperCase().includes(search)) return false;
+            if (evFilter  && v.eventId !== evFilter)                  return false;
+            if (catFilter && v.categoryId !== catFilter)              return false;
+            return true;
+        });
+
+        list.sort((a, b) => {
+            if (sort === 'code_az')    return a.code.localeCompare(b.code);
+            if (sort === 'code_za')    return b.code.localeCompare(a.code);
+            if (sort === 'disc_high')  return parseFloat(b.value) - parseFloat(a.value);
+            if (sort === 'disc_low')   return parseFloat(a.value) - parseFloat(b.value);
+            if (sort === 'expiry_asc') return (a.expiry || '').localeCompare(b.expiry || '');
+            if (sort === 'expiry_desc')return (b.expiry || '').localeCompare(a.expiry || '');
+            return 0;
+        });
+
+        document.getElementById('filterCountNum').textContent = list.length;
+        tbody.innerHTML = '';
+
+        if (!list.length) {
+            tbody.innerHTML = "<tr><td colspan='5' align='center' style='color:#555; padding:20px;'>No vouchers match.</td></tr>";
+            return;
+        }
+
+        list.forEach(v => {
                 const usedCount  = parseInt(v.used)  || 0;
                 const limitCount = parseInt(v.limit) || 0;
 
@@ -583,9 +681,8 @@
                         </td>
                     </tr>
                 `;
-            });
         });
-    }
+    };
 
     // --- EDIT FUNCTION ---
     window.editVoucher = (code) => {
