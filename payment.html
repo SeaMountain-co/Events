@@ -150,9 +150,20 @@
                     <i class="fas fa-chevron-right method-arrow"></i>
                 </div>
 
-                <div class="method-card" onclick="selectMethod('toyyibpay')">
-                    <div class="method-icon tp"><i class="fas fa-globe"></i></div>
-                    <div class="method-info">
+                <!-- ============================================================
+                     COMING SOON — MAYBANK GATEWAY
+                     Bila gateway dah siap, buat 3 perkara ni:
+                     1. Buang class "coming-soon" dari div pertama
+                     2. Delete keseluruhan blok <div class="cs-overlay">...</div>
+                     3. Buang 3x style="opacity:0.45;" dari ikon, info, dan arrow
+                ============================================================ -->
+                <div class="method-card coming-soon">
+                    <div class="cs-overlay">
+                        <div class="cs-badge"><i class="fas fa-lock"></i><span>Coming Soon</span></div>
+                        <div class="cs-sub">Payment Gateway</div>
+                    </div>
+                    <div class="method-icon tp" style="opacity:0.45;"><i class="fas fa-globe"></i></div>
+                    <div class="method-info" style="opacity:0.45;">
                         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;"><h3>Online Banking</h3><span class="method-badge badge-auto">Auto Verify</span></div>
                         <p>Pay instantly via Maybank Online Banking (FPX).</p>
                         <div class="method-tags">
@@ -160,7 +171,7 @@
                             <span class="method-tag" style="color:#00cc88;border-color:#1a3a25;">&#10003; Maybank2u</span>
                         </div>
                     </div>
-                    <i class="fas fa-chevron-right method-arrow"></i>
+                    <i class="fas fa-chevron-right method-arrow" style="opacity:0.45;"></i>
                 </div>
             </div>
         </div>
