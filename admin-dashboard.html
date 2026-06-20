@@ -501,7 +501,7 @@
                 update(ref(db, 'settings'), { maintenance: isOn })
                     .then(() => {
                         writeLog(isOn ? 'MAINTENANCE_ON' : 'MAINTENANCE_OFF', 'settings',
-                            isOn ? 'Maintenance mode DIHIDUPKAN' : 'Maintenance mode DIMATIKAN', 'fa-tools');
+                            isOn ? 'Maintenance mode turned ON' : 'Maintenance mode turned OFF', 'fa-tools');
                     })
                     .catch(err => alert('Error: ' + err.message));
             });
@@ -534,7 +534,7 @@
                 })
                 .then(() => {
                     writeLog('MAINTENANCE_MESSAGE', 'settings',
-                        `Mesej maintenance dikemaskini: "${msgInput.value.trim() || '(kosong)'}"`, 'fa-edit');
+                        `Maintenance message updated: "${msgInput.value.trim() || '(empty)'}"`, 'fa-edit');
                     overlay.classList.remove('open');
                 })
                 .catch(err => alert('Error: ' + err.message))
@@ -819,7 +819,7 @@
                 const name = row ? `${row.first_name || ''} ${row.last_name || ''}`.trim() : regKey;
                 remove(ref(db, `registrations/${eventId}/${regKey}`))
                 .then(() => {
-                    writeLog('DELETE_RUNNER', 'registrations', `Padam peserta: ${name} (${eventId.toUpperCase()})`, 'fa-trash');
+                    writeLog('DELETE_RUNNER', 'registrations', `Deleted participant: ${name} (${eventId.toUpperCase()})`, 'fa-trash');
                     alert("User Deleted Successfully");
                 })
                 .catch((err) => alert("Error deleting: " + err.message));
@@ -885,7 +885,7 @@
                 .then(() => {
                     const icon = newStatus === 'Paid' ? 'fa-check-circle' : 'fa-undo';
                     writeLog(newStatus === 'Paid' ? 'MARK_PAID' : 'REVOKE_PAYMENT', 'registrations',
-                        `Status ditukar ke "${newStatus}": ${name2} (${eventId.toUpperCase()})`, icon);
+                        `Status changed to "${newStatus}": ${name2} (${eventId.toUpperCase()})`, icon);
                     alert("Success! Status updated to " + newStatus);
                 })
                 .catch((err) => { alert("Error updating status: " + err.message); });
