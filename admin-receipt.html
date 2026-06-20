@@ -706,9 +706,9 @@
         const name2 = r2 ? ((r2.data.first_name || r2.data.captainName || '') + ' ' + (r2.data.last_name || '')).trim() : regId;
         const ref2 = r2 ? (r2.data.paymentRef || regId) : regId;
         if (newStatus === 'verified') {
-            writeLog('APPROVE_RECEIPT', 'receipts', `Resit DILULUSKAN: ${name2} | Ref: ${ref2}`, 'fa-check-circle');
+            writeLog('APPROVE_RECEIPT', 'receipts', `Receipt APPROVED: ${name2} | Ref: ${ref2}`, 'fa-check-circle');
         } else {
-            writeLog('REJECT_RECEIPT', 'receipts', `Resit DITOLAK: ${name2} | Ref: ${ref2}`, 'fa-times-circle');
+            writeLog('REJECT_RECEIPT', 'receipts', `Receipt REJECTED: ${name2} | Ref: ${ref2}`, 'fa-times-circle');
         }
 
         // Update in-memory cache
