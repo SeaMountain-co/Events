@@ -244,7 +244,7 @@
                 updates[`events/${eventId}/isFeatured`] = true;
                 update(ref(db), updates)
                 .then(() => {
-                    writeLog('SET_FEATURED', 'events', `Event "${eventId}" ditetapkan sebagai FEATURED`, 'fa-star');
+                    writeLog('SET_FEATURED', 'events', `Event "${eventId}" set as FEATURED`, 'fa-star');
                     alert("Featured Event Updated!");
                 })
                 .catch((err) => alert("Error: " + err.message));
@@ -258,7 +258,7 @@
                 update(ref(db, 'events/' + eventId), { isArchived: newStatus })
                 .then(() => {
                     writeLog(newStatus ? 'ARCHIVE_EVENT' : 'UNARCHIVE_EVENT', 'events',
-                        `Event "${eventId}" ${newStatus ? 'diarkibkan' : 'dibuka semula dari arkib'}`, 'fa-archive');
+                        `Event "${eventId}" ${newStatus ? 'archived' : 'unarchived'}`, 'fa-archive');
                 })
                 .catch((err) => alert("Error: " + err.message));
             }
@@ -268,7 +268,7 @@
             if(confirm(`Are you sure you want to DELETE event: ${eventId}? This cannot be undone.`)) {
                 remove(ref(db, 'events/' + eventId))
                 .then(() => {
-                    writeLog('DELETE_EVENT', 'events', `Event "${eventId}" DIPADAM`, 'fa-trash');
+                    writeLog('DELETE_EVENT', 'events', `Event "${eventId}" deleted`, 'fa-trash');
                     alert("Event Deleted Successfully");
                 })
                 .catch((err) => alert("Error: " + err.message));
