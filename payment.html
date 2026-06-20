@@ -300,7 +300,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, push, set, update, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
@@ -332,6 +332,7 @@
     let receiptBase64 = null;
     let receiptFile   = null;
     let whatsappSent  = false;
+    let pendingRegKey = sessionStorage.getItem('pendingRegKey') || null;
 
     if (isToyyibPayReturn) {
         regData = JSON.parse(localStorage.getItem('pendingTP_regData') || 'null');
@@ -340,7 +341,8 @@
         const storedData = sessionStorage.getItem('tempRegistration');
         if (!storedData) { alert("No registration data found. Redirecting to home."); window.location.href = "index.html"; }
         regData = JSON.parse(storedData);
-        refCode = "SM-" + Math.floor(10000 + Math.random() * 90000);
+        refCode = sessionStorage.getItem('pendingRefCode') || ("SM-" + Math.floor(10000 + Math.random() * 90000));
+        sessionStorage.setItem('pendingRefCode', refCode);
     }
 
     document.getElementById("display-name").textContent    = regData.first_name;
@@ -400,7 +402,22 @@
         preview.style.display = 'block';
         preview.src = URL.createObjectURL(file);
         const reader = new FileReader();
-        reader.onload = e => { receiptBase64 = e.target.result; document.getElementById('nextToStep2').disabled = false; };
+        reader.onload = e => {
+            receiptBase64 = e.target.result;
+            document.getElementById('nextToStep2').disabled = false;
+            // Early save — sekali je per session, dengan gambar supaya admin boleh nampak
+            if (!pendingRegKey) {
+                const earlyData = Object.assign({}, regData, {
+                    paymentRef: refCode, status: 'Pending Payment',
+                    paymentMethod: 'Bank Transfer', whatsappSent: false,
+                    receiptImage: e.target.result
+                });
+                const earlyRef = push(ref(db, 'registrations/' + regData.event_code));
+                pendingRegKey = earlyRef.key;
+                sessionStorage.setItem('pendingRegKey', pendingRegKey);
+                set(earlyRef, earlyData).catch(err => console.warn('Early save failed:', err.message));
+            }
+        };
         reader.readAsDataURL(file);
     });
 
@@ -490,18 +507,52 @@
         const btn = document.getElementById('confirmBtn');
         btn.innerText = "PROCESSING...";
         btn.disabled  = true;
-        regData.paymentRef    = refCode;
-        regData.status        = "Paid";
-        regData.paymentMethod = "Bank Transfer";
-        regData.whatsappSent  = true;
-        if (receiptBase64) regData.receiptImage = receiptBase64;
-        saveToFirebase(regData, () => {
-            sessionStorage.removeItem('tempRegistration');
-            alert("Payment Submitted! Please check your email for the receipt and QR Code.");
-        }, () => {
-            btn.innerText = "&#10003; CONFIRM & SUBMIT PAYMENT";
-            btn.disabled  = false;
-        });
+
+        const savedKey = pendingRegKey || sessionStorage.getItem('pendingRegKey');
+
+        if (savedKey) {
+            // Update rekod yang dah disimpan masa upload resit
+            const updates = { status: 'Paid', whatsappSent: true };
+            if (receiptBase64) updates.receiptImage = receiptBase64;
+            update(ref(db, 'registrations/' + regData.event_code + '/' + savedKey), updates)
+            .then(() => {
+                runTransaction(ref(db, 'events/' + regData.event_code + '/registered'), c => (c||0)+1);
+                if (regData.voucherUsed && regData.voucherUsed !== "NONE")
+                    runTransaction(ref(db, 'vouchers/' + regData.voucherUsed + '/used'), c => (c||0)+1);
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    to_name: regData.first_name, to_email: regData.email,
+                    event_name: regData.event_name, amount: regData.amountPaid, date: regData.registration_time,
+                    category: regData.category, tshirt: regData.tshirt_size, voucher: regData.voucherUsed,
+                    reg_id: savedKey, reply_to: "support@seamountain.com"
+                }).then(() => console.log("Email sent"));
+                sessionStorage.removeItem('tempRegistration');
+                sessionStorage.removeItem('pendingRegKey');
+                sessionStorage.removeItem('pendingRefCode');
+                alert("Payment Submitted! Please check your email for the receipt and QR Code.");
+                window.location.href = `ticket.html?eid=${regData.event_code}&uid=${savedKey}`;
+            })
+            .catch(err => {
+                alert("Error saving data: " + err.message);
+                btn.innerText = "&#10003; CONFIRM & SUBMIT PAYMENT";
+                btn.disabled  = false;
+            });
+        } else {
+            // Fallback: early save tak berlaku (jarang terjadi)
+            regData.paymentRef    = refCode;
+            regData.status        = "Paid";
+            regData.paymentMethod = "Bank Transfer";
+            regData.whatsappSent  = true;
+            if (receiptBase64) regData.receiptImage = receiptBase64;
+            saveToFirebase(regData, () => {
+                sessionStorage.removeItem('tempRegistration');
+                sessionStorage.removeItem('pendingRegKey');
+                sessionStorage.removeItem('pendingRefCode');
+                alert("Payment Submitted! Please check your email for the receipt and QR Code.");
+            }, () => {
+                btn.innerText = "&#10003; CONFIRM & SUBMIT PAYMENT";
+                btn.disabled  = false;
+            });
+        }
     };
 
     window.proceedToToyyibPay = function() {
