@@ -346,7 +346,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, get, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
@@ -667,6 +667,15 @@
         currentModalReceipt = null;
     };
 
+    function writeLog(action, category, detail, icon) {
+        push(ref(db, 'adminLogs'), {
+            action, category, detail,
+            icon: icon || 'fa-circle',
+            adminEmail: currentAdminEmail || 'admin',
+            timestamp: Date.now()
+        }).catch(() => {});
+    }
+
     // ===== APPROVE / REJECT ACTIONS =====
     async function updateStatus(eventId, regId, newStatus) {
         const path = `registrations/${eventId}/${regId}`;
@@ -691,6 +700,16 @@
         }
 
         await update(ref(db, path), updates);
+
+        // Log the action
+        const r2 = allReceipts.find(x => x.eventId === eventId && x.regId === regId);
+        const name2 = r2 ? ((r2.data.first_name || r2.data.captainName || '') + ' ' + (r2.data.last_name || '')).trim() : regId;
+        const ref2 = r2 ? (r2.data.paymentRef || regId) : regId;
+        if (newStatus === 'verified') {
+            writeLog('APPROVE_RECEIPT', 'receipts', `Resit DILULUSKAN: ${name2} | Ref: ${ref2}`, 'fa-check-circle');
+        } else {
+            writeLog('REJECT_RECEIPT', 'receipts', `Resit DITOLAK: ${name2} | Ref: ${ref2}`, 'fa-times-circle');
+        }
 
         // Update in-memory cache
         const r = allReceipts.find(x => x.eventId === eventId && x.regId === regId);
