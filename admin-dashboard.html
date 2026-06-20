@@ -314,6 +314,7 @@
             <a href="admin-scanner.html" class="btn-nav"><i class="fas fa-qrcode"></i> QR Scanner</a>
             <a href="timing-login.html" class="btn-nav"><i class="fas fa-stopwatch"></i> Timing System</a>
             <a href="client-login.html" class="btn-nav"><i class="fas fa-user-tie"></i> Client View</a>
+            <a href="admin-logs.html" class="btn-nav"><i class="fas fa-history"></i> Activity Logs</a>
 
             <div class="nav-label">Site</div>
             <div class="sidebar-maint" id="maintCard">
@@ -411,7 +412,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, onValue, remove, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBZzcjRx3KhBaHaahSUee1ySRIlRgVmi3o",
@@ -442,6 +443,15 @@
         const auth = getAuth(adminApp);
         const db = getDatabase(adminApp);
         const ALLOWED_ADMIN = "admin@sm.com"; 
+
+        function writeLog(action, category, detail, icon) {
+            push(ref(db, 'adminLogs'), {
+                action, category, detail,
+                icon: icon || 'fa-circle',
+                adminEmail: auth.currentUser ? auth.currentUser.email : 'admin',
+                timestamp: Date.now()
+            }).catch(() => {});
+        }
 
         window.toggleMenu = function() {
             document.getElementById('sidebar').classList.toggle('active');
@@ -489,6 +499,10 @@
                     }
                 }
                 update(ref(db, 'settings'), { maintenance: isOn })
+                    .then(() => {
+                        writeLog(isOn ? 'MAINTENANCE_ON' : 'MAINTENANCE_OFF', 'settings',
+                            isOn ? 'Maintenance mode DIHIDUPKAN' : 'Maintenance mode DIMATIKAN', 'fa-tools');
+                    })
                     .catch(err => alert('Error: ' + err.message));
             });
 
@@ -519,6 +533,8 @@
                     maintenanceETA:     etaInput.value.trim() || null
                 })
                 .then(() => {
+                    writeLog('MAINTENANCE_MESSAGE', 'settings',
+                        `Mesej maintenance dikemaskini: "${msgInput.value.trim() || '(kosong)'}"`, 'fa-edit');
                     overlay.classList.remove('open');
                 })
                 .catch(err => alert('Error: ' + err.message))
@@ -798,10 +814,15 @@
                 alert("Cannot delete: Invalid ID. Try refreshing.");
                 return;
             }
-            if(confirm("Delete this runner permanently?")) { 
+            if(confirm("Delete this runner permanently?")) {
+                const row = allRegistrations.find(r => r.eventId === eventId && r.regKey === regKey);
+                const name = row ? `${row.first_name || ''} ${row.last_name || ''}`.trim() : regKey;
                 remove(ref(db, `registrations/${eventId}/${regKey}`))
-                .then(() => alert("User Deleted Successfully"))
-                .catch((err) => alert("Error deleting: " + err.message)); 
+                .then(() => {
+                    writeLog('DELETE_RUNNER', 'registrations', `Padam peserta: ${name} (${eventId.toUpperCase()})`, 'fa-trash');
+                    alert("User Deleted Successfully");
+                })
+                .catch((err) => alert("Error deleting: " + err.message));
             }
         }
 
@@ -858,8 +879,15 @@
                     updates.rejectedAt         = null;
                 }
 
+                const row2 = allRegistrations.find(r => r.eventId === eventId && r.regKey === regKey);
+                const name2 = row2 ? `${row2.first_name || ''} ${row2.last_name || ''}`.trim() : regKey;
                 update(ref(db, `registrations/${eventId}/${regKey}`), updates)
-                .then(() => { alert("Success! Status updated to " + newStatus); })
+                .then(() => {
+                    const icon = newStatus === 'Paid' ? 'fa-check-circle' : 'fa-undo';
+                    writeLog(newStatus === 'Paid' ? 'MARK_PAID' : 'REVOKE_PAYMENT', 'registrations',
+                        `Status ditukar ke "${newStatus}": ${name2} (${eventId.toUpperCase()})`, icon);
+                    alert("Success! Status updated to " + newStatus);
+                })
                 .catch((err) => { alert("Error updating status: " + err.message); });
             }
         }
