@@ -503,7 +503,7 @@
         set(ref(db, 'vouchers/' + code), payload).then(() => {
             const discStr = payload.type === 'percent' ? `${payload.value}%` : `RM${payload.value}`;
             writeLog(editMode ? 'UPDATE_VOUCHER' : 'CREATE_VOUCHER', 'vouchers',
-                `${editMode ? 'Kemaskini' : 'Cipta'} voucher "${code}" | ${discStr} OFF | Event: ${payload.eventId}`,
+                `${editMode ? 'Updated' : 'Created'} voucher "${code}" | ${discStr} OFF | Event: ${payload.eventId}`,
                 editMode ? 'fa-edit' : 'fa-ticket-alt');
             alert(editMode ? "Voucher Updated!" : "Voucher Created!");
             resetForm();
@@ -741,7 +741,7 @@
     window.delVoucher = (code) => {
         if (confirm("Delete voucher " + code + "?")) {
             remove(ref(db, 'vouchers/' + code)).then(() => {
-                writeLog('DELETE_VOUCHER', 'vouchers', `Voucher "${code}" DIPADAM`, 'fa-trash');
+                writeLog('DELETE_VOUCHER', 'vouchers', `Voucher "${code}" deleted`, 'fa-trash');
             });
         }
     };
