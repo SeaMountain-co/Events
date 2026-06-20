@@ -216,7 +216,10 @@
                         <img id="receiptPreview" alt="Receipt Preview">
                     </div>
                 </div>
-                <button class="next-btn" id="nextToStep2" disabled onclick="goToStep(2)">NEXT: SHARE VIA WHATSAPP &rarr;</button>
+                <div id="dataSavedBadge" style="display:none; align-items:center; gap:8px; background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:10px 14px; margin-bottom:10px; font-size:0.85rem; color:#2e7d32; font-weight:700;">
+                        <i class="fas fa-check-circle"></i> Data saved — you can safely continue
+                    </div>
+                    <button class="next-btn" id="nextToStep2" disabled onclick="goToStep(2)">NEXT: SHARE VIA WHATSAPP &rarr;</button>
                 <button class="back-link" onclick="showScreen('method')">&larr; Change Payment Method</button>
             </div>
 
@@ -402,20 +405,40 @@
         preview.style.display = 'block';
         preview.src = URL.createObjectURL(file);
         const reader = new FileReader();
-        reader.onload = e => {
+        reader.onload = async e => {
             receiptBase64 = e.target.result;
             document.getElementById('nextToStep2').disabled = false;
-            // Early save — sekali je per session, dengan gambar supaya admin boleh nampak
+            // Early save — save metadata dulu (tanpa image) supaya tak fail
             if (!pendingRegKey) {
+                if (!regData || !regData.event_code) {
+                    alert('Session expired. Please go back and fill the form again.');
+                    return;
+                }
                 const earlyData = Object.assign({}, regData, {
-                    paymentRef: refCode, status: 'Pending Payment',
-                    paymentMethod: 'Bank Transfer', whatsappSent: false,
-                    receiptImage: e.target.result
+                    paymentRef:    refCode,
+                    status:        'Pending Payment',
+                    paymentMethod: 'Bank Transfer',
+                    whatsappSent:  false,
+                    receiptImage:  ''   // kosong dulu — update selepas
                 });
-                const earlyRef = push(ref(db, 'registrations/' + regData.event_code));
-                pendingRegKey = earlyRef.key;
-                sessionStorage.setItem('pendingRegKey', pendingRegKey);
-                set(earlyRef, earlyData).catch(err => console.warn('Early save failed:', err.message));
+                try {
+                    const earlyRef = push(ref(db, 'registrations/' + regData.event_code));
+                    pendingRegKey  = earlyRef.key;
+                    sessionStorage.setItem('pendingRegKey', pendingRegKey);
+                    await set(earlyRef, earlyData);
+                    // Lepas metadata berjaya, baru update image (boleh besar)
+                    await update(ref(db, 'registrations/' + regData.event_code + '/' + pendingRegKey), {
+                        receiptImage: e.target.result
+                    });
+                    // Tunjuk indicator data selamat tersimpan
+                    const savedBadge = document.getElementById('dataSavedBadge');
+                    if (savedBadge) savedBadge.style.display = 'flex';
+                } catch(err) {
+                    console.error('Early save failed:', err);
+                    pendingRegKey = null;
+                    sessionStorage.removeItem('pendingRegKey');
+                    alert('⚠️ Failed to save data. Check your internet connection and try again.');
+                }
             }
         };
         reader.readAsDataURL(file);
@@ -511,9 +534,8 @@
         const savedKey = pendingRegKey || sessionStorage.getItem('pendingRegKey');
 
         if (savedKey) {
-            // Update rekod yang dah disimpan masa upload resit
-            const updates = { status: 'Paid', whatsappSent: true };
-            if (receiptBase64) updates.receiptImage = receiptBase64;
+            // Update rekod yang dah disimpan masa upload resit — status je, image dah ada
+            const updates = { status: 'Paid', whatsappSent: true, paidAt: new Date().toISOString() };
             update(ref(db, 'registrations/' + regData.event_code + '/' + savedKey), updates)
             .then(() => {
                 runTransaction(ref(db, 'events/' + regData.event_code + '/registered'), c => (c||0)+1);
