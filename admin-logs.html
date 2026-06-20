@@ -395,6 +395,26 @@
         }).join('');
     };
 
+    // Translate legacy Malay detail strings stored in Firebase before English update
+    function translateDetail(text) {
+        if (!text) return text;
+        return text
+            .replace(/diarkibkan/g, 'archived')
+            .replace(/dibuka semula dari arkib/g, 'unarchived')
+            .replace(/^Padam peserta:/,       'Deleted participant:')
+            .replace(/^Status ditukar ke/,    'Status changed to')
+            .replace(/ditetapkan sebagai FEATURED/i, 'set as FEATURED')
+            .replace(/DIHIDUPKAN/,            'turned ON')
+            .replace(/DIMATIKAN/,             'turned OFF')
+            .replace(/dikemaskini:/,          'updated:')
+            .replace(/\(kosong\)/,            '(empty)')
+            .replace(/^Resit DILULUSKAN:/,    'Receipt APPROVED:')
+            .replace(/^Resit DITOLAK:/,       'Receipt REJECTED:')
+            .replace(/^Cipta voucher/,        'Created voucher')
+            .replace(/^Kemaskini voucher/,    'Updated voucher')
+            .replace(/DIPADAM$/,              'deleted');
+    }
+
     function getTimeAgo(date) {
         const diffMs = Date.now() - date.getTime();
         const mins   = Math.floor(diffMs / 60000);
