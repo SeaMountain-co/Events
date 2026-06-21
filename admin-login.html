@@ -143,8 +143,9 @@
                     
                     // 2. Security Check (Admin Only)
                     if(user.email === ADMIN_EMAIL_CHECK) {
-                        sessionStorage.setItem("isAdmin", "true"); 
-                        window.location.href = "admin-dashboard.html"; 
+                        sessionStorage.setItem("isAdmin", "true");
+                        sessionStorage.setItem("userEmail", user.email);
+                        window.location.href = "admin-dashboard.html";
                     } else {
                         throw new Error("Unauthorized");
                     }
