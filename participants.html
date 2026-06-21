@@ -72,8 +72,12 @@
         th { background: #111; color: var(--text-gray); font-size: 0.85rem; text-transform: uppercase; }
         tr:hover { background: #222; }
         
-        .status-paid { color: #28a745; font-weight: bold; background: rgba(40, 167, 69, 0.1); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; }
-        .status-pending { color: #ffc107; font-weight: bold; background: rgba(255, 193, 7, 0.1); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; }
+        .status-paid     { color: #2ecc71; font-weight: bold; background: rgba(46,204,113,0.1); padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; border: 1px solid rgba(46,204,113,0.3); }
+        .status-pending  { color: #ffc107; font-weight: bold; background: rgba(255,193,7,0.1);  padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; border: 1px solid rgba(255,193,7,0.3); }
+        .status-awaiting { color: #ff9500; font-weight: bold; background: rgba(255,149,0,0.1);  padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; border: 1px solid rgba(255,149,0,0.5); cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s; }
+        .status-awaiting:hover { background: rgba(255,149,0,0.25); }
+        .status-rejected { color: #ff4d4d; font-weight: bold; background: rgba(255,77,77,0.1);  padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; border: 1px solid rgba(255,77,77,0.3); cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s; }
+        .status-rejected:hover { background: rgba(255,77,77,0.25); }
 
         /* --- MOBILE RESPONSIVE FIX (DIPERBAIKI) --- */
         @media (max-width: 1000px) {
@@ -158,6 +162,14 @@
                 <div class="kpi-value" id="eventStatus" style="font-size:1.8rem;">OPEN</div>
                 <div class="kpi-icon"><i class="fas fa-clock"></i></div>
                 <div class="kpi-sub" id="eventDateDisplay">-</div>
+            </div>
+            <div class="kpi-card" id="verifyCard" style="border-color: #ff9500; display:none;">
+                <div class="kpi-title" style="color:#ff9500;">Pending Verification</div>
+                <div class="kpi-value" id="awaitingCount" style="color:#ff9500;">0</div>
+                <div class="kpi-icon"><i class="fas fa-hourglass-half" style="color:#ff9500;"></i></div>
+                <a href="admin-receipt.html?filter=pending" target="_blank" class="kpi-sub" style="color:#ff9500; text-decoration:none; display:block; margin-top:8px;">
+                    <i class="fas fa-arrow-right"></i> Verify di Receipt Page
+                </a>
             </div>
         </div>
 
@@ -252,6 +264,21 @@
         }
     });
 
+    // Mirrors the logic in admin-dashboard.html — must stay in sync
+    function getDisplayState(reg) {
+        const status    = (reg.status || "").toLowerCase();
+        const verStatus = (reg.verificationStatus || "").toLowerCase();
+        const hasReceipt = !!reg.receiptImage;
+        const isBankTx   = reg.paymentMethod === "Bank Transfer";
+
+        if (status === 'rejected' || verStatus === 'rejected') return 'rejected';
+        if (status === 'paid') {
+            if (isBankTx && hasReceipt && verStatus !== 'verified') return 'awaiting';
+            return 'paid';
+        }
+        return 'pending';
+    }
+
     // FETCH PARTICIPANTS & VOUCHERS
     function fetchParticipants(eventId, maxQuota) {
         get(ref(db, `registrations/${eventId}`)).then((snapshot) => {
@@ -260,7 +287,7 @@
 
             if(!snapshot.exists()) {
                 tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No participants found.</td></tr>`;
-                updateKPI(0, 0, maxQuota, {}, {}, {});
+                updateKPI(0, 0, maxQuota, {}, {}, {}, 0);
                 return;
             }
 
@@ -270,7 +297,8 @@
             
             const shirtStats = {};
             const categoryStats = {};
-            const voucherStats = {}; 
+            const voucherStats = {};
+            let awaitingCount = 0;
 
             Object.entries(users).forEach(([userId, reg]) => {
                 count++;
@@ -296,10 +324,17 @@
                     voucherStats[voucher] = (voucherStats[voucher] || 0) + 1;
                 }
 
-                let statusBadge = `<span class="status-pending">PENDING</span>`;
-                if(reg.status && reg.status.toLowerCase() === 'paid') {
-                    statusBadge = `<span class="status-paid">PAID</span>`;
-                }
+                const state = getDisplayState(reg);
+                if (state === 'awaiting') awaitingCount++;
+                const refHint = encodeURIComponent(reg.paymentRef || userId);
+                const receiptUrl = `admin-receipt.html?search=${refHint}`;
+                const stateMap = {
+                    paid:     `<span class="status-paid"><i class="fas fa-check-circle"></i> PAID</span>`,
+                    awaiting: `<a class="status-awaiting" href="${receiptUrl}" target="_blank" title="Klik untuk verify resit"><i class="fas fa-hourglass-half"></i> PENDING VERIFY</a>`,
+                    rejected: `<a class="status-rejected" href="${receiptUrl}" target="_blank" title="Klik untuk semak semula"><i class="fas fa-times-circle"></i> REJECTED</a>`,
+                    pending:  `<span class="status-pending"><i class="fas fa-clock"></i> PENDING</span>`
+                };
+                const statusBadge = stateMap[state] || stateMap.pending;
 
                 rowsHTML += `
                     <tr>
@@ -315,18 +350,23 @@
             });
 
             tbody.innerHTML = rowsHTML;
-            updateKPI(count, count * eventPrice, maxQuota, shirtStats, categoryStats, voucherStats);
+            updateKPI(count, count * eventPrice, maxQuota, shirtStats, categoryStats, voucherStats, awaitingCount);
         });
     }
 
     // UPDATE UI
-    function updateKPI(count, revenue, maxQuota, shirtStats, categoryStats, voucherStats) {
+    function updateKPI(count, revenue, maxQuota, shirtStats, categoryStats, voucherStats, awaitingCount = 0) {
         document.getElementById('totalPax').innerText = count;
         document.getElementById('totalRevenue').innerText = "RM " + revenue.toLocaleString('en-MY', {minimumFractionDigits: 2});
 
         const percent = Math.min((count / maxQuota) * 100, 100);
         document.getElementById('quotaBar').style.width = percent + "%";
         document.getElementById('quotaText').innerText = `${count} / ${maxQuota} Quota used`;
+
+        // Show/hide the pending-verify card
+        const verifyCard = document.getElementById('verifyCard');
+        document.getElementById('awaitingCount').innerText = awaitingCount;
+        verifyCard.style.display = awaitingCount > 0 ? 'block' : 'none';
 
         renderCharts(shirtStats, categoryStats);
         renderVoucherList(voucherStats);
