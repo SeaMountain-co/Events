@@ -179,8 +179,12 @@
             </div>
 
             <div class="chart-box">
-                <div class="chart-header"><span class="chart-title">T-Shirt Sizes</span></div>
-                <canvas id="shirtChart" style="max-height:250px;"></canvas>
+                <div class="chart-header">
+                    <span class="chart-title">T-Shirt Sizes</span>
+                    <span style="font-size:0.8rem; color:#888;" id="totalShirts">0 pax</span>
+                </div>
+                <canvas id="shirtChart" style="max-height:180px;"></canvas>
+                <div id="shirtSummary" style="margin-top:12px; display:flex; flex-wrap:wrap; gap:6px; justify-content:center;"></div>
             </div>
         </div>
 
@@ -270,12 +274,22 @@
 
             Object.entries(users).forEach(([userId, reg]) => {
                 count++;
-                
-                const shirt = reg.tshirt_size || "Unknown";
+
+                // Extract shirt sizes — new format uses racers[].shirt, legacy uses tshirt_size
+                let shirtSizes = [];
+                if (reg.racers && Array.isArray(reg.racers) && reg.racers.length > 0) {
+                    shirtSizes = reg.racers.map(r => (r.shirt || '').trim().toUpperCase()).filter(s => s);
+                }
+                if (shirtSizes.length === 0 && reg.tshirt_size) {
+                    shirtSizes = [reg.tshirt_size.trim().toUpperCase()];
+                }
+                const shirtDisplay = shirtSizes.length > 0 ? shirtSizes.join(', ') : 'N/A';
+                shirtSizes.forEach(s => { shirtStats[s] = (shirtStats[s] || 0) + 1; });
+                if (shirtSizes.length === 0) { shirtStats['Unknown'] = (shirtStats['Unknown'] || 0) + 1; }
+
                 const category = reg.category || "General";
                 const voucher = reg.voucherUsed || reg.voucher_code || "-";
 
-                shirtStats[shirt] = (shirtStats[shirt] || 0) + 1;
                 categoryStats[category] = (categoryStats[category] || 0) + 1;
                 
                 if(voucher !== "-" && voucher !== "NONE") {
@@ -293,7 +307,7 @@
                         <td>${reg.first_name} ${reg.last_name || ''}</td>
                         <td>${reg.email}</td>
                         <td>${category}</td>
-                        <td>${shirt}</td>
+                        <td>${shirtDisplay}</td>
                         <td style="color:${(voucher !== '-' && voucher !== 'NONE') ? '#f1c40f' : '#666'}; font-family:monospace;">${voucher}</td>
                         <td>${statusBadge}</td>
                     </tr>
@@ -348,23 +362,71 @@
 
     // RENDER CHARTS
     function renderCharts(shirtData, categoryData) {
+        // --- T-Shirt Sizes Chart ---
+        const sizeOrder = ['XS','S','M','L','XL','XXL','XXXL'];
+        const sizeColors = {
+            'XS': '#9b59b6', 'S': '#3498db', 'M': '#2ecc71',
+            'L': '#f1c40f', 'XL': '#e67e22', 'XXL': '#e74c3c', 'XXXL': '#c0392b',
+            'Unknown': '#555'
+        };
+        const fallbackColors = ['#e74c3c','#e67e22','#f1c40f','#2ecc71','#3498db','#9b59b6','#1abc9c'];
+
+        // Sort labels by standard size order
+        const shirtKeys = [...sizeOrder.filter(s => shirtData[s]), ...Object.keys(shirtData).filter(k => !sizeOrder.includes(k))];
+        const shirtValues = shirtKeys.map(k => shirtData[k] || 0);
+        const shirtColors = shirtKeys.map((k, i) => sizeColors[k] || fallbackColors[i % fallbackColors.length]);
+
+        const totalShirts = shirtValues.reduce((a, b) => a + b, 0);
+        document.getElementById('totalShirts').innerText = `${totalShirts} pax`;
+
         const shirtCtx = document.getElementById('shirtChart').getContext('2d');
         if(window.myShirtChart) window.myShirtChart.destroy();
+
+        const hasRealData = shirtKeys.some(k => k !== 'Unknown');
         window.myShirtChart = new Chart(shirtCtx, {
             type: 'doughnut',
             data: {
-                labels: Object.keys(shirtData),
+                labels: shirtKeys,
                 datasets: [{
-                    data: Object.values(shirtData),
-                    backgroundColor: ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6'],
-                    borderWidth: 0
+                    data: shirtValues,
+                    backgroundColor: shirtColors,
+                    borderColor: '#1a1c23',
+                    borderWidth: 3,
+                    hoverOffset: 8
                 }]
             },
-            options: { 
-                plugins: { legend: { position: 'bottom', labels: { color: '#aaa', boxWidth: 10 } } },
-                maintainAspectRatio: false 
+            options: {
+                cutout: '65%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.label}: ${ctx.raw} pax (${Math.round(ctx.raw/totalShirts*100)}%)`
+                        }
+                    }
+                },
+                maintainAspectRatio: false
             }
         });
+
+        // Size summary badges
+        const summaryEl = document.getElementById('shirtSummary');
+        summaryEl.innerHTML = '';
+        if (!hasRealData) {
+            summaryEl.innerHTML = '<span style="color:#666; font-size:0.8rem; font-style:italic;">No size data in registrations</span>';
+        } else {
+            shirtKeys.filter(k => k !== 'Unknown').forEach(size => {
+                const color = sizeColors[size] || '#aaa';
+                const pct = Math.round((shirtData[size] / totalShirts) * 100);
+                summaryEl.innerHTML += `
+                    <div style="background:${color}22; border:1px solid ${color}55; padding:5px 12px; border-radius:20px; text-align:center; min-width:52px;">
+                        <div style="font-size:0.75rem; color:${color}; font-weight:800;">${size}</div>
+                        <div style="font-size:1rem; color:#fff; font-weight:800; line-height:1.2;">${shirtData[size]}</div>
+                        <div style="font-size:0.65rem; color:#888;">${pct}%</div>
+                    </div>
+                `;
+            });
+        }
 
         const catCtx = document.getElementById('categoryChart').getContext('2d');
         if(window.myCatChart) window.myCatChart.destroy();
