@@ -459,6 +459,7 @@
         }
 
         let allRegistrations = [];
+        let isLoggingOut = false;
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.email === ALLOWED_ADMIN) {
@@ -466,7 +467,7 @@
                 loadData();
                 initMaintenanceControl();
             } else {
-                alert("ACCESS DENIED");
+                if (!isLoggingOut) alert("ACCESS DENIED");
                 window.location.href = "admin-login.html";
             }
         });
@@ -546,7 +547,8 @@
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            if(confirm("Log out form dashboard?")) {
+            if(confirm("Log out from dashboard?")) {
+                isLoggingOut = true;
                 signOut(auth).then(() => { window.location.href = "admin-login.html"; });
             }
         });
