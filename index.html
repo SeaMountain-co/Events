@@ -461,7 +461,8 @@
         (function() {
             const ADMIN_EMAIL = 'admin@sm.com';
             const currentUser = sessionStorage.getItem('userEmail');
-            if (currentUser === ADMIN_EMAIL) return; // admin bypasses maintenance
+            const isAdminPreview = new URLSearchParams(window.location.search).get('admin_preview') === '1';
+            if (currentUser === ADMIN_EMAIL || isAdminPreview) return; // admin bypasses maintenance
             fetch('https://sea-mountain-default-rtdb.asia-southeast1.firebasedatabase.app/settings/maintenance.json')
                 .then(r => r.json())
                 .then(val => { if (val === true) window.location.replace('maintenance.html'); })
