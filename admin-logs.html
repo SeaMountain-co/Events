@@ -73,6 +73,23 @@
         .btn-clear-logs { background: #e74c3c; color: #fff; border: none; padding: 9px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.82rem; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
         .btn-clear-logs:hover { background: #c0392b; }
 
+        /* Delete confirm modal */
+        .del-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; }
+        .del-modal-overlay.open { display: flex; }
+        .del-modal { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 28px 24px; width: 100%; max-width: 380px; }
+        .del-modal h3 { margin: 0 0 6px; font-size: 1.05rem; color: #ff4d4d; }
+        .del-modal p { margin: 0 0 16px; font-size: 0.83rem; color: #aaa; line-height: 1.5; }
+        .del-modal p span { color: #fff; font-weight: bold; }
+        .del-modal input { width: 100%; box-sizing: border-box; padding: 9px 12px; background: #111; color: #fff; border: 1px solid #444; border-radius: 6px; font-family: 'Montserrat'; font-size: 0.9rem; outline: none; transition: border 0.2s; }
+        .del-modal input:focus { border-color: #ff4d4d; }
+        .del-modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+        .del-modal-actions button { padding: 8px 18px; border-radius: 6px; border: none; font-weight: bold; font-size: 0.82rem; cursor: pointer; transition: 0.2s; }
+        .btn-del-cancel { background: #2a2a2a; color: #aaa; border: 1px solid #444 !important; }
+        .btn-del-cancel:hover { color: #fff; }
+        .btn-del-confirm { background: #e74c3c; color: #fff; }
+        .btn-del-confirm:hover:not(:disabled) { background: #c0392b; }
+        .btn-del-confirm:disabled { opacity: 0.35; cursor: not-allowed; }
+
         /* TABLE */
         .table-wrapper { background: var(--card-bg); border-radius: 10px; padding: 10px; border: 1px solid var(--border); }
         .table-scroll { overflow-x: auto; }
@@ -426,11 +443,41 @@
         return `${days} day${days > 1 ? 's' : ''} ago`;
     }
 
+    // Delete confirm modal logic
+    (function() {
+        const overlay     = document.getElementById('delModalOverlay');
+        const input       = document.getElementById('delConfirmInput');
+        const confirmBtn  = document.getElementById('delModalConfirm');
+        const cancelBtn   = document.getElementById('delModalCancel');
+
+        input.addEventListener('input', () => {
+            confirmBtn.disabled = input.value.trim().toLowerCase() !== 'delete';
+        });
+
+        cancelBtn.addEventListener('click', closeDelModal);
+        overlay.addEventListener('click', e => { if (e.target === overlay) closeDelModal(); });
+
+        function closeDelModal() {
+            overlay.classList.remove('open');
+            input.value = '';
+            confirmBtn.disabled = true;
+        }
+
+        confirmBtn.addEventListener('click', () => {
+            closeDelModal();
+            remove(ref(db, 'adminLogs'))
+                .then(() => alert('All logs have been cleared.'))
+                .catch(err => alert('Error: ' + err.message));
+        });
+
+        window._openDelModal = function() {
+            overlay.classList.add('open');
+            setTimeout(() => input.focus(), 50);
+        };
+    })();
+
     window.clearAllLogs = function() {
-        if (!confirm('Delete ALL activity logs?\n\nThis action cannot be undone.')) return;
-        remove(ref(db, 'adminLogs'))
-            .then(() => alert('All logs have been cleared.'))
-            .catch(err => alert('Error: ' + err.message));
+        window._openDelModal();
     };
 
     // ---- Maintenance sidebar toggle ----
@@ -475,5 +522,18 @@
         if (dot) dot.textContent = count > 0 ? count : '';
     });
 </script>
+
+<!-- Delete confirm modal -->
+<div class="del-modal-overlay" id="delModalOverlay">
+    <div class="del-modal">
+        <h3><i class="fas fa-exclamation-triangle"></i> Padam Semua Log?</h3>
+        <p>Tindakan ini <span>tidak boleh dibatalkan</span>. Taip <span>delete</span> di bawah untuk sahkan.</p>
+        <input type="text" id="delConfirmInput" placeholder='Taip "delete" untuk teruskan' autocomplete="off">
+        <div class="del-modal-actions">
+            <button class="btn-del-cancel" id="delModalCancel">Batal</button>
+            <button class="btn-del-confirm" id="delModalConfirm" disabled><i class="fas fa-trash-alt"></i> Padam Semua</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
