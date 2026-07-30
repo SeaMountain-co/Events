@@ -227,7 +227,8 @@
                             const pdfLink = q.pdf_link || "";
                             const showIf  = q.show_if_value || "";
                             const isMin = q.type !== 'header';
-                            addQuestionRow(q.question_text, q.type, opts, q.required, isMin, pdfLink, showIf);
+                            const qDesc  = q.description || "";
+                            addQuestionRow(q.question_text, q.type, opts, q.required, isMin, pdfLink, showIf, qDesc);
                         });
                         refreshGroupStyling();
                     }
@@ -238,7 +239,7 @@
         }
 
         // ===== addQuestionRow now accepts qPdfLink param =====
-        window.addQuestionRow = function(qText="", qType="text", qOptions="", qReq=true, minimized=false, qPdfLink="", qShowIf="") {
+        window.addQuestionRow = function(qText="", qType="text", qOptions="", qReq=true, minimized=false, qPdfLink="", qShowIf="", qDesc="") {
             const container = document.getElementById('questionBuilderContainer');
             if(container.innerHTML.includes('<p')) container.innerHTML = "";
 
@@ -289,6 +290,7 @@
                 <div class="col-label">
                     <label class="input-label">QUESTION / HEADER LABEL</label>
                     <input type="text" class="form-input q-text" placeholder="e.g. Bike Info" value="${qText}">
+                    <input type="text" class="form-input q-desc" placeholder="Custom description (optional) — default: &quot;Please complete this section.&quot;" value="${qDesc}" style="margin-top:6px; ${isHeader ? '' : 'display:none;'}">
                 </div>
 
                 <div class="col-type">
@@ -388,8 +390,11 @@
             const colLabel    = row.querySelector('.q-col-label');
             const colOptions  = row.querySelector('.col-options');
             const reqDiv      = row.querySelector('.col-req');
+            const descInput   = row.querySelector('.q-desc');
 
             const newType = selectElem.value;
+
+            if (descInput) descInput.style.display = (newType === 'header') ? 'block' : 'none';
 
             if (newType === 'header') {
                 colOptions.style.visibility = 'hidden';
@@ -482,6 +487,7 @@
                 const qOptionsStr = row.querySelector('.q-options').value.trim();
                 const qPdfLink    = row.querySelector('.q-pdf-link').value.trim();
                 const qReq        = row.querySelector('.q-req').checked;
+                const qDesc       = (row.querySelector('.q-desc') || {}).value || '';
 
                 if(qText) {
                     let optsArray = [];
@@ -495,6 +501,11 @@
                         options: optsArray,
                         required: qReq
                     };
+
+                    // Only attach description for header type, and only if non-empty
+                    if (qType === 'header' && qDesc.trim()) {
+                        questionObj.description = qDesc.trim();
+                    }
 
                     // Only attach pdf_link for checkbox type, and only if non-empty
                     if (qType === 'checkbox' && qPdfLink) {

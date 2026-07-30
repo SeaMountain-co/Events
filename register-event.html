@@ -736,10 +736,11 @@
                 card.className = 'form-card';
                 currentCardBody = document.createElement('div');
                 currentCardBody.className = 'form-card-body';
+                const stepDesc = q.description ? q.description : "Please complete this section.";
                 currentCardBody.innerHTML = `
                     <div class="step-header">
                         <h3 class="step-title">${stepCount}. ${q.question_text}</h3>
-                        <p class="step-desc">Please complete this section.</p>
+                        <p class="step-desc">${stepDesc}</p>
                     </div>`;
                 card.appendChild(currentCardBody);
                 currentGroupDiv.appendChild(card);
