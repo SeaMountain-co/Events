@@ -456,7 +456,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, get, set, remove, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -492,6 +492,25 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('event') || urlParams.get('id');
+
+    // ── Realtime maintenance guard ──────────────────────────────
+    // Keeps listening the whole time this page is open — if admin
+    // flips maintenance ON mid-registration, the user is bounced to
+    // maintenance.html immediately instead of being able to keep
+    // filling in / submitting the form. Their in-progress draft is
+    // untouched (autosaved separately) so they can resume once
+    // maintenance is lifted.
+    const ADMIN_EMAIL = 'admin@sm.com';
+    const isAdminPreview = urlParams.get('admin_preview') === '1';
+    function isAdminUser() {
+        const email = (auth.currentUser && auth.currentUser.email) || sessionStorage.getItem('userEmail');
+        return email === ADMIN_EMAIL;
+    }
+    onValue(ref(db, 'settings/maintenance'), (snap) => {
+        if (snap.val() === true && !isAdminUser() && !isAdminPreview) {
+            window.location.replace('maintenance.html');
+        }
+    });
 
     onAuthStateChanged(auth, (user) => {
         if (user) {

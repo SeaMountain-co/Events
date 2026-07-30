@@ -491,6 +491,25 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        // ── Realtime maintenance guard ──────────────────────────
+        // The inline script above only checks once, on first load.
+        // This keeps listening the whole time the page is open, so
+        // a visitor already browsing gets bounced to maintenance.html
+        // the moment admin flips it ON — not just on their next visit.
+        (function() {
+            const ADMIN_EMAIL = 'admin@sm.com';
+            const isAdminPreview = new URLSearchParams(window.location.search).get('admin_preview') === '1';
+            function isAdminUser() {
+                const email = (auth.currentUser && auth.currentUser.email) || sessionStorage.getItem('userEmail');
+                return email === ADMIN_EMAIL;
+            }
+            onValue(ref(db, 'settings/maintenance'), (snap) => {
+                if (snap.val() === true && !isAdminUser() && !isAdminPreview) {
+                    window.location.replace('maintenance.html');
+                }
+            });
+        })();
+
         // --- UI HELPER: TOGGLE MOBILE MENU ---
         window.toggleMenu = function() {
             const nav = document.getElementById('navMenu');

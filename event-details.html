@@ -410,6 +410,24 @@
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('id');
 
+    // ── Realtime maintenance guard ──────────────────────────────
+    // Unlike the one-time check on index.html, this keeps listening
+    // the whole time the page is open. If admin flips maintenance ON
+    // while a visitor is already sitting on this page, they get
+    // bounced to maintenance.html immediately instead of being able
+    // to keep browsing/registering.
+    const ADMIN_EMAIL = 'admin@sm.com';
+    const isAdminPreview = urlParams.get('admin_preview') === '1';
+    function isAdminUser() {
+        const email = (auth.currentUser && auth.currentUser.email) || sessionStorage.getItem('userEmail');
+        return email === ADMIN_EMAIL;
+    }
+    onValue(ref(db, 'settings/maintenance'), (snap) => {
+        if (snap.val() === true && !isAdminUser() && !isAdminPreview) {
+            window.location.replace('maintenance.html');
+        }
+    });
+
     window.toggleMenu = function() {
         const nav = document.getElementById('navMenu');
         nav.classList.toggle('active');
