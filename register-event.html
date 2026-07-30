@@ -502,12 +502,14 @@
     // maintenance is lifted.
     const ADMIN_EMAIL = 'admin@sm.com';
     const isAdminPreview = urlParams.get('admin_preview') === '1';
+    let maintenanceIsOn = false; // cached — also checked synchronously before proceeding to payment
     function isAdminUser() {
         const email = (auth.currentUser && auth.currentUser.email) || sessionStorage.getItem('userEmail');
         return email === ADMIN_EMAIL;
     }
     onValue(ref(db, 'settings/maintenance'), (snap) => {
-        if (snap.val() === true && !isAdminUser() && !isAdminPreview) {
+        maintenanceIsOn = snap.val() === true;
+        if (maintenanceIsOn && !isAdminUser() && !isAdminPreview) {
             window.location.replace('maintenance.html');
         }
     });
@@ -1447,6 +1449,10 @@
     document.getElementById('voucherCode').addEventListener('input', scheduleSaveDraft);
 
     document.getElementById('payBtn').addEventListener('click', () => {
+        if (maintenanceIsOn && !isAdminUser() && !isAdminPreview) {
+            window.location.replace('maintenance.html');
+            return;
+        }
         if (currentStep !== totalSteps || !validateStep(totalSteps)) { alert("Please complete all steps."); return; }
 
         let racers = [];

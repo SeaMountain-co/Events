@@ -418,12 +418,14 @@
     // to keep browsing/registering.
     const ADMIN_EMAIL = 'admin@sm.com';
     const isAdminPreview = urlParams.get('admin_preview') === '1';
+    let maintenanceIsOn = false; // cached — also checked synchronously before critical actions (see registerBtn)
     function isAdminUser() {
         const email = (auth.currentUser && auth.currentUser.email) || sessionStorage.getItem('userEmail');
         return email === ADMIN_EMAIL;
     }
     onValue(ref(db, 'settings/maintenance'), (snap) => {
-        if (snap.val() === true && !isAdminUser() && !isAdminPreview) {
+        maintenanceIsOn = snap.val() === true;
+        if (maintenanceIsOn && !isAdminUser() && !isAdminPreview) {
             window.location.replace('maintenance.html');
         }
     });
@@ -543,7 +545,11 @@
                 } else if(data.price) {
                     registerBtn.innerHTML = `Register Now <i class="fas fa-arrow-right"></i>`;
                     registerBtn.onclick = function(e) {
-                        e.preventDefault(); 
+                        e.preventDefault();
+                        if (maintenanceIsOn && !isAdminUser() && !isAdminPreview) {
+                            window.location.replace('maintenance.html');
+                            return;
+                        }
                         if (isUserLoggedIn) {
                             window.location.href = `register-event.html?event=${eventId}`;
                         } else {
