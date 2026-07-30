@@ -283,6 +283,51 @@
             .form-card-body { padding: 25px; }
             .stepper-container { max-width: 100%; margin: 20px 0; }
         }
+
+        /* =====================================================
+           Branded resume-draft modal (replaces native confirm())
+        ===================================================== */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(5, 5, 8, 0.75);
+            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 2000; padding: 20px;
+            opacity: 0; visibility: hidden; transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .modal-overlay.show { opacity: 1; visibility: visible; }
+        .modal-card {
+            background: var(--card-bg); border: 1px solid #333; border-radius: 14px;
+            max-width: 420px; width: 100%; padding: 35px 30px 30px;
+            text-align: center; position: relative; overflow: hidden;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.6);
+            transform: translateY(16px) scale(0.97); transition: transform 0.25s ease;
+        }
+        .modal-overlay.show .modal-card { transform: translateY(0) scale(1); }
+        .modal-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--brand-red), var(--brand-yellow));
+        }
+        .modal-icon {
+            width: 60px; height: 60px; border-radius: 50%; margin: 0 auto 18px;
+            background: rgba(255, 204, 0, 0.12); border: 1px solid rgba(255, 204, 0, 0.35);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--brand-yellow);
+        }
+        .modal-title {
+            font-family: 'Russo One', sans-serif; font-size: 1.15rem; text-transform: uppercase;
+            letter-spacing: 0.5px; margin: 0 0 12px; color: #fff;
+        }
+        .modal-desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin: 0 0 28px; }
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+        .modal-btn {
+            padding: 14px 20px; border-radius: 8px; border: none; cursor: pointer;
+            font-weight: 800; text-transform: uppercase; font-size: 0.82rem; letter-spacing: 0.5px;
+            transition: all 0.25s ease;
+        }
+        .modal-btn-primary { background: linear-gradient(135deg, var(--brand-yellow), #ffb300); color: #000; }
+        .modal-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 204, 0, 0.35); }
+        .modal-btn-ghost { background: transparent; color: var(--text-secondary); border: 1px solid #444; }
+        .modal-btn-ghost:hover { color: #fff; border-color: #666; }
     </style>
 </head>
 <body>
@@ -290,6 +335,18 @@
     <div class="header">
         <a href="index.html" class="logo">SEA<span>MOUNTAIN</span></a>
         <a href="index.html" class="exit-link"><i class="fas fa-times"></i> EXIT REGISTRATION</a>
+    </div>
+
+    <div class="modal-overlay" id="resumeModal">
+        <div class="modal-card">
+            <div class="modal-icon"><i class="fas fa-history"></i></div>
+            <h3 class="modal-title">Unfinished Registration</h3>
+            <p class="modal-desc">We found a registration you started earlier for this event.<br>Continue where you left off?</p>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn modal-btn-primary" id="resumeModalContinue">Continue Registration</button>
+                <button type="button" class="modal-btn modal-btn-ghost" id="resumeModalRestart">Start Over</button>
+            </div>
+        </div>
     </div>
 
     <div class="stepper-container">
@@ -1315,6 +1372,27 @@
         isRestoringDraft = false;
     }
 
+    function showResumeModal() {
+        return new Promise(resolve => {
+            const overlay = document.getElementById('resumeModal');
+            const btnContinue = document.getElementById('resumeModalContinue');
+            const btnRestart  = document.getElementById('resumeModalRestart');
+
+            function close(result) {
+                overlay.classList.remove('show');
+                btnContinue.removeEventListener('click', onContinue);
+                btnRestart.removeEventListener('click', onRestart);
+                resolve(result);
+            }
+            function onContinue() { close(true); }
+            function onRestart() { close(false); }
+
+            btnContinue.addEventListener('click', onContinue);
+            btnRestart.addEventListener('click', onRestart);
+            overlay.classList.add('show');
+        });
+    }
+
     async function checkForDraft() {
         let draft = null;
         try {
@@ -1331,7 +1409,7 @@
 
         if (!draft || !draft.fields) return;
 
-        const resume = confirm("You have an unfinished registration for this event.\n\nContinue where you left off?\n\nOK = Resume\nCancel = Start Over");
+        const resume = await showResumeModal();
         if (resume) {
             restoreDraftData(draft);
         } else {
