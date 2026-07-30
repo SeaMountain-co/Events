@@ -352,8 +352,8 @@
                         <div class="form-card-body">
                             <div class="step-header"><h3 class="step-title" id="mediaTitle">Media & Communication</h3></div>
                             <div class="checkbox-group">
-                                <label class="checkbox-item"><input type="checkbox" required> I consent to photography and video recording.</label>
-                                <label class="checkbox-item"><input type="checkbox" required> I agree to receive official updates.</label>
+                                <label class="checkbox-item"><input type="checkbox" id="mediaConsent" required> I consent to photography and video recording.</label>
+                                <label class="checkbox-item"><input type="checkbox" id="mediaUpdates" required> I agree to receive official updates.</label>
                             </div>
                         </div>
                     </div>
@@ -364,9 +364,9 @@
                         <div class="form-card-body">
                             <div class="step-header"><h3 class="step-title" id="finalTitle">Final Acknowledgement</h3></div>
                             <div class="checkbox-group">
-                                <label class="checkbox-item"><input type="checkbox" required> I confirm all information provided is accurate.</label>
-                                <label class="checkbox-item"><input type="checkbox" required> I understand rules compliance is mandatory.</label>
-                                <label class="checkbox-item"><input type="checkbox" required> I understand organiser decisions are final.</label>
+                                <label class="checkbox-item"><input type="checkbox" id="finalAccurate" required> I confirm all information provided is accurate.</label>
+                                <label class="checkbox-item"><input type="checkbox" id="finalRules" required> I understand rules compliance is mandatory.</label>
+                                <label class="checkbox-item"><input type="checkbox" id="finalDecisions" required> I understand organiser decisions are final.</label>
                             </div>
                         </div>
                     </div>
@@ -399,7 +399,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, get, set, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -427,11 +427,21 @@
     let crewFeePerRacer = 0;     // fee per crew (early or normal)
     let totalCrewCount  = 0;     // how many racers ticked crew
 
+    // ── Draft resume state ────────────────────────────────
+    let authReady       = false; // currentUser resolved
+    let stepsReady       = false; // event data + dynamic steps built
+    let draftSaveTimer   = null;
+    let isRestoringDraft = false; // true while replaying a saved draft (suppress autosave loop)
+
     const urlParams = new URLSearchParams(window.location.search);
     const eventId = urlParams.get('event') || urlParams.get('id');
 
     onAuthStateChanged(auth, (user) => {
-        if (user) { currentUser = user; }
+        if (user) {
+            currentUser = user;
+            authReady = true;
+            maybeCheckDraft();
+        }
         else { alert("Please Log In."); window.location.href = "login.html"; }
     });
 
@@ -492,6 +502,9 @@
                     renderStepper(5);
                     setupFixedEndSteps(4, 5);
                 }
+
+                stepsReady = true;
+                maybeCheckDraft();
             }
         });
     }
@@ -878,6 +891,7 @@
             el.classList.add('cs-opt-selected');
             wrap.classList.remove('open');
             handleConditional(parseInt(idx));
+            scheduleSaveDraft();
             e.stopPropagation();
         }
     });
@@ -934,6 +948,35 @@
 
         document.getElementById('prevBtn').style.display = (currentStep === 1) ? 'none' : 'inline-block';
 
+        if (currentStep === totalSteps) {
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('payBtn').style.display = 'block';
+        } else {
+            document.getElementById('nextBtn').style.display = 'inline-block';
+            document.getElementById('payBtn').style.display = 'none';
+        }
+        window.scrollTo(0, 0);
+        saveDraftNow();
+    }
+
+    // Jump straight to a saved step (used only when resuming a draft —
+    // skips validation since we're restoring, not user-navigating).
+    function goToStep(target) {
+        if (target < 1 || target > totalSteps) target = 1;
+        document.getElementById(`step${currentStep}`).classList.remove('active');
+        const items = document.querySelectorAll('.step-item');
+        items[currentStep - 1].classList.remove('active');
+
+        items.forEach((item, i) => {
+            item.classList.remove('active', 'completed');
+            if (i < target - 1) item.classList.add('completed');
+        });
+
+        currentStep = target;
+        document.getElementById(`step${currentStep}`).classList.add('active');
+        items[currentStep - 1].classList.add('active');
+
+        document.getElementById('prevBtn').style.display = (currentStep === 1) ? 'none' : 'inline-block';
         if (currentStep === totalSteps) {
             document.getElementById('nextBtn').style.display = 'none';
             document.getElementById('payBtn').style.display = 'block';
@@ -1125,6 +1168,7 @@
             document.getElementById('voucherMsg').style.display = 'none';
             currentVoucherCode = code;
             updatePriceUI();
+            scheduleSaveDraft();
         });
     });
 
@@ -1148,6 +1192,7 @@
         document.getElementById('rowDiscount').style.display = 'none';
         document.getElementById('voucherCode').value = "";
         updatePriceUI();
+        scheduleSaveDraft();
     }
 
     function updatePriceUI() {
@@ -1170,6 +1215,139 @@
             }
         }
     }
+
+    // =====================================================
+    // DRAFT SAVE / RESUME
+    // Keeps an in-progress registration recoverable after an
+    // accidental refresh/crash. Saved to localStorage (instant,
+    // same-browser) AND Firebase (events/{id}/drafts/{uid}, so
+    // it also survives a device/browser switch). Cleared once
+    // the user proceeds to payment — from then on the normal
+    // payment.html flow (sessionStorage tempRegistration) takes over.
+    // =====================================================
+    function draftLocalKey() {
+        return `reg_draft_${eventId}_${currentUser.uid}`;
+    }
+
+    function collectDraftData() {
+        const fields = {};
+        document.querySelectorAll('#regForm [id]').forEach(el => {
+            if (!el.id) return;
+            fields[el.id] = (el.type === 'checkbox') ? el.checked : el.value;
+        });
+        return {
+            step: currentStep,
+            fields: fields,
+            voucherCode: currentVoucherCode || '',
+            updated_at: Date.now()
+        };
+    }
+
+    function saveDraftNow() {
+        if (!authReady || !stepsReady || isRestoringDraft || !currentUser || !eventId) return;
+        const data = collectDraftData();
+        try { localStorage.setItem(draftLocalKey(), JSON.stringify(data)); } catch (e) {}
+        set(ref(db, `events/${eventId}/drafts/${currentUser.uid}`), data).catch(() => {});
+    }
+
+    function scheduleSaveDraft() {
+        if (!authReady || !stepsReady || isRestoringDraft) return;
+        clearTimeout(draftSaveTimer);
+        draftSaveTimer = setTimeout(saveDraftNow, 1000);
+    }
+
+    function clearDraft() {
+        if (!currentUser || !eventId) return;
+        try { localStorage.removeItem(draftLocalKey()); } catch (e) {}
+        remove(ref(db, `events/${eventId}/drafts/${currentUser.uid}`)).catch(() => {});
+    }
+
+    function applyFieldsPass(fields) {
+        Object.keys(fields).forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return; // element not built yet (e.g. racer/medical rows) — filled in later pass
+            if (el.type === 'checkbox') el.checked = !!fields[id];
+            else el.value = fields[id];
+        });
+    }
+
+    function restoreDraftData(data) {
+        isRestoringDraft = true;
+
+        // Pass 1: static step-1 fields (incl. raceCategory) so we can rebuild racer/medical rows.
+        applyFieldsPass(data.fields);
+
+        if (document.getElementById('raceCategory').value) {
+            updateRacersCount(); // builds racer{i}_* / med{i}_* inputs for the saved category
+        }
+
+        // Pass 2: now racer/medical rows exist — fill them in.
+        applyFieldsPass(data.fields);
+
+        // Sync custom dropdown widgets (hidden <select> value was restored above,
+        // but the visual label/highlight needs to be updated manually).
+        Object.keys(window._csOpts || {}).forEach(idx => {
+            const sel = document.getElementById('customQ_' + idx);
+            if (!sel || !sel.value) return;
+            const optIdx = (window._csOpts[idx] || []).indexOf(sel.value);
+            if (optIdx === -1) return;
+            const lbl = document.getElementById('cslbl_' + idx);
+            const wrap = document.getElementById('csw_' + idx);
+            if (lbl) { lbl.textContent = sel.value; lbl.className = 'cs-selected-text'; }
+            if (wrap) {
+                wrap.querySelectorAll('.cs-opt').forEach(o => o.classList.remove('cs-opt-selected'));
+                const optEl = wrap.querySelector(`.cs-opt[data-optidx="${optIdx}"]`);
+                if (optEl) optEl.classList.add('cs-opt-selected');
+            }
+            handleConditional(parseInt(idx));
+        });
+
+        if (crewData) updateCrewCount();
+
+        if (data.voucherCode) {
+            document.getElementById('voucherCode').value = data.voucherCode;
+            document.getElementById('btnApply').click(); // re-validates + reapplies against saved category
+        } else {
+            updatePriceUI();
+        }
+
+        goToStep(data.step || 1);
+        isRestoringDraft = false;
+    }
+
+    async function checkForDraft() {
+        let draft = null;
+        try {
+            const snap = await get(ref(db, `events/${eventId}/drafts/${currentUser.uid}`));
+            if (snap.exists()) draft = snap.val();
+        } catch (e) {}
+
+        if (!draft) {
+            try {
+                const local = localStorage.getItem(draftLocalKey());
+                if (local) draft = JSON.parse(local);
+            } catch (e) {}
+        }
+
+        if (!draft || !draft.fields) return;
+
+        const resume = confirm("You have an unfinished registration for this event.\n\nContinue where you left off?\n\nOK = Resume\nCancel = Start Over");
+        if (resume) {
+            restoreDraftData(draft);
+        } else {
+            clearDraft();
+        }
+    }
+
+    function maybeCheckDraft() {
+        if (authReady && stepsReady) checkForDraft();
+    }
+
+    // Autosave on any form input/change (debounced), incl. voucher code
+    // which lives outside #regForm in the summary card.
+    document.getElementById('regForm').addEventListener('input', scheduleSaveDraft);
+    document.getElementById('regForm').addEventListener('change', scheduleSaveDraft);
+    document.getElementById('voucherCode').addEventListener('input', scheduleSaveDraft);
 
     document.getElementById('payBtn').addEventListener('click', () => {
         if (currentStep !== totalSteps || !validateStep(totalSteps)) { alert("Please complete all steps."); return; }
@@ -1247,6 +1425,7 @@
             userId:        currentUser.uid
         };
 
+        clearDraft();
         sessionStorage.setItem('tempRegistration', JSON.stringify(formData));
         window.location.href = "payment.html";
     });
